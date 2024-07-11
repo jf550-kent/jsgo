@@ -39,11 +39,12 @@ jobs:
       - name: Run benchmark and write to file
         run:  |
           FILENAME="performance/$(date +"%Y-%m-%d_%H-%M-%S")_${GITHUB_SHA}.txt"
-          go test ./... -bench=. -count=30 -benchmem -run '^#' > tee "${FILENAME}"
+          go test ./... -bench=. -count=1 -benchmem -run '^#' > tee "${FILENAME}"
 
       - name: Commit and push the 
         run: |
-          echo "${FILENAME}"
-          git add $("${FILENAME}")
+          git config --global user.name 'ci'
+          git config --global user.email 'jf550-kent@users.noreply.github.com'
+          git add .
           git commit -m "Record performance for ${FILENAME}"
           git push
