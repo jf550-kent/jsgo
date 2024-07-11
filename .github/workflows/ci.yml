@@ -1,33 +1,33 @@
 name: CI 
 
-on: push
-permissions:
-  contents: write
+on: 
+  push:
+    permissions:
+      contents: write
 
 jobs:
   tests:
     name: Tests
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout out code
         uses: actions/checkout@v4
 
       - name: Fetch PR title
-      id: get_pr_title
-      run: |
-        PR_TITLE=$(curl -s -H "Accept: application/vnd.github.v3+json" \
-        -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-        "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}" \
-        | jq -r '.title')
-        echo "PR_TITLE=$PR_TITLE" >> $GITHUB_ENV
+        id: get_pr_title
+        run: |
+          PR_TITLE=$(curl -s -H "Accept: application/vnd.github.v3+json" \
+                     -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+                     "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}" \
+                     | jq -r '.title')
+          echo "PR_TITLE=$PR_TITLE" >> $GITHUB_ENV
 
       - name: Create a file with PR title
         run: |
-        FILENAME="$(date +"%Y-%m-%d_%H-%M-%S")_${{ env.PR_TITLE }}.txt"
-        echo "This file was created for PR: ${{ env.PR_TITLE }}" > "${FILENAME}"
-        echo "Created file: ${FILENAME}"
-      
+          FILENAME="$(date +"%Y-%m-%d_%H-%M-%S")_${{ env.PR_TITLE }}.txt"
+          echo "This file was created for PR: ${{ env.PR_TITLE }}" > "${FILENAME}"
+          echo "Created file: ${FILENAME}"
+
       # - name: Setup Go
       #   uses: actions/setup-go@v5
       #   with:
