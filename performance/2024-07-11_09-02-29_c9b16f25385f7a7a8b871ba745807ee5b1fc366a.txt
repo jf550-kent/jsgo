@@ -1,0 +1,23 @@
+FAIL	github.com/jf550-kent/jsgo/ast [build failed]
+?   	github.com/jf550-kent/jsgo/jsgo	[no test files]
+goos: linux
+goarch: amd64
+pkg: github.com/jf550-kent/jsgo/lexer
+cpu: AMD EPYC 7763 64-Core Processor                
+BenchmarkLex-4   	16830103	        71.50 ns/op	       8 B/op	       1 allocs/op
+BenchmarkLex-4   	16407212	        70.85 ns/op	       8 B/op	       1 allocs/op
+BenchmarkLex-4   	16527836	        71.13 ns/op	       8 B/op	       1 allocs/op
+BenchmarkLex-4   	16400479	        71.22 ns/op	       8 B/op	       1 allocs/op
+BenchmarkLex-4   	16499758	        71.16 ns/op	       8 B/op	       1 allocs/op
+BenchmarkLex-4   	16443564	        71.61 ns/op	       8 B/op	       1 allocs/op
+BenchmarkLex-4   	16481157	        70.89 ns/op	       8 B/op	       1 allocs/op
+BenchmarkLex-4   	16491560	        71.04 ns/op	       8 B/op	       1 allocs/op
+BenchmarkLex-4   	16583786	        71.05 ns/op	       8 B/op	       1 allocs/op
+BenchmarkLex-4   	16469731	        71.44 ns/op	       8 B/op	       1 allocs/op
+PASS
+ok  	github.com/jf550-kent/jsgo/lexer	12.516s
+FAIL	github.com/jf550-kent/jsgo/parser [build failed]
+?   	github.com/jf550-kent/jsgo/run	[no test files]
+PASS
+ok  	github.com/jf550-kent/jsgo/token	0.002s
+FAIL
