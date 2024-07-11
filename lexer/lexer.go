@@ -6,22 +6,22 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/jun-hf/jsgo/token"
+	"github.com/jf550-kent/jsgo/token"
 )
 
 // Lexer tokenization the source text for the language
 type Lexer struct {
 	src          []byte // source text for tokenization
-	position     int // current position at [Lexer.src]
-	nextPosition int // next position to be lex at [Lexer.src]
+	position     int    // current position at [Lexer.src]
+	nextPosition int    // next position to be lex at [Lexer.src]
 
 	line int // the current line at the source text
-	col int // the current column at the source text
+	col  int // the current column at the source text
 
-	ch           byte // the current byte at [Lexer.src]
+	ch byte // the current byte at [Lexer.src]
 }
 
-// New return a *Lexer 
+// New return a *Lexer
 func New(byt []byte) *Lexer {
 	l := &Lexer{src: byt, line: 1}
 	l.next()
@@ -109,7 +109,7 @@ func (l *Lexer) Lex() (token.Token, error) {
 
 // getDigitToken returns either [token.Token.NUMBER] or [token.Token.FLOAT]
 // with its corresponding literal
-func (l *Lexer) getDigitToken() (token.Token, error){
+func (l *Lexer) getDigitToken() (token.Token, error) {
 	var digit strings.Builder
 	start := l.currentPos()
 	var end token.Pos
@@ -124,7 +124,7 @@ func (l *Lexer) getDigitToken() (token.Token, error){
 		}
 		if l.ch == '.' {
 			if hasDot {
-				err = errors.New("digit formatted incorrect at "+ strconv.Itoa(l.position))
+				err = errors.New("digit formatted incorrect at " + strconv.Itoa(l.position))
 			}
 			hasDot = true
 			digit.WriteByte(l.ch)
@@ -137,7 +137,7 @@ func (l *Lexer) getDigitToken() (token.Token, error){
 	if hasDot {
 		return newToken(token.FLOAT, digit.String(), start, end), err
 	}
-	return newToken(token.NUMBER, digit.String(), start, end), err 
+	return newToken(token.NUMBER, digit.String(), start, end), err
 }
 
 // getLetter return the whole letter with the position
@@ -172,7 +172,7 @@ func (l *Lexer) next() {
 	l.nextPosition++
 }
 
-// peekByte returns the next byte in [Lexer.src] without 
+// peekByte returns the next byte in [Lexer.src] without
 // moviing the [Lexer.position] and [Lexer.NextPostion]
 // use this function to look ahead of the [Lexer.src]
 func (l *Lexer) peekByte() byte {

@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/jun-hf/jsgo/token"
+	"github.com/jf550-kent/jsgo/token"
 )
 
 func BenchmarkLex(b *testing.B) {
@@ -13,7 +13,7 @@ func BenchmarkLex(b *testing.B) {
 		b.Fatal("failed to read file", err)
 	}
 	b.ResetTimer()
-	for i := 0; i < b.N; i ++ {
+	for i := 0; i < b.N; i++ {
 		l := New(byt)
 		tok, err := l.Lex()
 		if err != nil {
@@ -29,9 +29,9 @@ func TestLexerLineAndCol(t *testing.T) {
 	
 	hh`
 	expected := []struct {
-		char  byte
-		line  int
-		col   int
+		char byte
+		line int
+		col  int
 	}{
 		{'H', 1, 1},
 		{'o', 1, 2},
@@ -105,8 +105,6 @@ func TestLexSingleToken(t *testing.T) {
 		{"false", token.Token{TokenType: token.FALSE, Literal: "false", Start: token.Pos{Line: 1, Col: 1}, End: token.Pos{Line: 1, Col: 5}}},
 		{"true", token.Token{TokenType: token.TRUE, Literal: "true", Start: token.Pos{Line: 1, Col: 1}, End: token.Pos{Line: 1, Col: 4}}},
 	}
-	
-	
 
 	for _, test := range tests {
 		l := New([]byte(test.input))
@@ -133,7 +131,7 @@ func TestLexSourceFile(t *testing.T) {
 		{TokenType: token.ASSIGN, Literal: "=", Start: token.Pos{Line: 1, Col: 9}, End: token.Pos{Line: 1, Col: 9}},
 		{TokenType: token.NUMBER, Literal: "89", Start: token.Pos{Line: 1, Col: 11}, End: token.Pos{Line: 1, Col: 12}},
 		{TokenType: token.SEMICOLON, Literal: ";", Start: token.Pos{Line: 1, Col: 13}, End: token.Pos{Line: 1, Col: 13}},
-	
+
 		// Line 2
 		{TokenType: token.VAR, Literal: "var", Start: token.Pos{Line: 2, Col: 1}, End: token.Pos{Line: 2, Col: 3}},
 		{TokenType: token.IDENT, Literal: "add", Start: token.Pos{Line: 2, Col: 5}, End: token.Pos{Line: 2, Col: 7}},
@@ -145,18 +143,18 @@ func TestLexSourceFile(t *testing.T) {
 		{TokenType: token.IDENT, Literal: "b", Start: token.Pos{Line: 2, Col: 23}, End: token.Pos{Line: 2, Col: 23}},
 		{TokenType: token.RPAREN, Literal: ")", Start: token.Pos{Line: 2, Col: 24}, End: token.Pos{Line: 2, Col: 24}},
 		{TokenType: token.LBRACE, Literal: "{", Start: token.Pos{Line: 2, Col: 26}, End: token.Pos{Line: 2, Col: 26}},
-	
+
 		// Line 3
 		{TokenType: token.RETURN, Literal: "return", Start: token.Pos{Line: 3, Col: 3}, End: token.Pos{Line: 3, Col: 8}},
 		{TokenType: token.IDENT, Literal: "a", Start: token.Pos{Line: 3, Col: 10}, End: token.Pos{Line: 3, Col: 10}},
 		{TokenType: token.ADD, Literal: "+", Start: token.Pos{Line: 3, Col: 12}, End: token.Pos{Line: 3, Col: 12}},
 		{TokenType: token.IDENT, Literal: "b", Start: token.Pos{Line: 3, Col: 14}, End: token.Pos{Line: 3, Col: 14}},
 		{TokenType: token.SEMICOLON, Literal: ";", Start: token.Pos{Line: 3, Col: 15}, End: token.Pos{Line: 3, Col: 15}},
-	
+
 		// Line 4
 		{TokenType: token.RBRACE, Literal: "}", Start: token.Pos{Line: 4, Col: 1}, End: token.Pos{Line: 4, Col: 1}},
 		{TokenType: token.SEMICOLON, Literal: ";", Start: token.Pos{Line: 4, Col: 2}, End: token.Pos{Line: 4, Col: 2}},
-	
+
 		// Line 6
 		{TokenType: token.VAR, Literal: "var", Start: token.Pos{Line: 6, Col: 1}, End: token.Pos{Line: 6, Col: 3}},
 		{TokenType: token.IDENT, Literal: "foo", Start: token.Pos{Line: 6, Col: 5}, End: token.Pos{Line: 6, Col: 7}},
@@ -168,7 +166,7 @@ func TestLexSourceFile(t *testing.T) {
 		{TokenType: token.IDENT, Literal: "func", Start: token.Pos{Line: 6, Col: 23}, End: token.Pos{Line: 6, Col: 26}},
 		{TokenType: token.RPAREN, Literal: ")", Start: token.Pos{Line: 6, Col: 27}, End: token.Pos{Line: 6, Col: 27}},
 		{TokenType: token.LBRACE, Literal: "{", Start: token.Pos{Line: 6, Col: 29}, End: token.Pos{Line: 6, Col: 29}},
-	
+
 		// Line 7
 		{TokenType: token.RETURN, Literal: "return", Start: token.Pos{Line: 7, Col: 3}, End: token.Pos{Line: 7, Col: 8}},
 		{TokenType: token.IDENT, Literal: "func", Start: token.Pos{Line: 7, Col: 10}, End: token.Pos{Line: 7, Col: 13}},
@@ -180,11 +178,11 @@ func TestLexSourceFile(t *testing.T) {
 		{TokenType: token.MINUS, Literal: "-", Start: token.Pos{Line: 7, Col: 21}, End: token.Pos{Line: 7, Col: 21}},
 		{TokenType: token.IDENT, Literal: "a", Start: token.Pos{Line: 7, Col: 23}, End: token.Pos{Line: 7, Col: 23}},
 		{TokenType: token.SEMICOLON, Literal: ";", Start: token.Pos{Line: 7, Col: 24}, End: token.Pos{Line: 7, Col: 24}},
-	
+
 		// Line 8
 		{TokenType: token.RBRACE, Literal: "}", Start: token.Pos{Line: 8, Col: 1}, End: token.Pos{Line: 8, Col: 1}},
 		{TokenType: token.SEMICOLON, Literal: ";", Start: token.Pos{Line: 8, Col: 2}, End: token.Pos{Line: 8, Col: 2}},
-	
+
 		// Line 10
 		{TokenType: token.IDENT, Literal: "foo", Start: token.Pos{Line: 10, Col: 1}, End: token.Pos{Line: 10, Col: 3}},
 		{TokenType: token.LPAREN, Literal: "(", Start: token.Pos{Line: 10, Col: 4}, End: token.Pos{Line: 10, Col: 4}},
@@ -193,7 +191,7 @@ func TestLexSourceFile(t *testing.T) {
 		{TokenType: token.IDENT, Literal: "add", Start: token.Pos{Line: 10, Col: 8}, End: token.Pos{Line: 10, Col: 10}},
 		{TokenType: token.RPAREN, Literal: ")", Start: token.Pos{Line: 10, Col: 11}, End: token.Pos{Line: 10, Col: 11}},
 		{TokenType: token.SEMICOLON, Literal: ";", Start: token.Pos{Line: 10, Col: 12}, End: token.Pos{Line: 10, Col: 12}},
-	
+
 		// Line 12
 		{TokenType: token.VAR, Literal: "var", Start: token.Pos{Line: 12, Col: 1}, End: token.Pos{Line: 12, Col: 3}},
 		{TokenType: token.IDENT, Literal: "total", Start: token.Pos{Line: 12, Col: 5}, End: token.Pos{Line: 12, Col: 9}},
@@ -203,7 +201,7 @@ func TestLexSourceFile(t *testing.T) {
 		{TokenType: token.NUMBER, Literal: "90", Start: token.Pos{Line: 12, Col: 19}, End: token.Pos{Line: 12, Col: 20}},
 		{TokenType: token.SEMICOLON, Literal: ";", Start: token.Pos{Line: 12, Col: 21}, End: token.Pos{Line: 12, Col: 21}},
 	}
-	
+
 	l := New(byt)
 
 	for _, test := range tests {

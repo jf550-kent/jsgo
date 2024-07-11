@@ -1,6 +1,6 @@
 package main
 
-import "github.com/jun-hf/jsgo/ast"
+import "github.com/jf550-kent/jsgo/ast"
 
 
 // if I design Is such that it reports errors

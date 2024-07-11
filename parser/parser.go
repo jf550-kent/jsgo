@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/jun-hf/jsgo/ast"
-	"github.com/jun-hf/jsgo/lexer"
-	"github.com/jun-hf/jsgo/token"
+	"github.com/jf550-kent/jsgo/ast"
+	"github.com/jf550-kent/jsgo/lexer"
+	"github.com/jf550-kent/jsgo/token"
 )
 
 type (
@@ -15,8 +15,8 @@ type (
 )
 
 const (
-	SYNTAX_ERROR = "SyntaxError"
-	TYPE_ERROR = "TypeError"
+	SYNTAX_ERROR   = "SyntaxError"
+	TYPE_ERROR     = "TypeError"
 	INTERNAL_ERROR = "InternalError"
 )
 
@@ -36,13 +36,12 @@ type parser struct {
 func new(filename string, l *lexer.Lexer) *parser {
 	p := &parser{l: l, errorList: []error{}, name: filename}
 
-	p.binaryExpressionFunc = map[token.TokenType]binaryExpressionFunc{
-	}
+	p.binaryExpressionFunc = map[token.TokenType]binaryExpressionFunc{}
 
 	p.unaryExpressionFuncs = map[token.TokenType]unaryExpressionFunc{
-		token.IDENT: p.parseIdent,
+		token.IDENT:  p.parseIdent,
 		token.NUMBER: p.parseNumber,
-		token.FLOAT: p.parseFloat,
+		token.FLOAT:  p.parseFloat,
 	}
 
 	return p
@@ -101,7 +100,7 @@ func (p *parser) parseVarStatement() ast.Statement {
 	if p.expect(token.SEMICOLON) {
 		p.next()
 	}
-	
+
 	return varStmt
 }
 
@@ -137,20 +136,20 @@ func (p *parser) parseIdent() ast.Expression {
 func (p *parser) parseNumber() ast.Expression {
 	v, err := strconv.ParseInt(p.currentToken.Literal, 10, 64)
 	if err != nil {
-		p.addError("unable to convert number", INTERNAL_ERROR, p.currentToken.Start )
+		p.addError("unable to convert number", INTERNAL_ERROR, p.currentToken.Start)
 		return nil
 	}
 
-	return &ast.Number{ Token: p.currentToken, Value: v}
+	return &ast.Number{Token: p.currentToken, Value: v}
 }
 
 func (p *parser) parseFloat() ast.Expression {
 	f, err := strconv.ParseFloat(p.currentToken.Literal, 64)
 	if err != nil {
-		p.addError("unable to convert float", INTERNAL_ERROR, p.currentToken.Start )
+		p.addError("unable to convert float", INTERNAL_ERROR, p.currentToken.Start)
 		return nil
 	}
-	return &ast.Float{ Token: p.currentToken, Value: f}
+	return &ast.Float{Token: p.currentToken, Value: f}
 }
 
 func (p *parser) peekPred() int {

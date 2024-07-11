@@ -2,7 +2,8 @@ package ast
 
 import (
 	"strings"
-	"github.com/jun-hf/jsgo/token"
+
+	"github.com/jf550-kent/jsgo/token"
 )
 
 type Node interface {
@@ -23,7 +24,7 @@ type Expression interface {
 
 // Main is the entry point of the program
 type Main struct {
-	Name string
+	Name       string
 	Statements []Statement
 }
 
@@ -40,7 +41,7 @@ func (m *Main) End() token.Pos {
 	if len(m.Statements) == 0 {
 		return token.Pos{Line: 0, Col: 0}
 	}
-	last := len(m.Statements) - 1 
+	last := len(m.Statements) - 1
 	return m.Statements[last].End()
 }
 
@@ -52,29 +53,29 @@ func (m *Main) String() string {
 }
 
 type Identifier struct {
-	Token token.Token
+	Token   token.Token
 	Literal string
 }
 
-func (i *Identifier) expressionNode() {}
+func (i *Identifier) expressionNode()  {}
 func (i *Identifier) Start() token.Pos { return i.Token.Start }
-func (i *Identifier) End() token.Pos { return i.Token.End }
-func (i *Identifier) String() string { return i.Literal }
+func (i *Identifier) End() token.Pos   { return i.Token.End }
+func (i *Identifier) String() string   { return i.Literal }
 
 // Statement in the language does not produce value
 type (
 	// VarStatement represent the var node
 	// var <identifier> = <expression>;
 	VarStatement struct {
-		Token token.Token
-		Variable *Identifier
+		Token      token.Token
+		Variable   *Identifier
 		Expression Expression
 	}
 )
 
-func (v *VarStatement) statementNode() {}
+func (v *VarStatement) statementNode()   {}
 func (v *VarStatement) Start() token.Pos { return v.Token.Start }
-func (v *VarStatement) End() token.Pos { 
+func (v *VarStatement) End() token.Pos {
 	if v.Expression != nil {
 		return v.Expression.End()
 	}
@@ -107,12 +108,12 @@ type (
 	}
 )
 
-func (n *Number) expressionNode() {}
-func (n *Number) Start() token.Pos { return n.Token.Start } 
-func (n *Number) End() token.Pos   { return n.Token.End } 
-func (n *Number) String() string { return n.Token.Literal }
+func (n *Number) expressionNode()  {}
+func (n *Number) Start() token.Pos { return n.Token.Start }
+func (n *Number) End() token.Pos   { return n.Token.End }
+func (n *Number) String() string   { return n.Token.Literal }
 
-func (f *Float) expressionNode() {}
-func (f *Float) Start() token.Pos { return f.Token.Start } 
-func (f *Float) End() token.Pos   { return f.Token.End } 
-func (f *Float) String() string { return f.Token.Literal }
+func (f *Float) expressionNode()  {}
+func (f *Float) Start() token.Pos { return f.Token.Start }
+func (f *Float) End() token.Pos   { return f.Token.End }
+func (f *Float) String() string   { return f.Token.Literal }
