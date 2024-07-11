@@ -1,10 +1,10 @@
 package parser
 
-import (
-	"testing"
+// import (
+// 	"testing"
 
-	"github.com/jf550-kent/jsgo/ast"
-)
+// 	"github.com/jf550-kent/jsgo/ast"
+// )
 
 // func TestVar(t *testing.T) {
 // 	input := []byte("var apple = 89;")
@@ -28,5 +28,3 @@ import (
 // 		t.Errorf("wrong statement. expected=%T got=%T", &ast.VarStatement{}, main.Statements[0])
 // 	}
 // }
-
-func testVarStatement(t *testing.T, s ast.Statement,)
