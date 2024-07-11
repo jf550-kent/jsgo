@@ -43,6 +43,7 @@ jobs:
 
       - name: Commit and push the 
         run: |
-          git add "${FILENAME}"
+          echo "${FILENAME}"
+          git add $("${FILENAME}")
           git commit -m "Record performance for ${FILENAME}"
           git push
