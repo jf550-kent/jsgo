@@ -1,0 +1,14 @@
+?   	github.com/jf550-kent/jsgo/ast	[no test files]
+?   	github.com/jf550-kent/jsgo/jsgo	[no test files]
+goos: linux
+goarch: amd64
+pkg: github.com/jf550-kent/jsgo/lexer
+cpu: AMD EPYC 7763 64-Core Processor                
+BenchmarkLex-4   	16525950	        71.55 ns/op	       8 B/op	       1 allocs/op
+PASS
+ok  	github.com/jf550-kent/jsgo/lexer	1.260s
+PASS
+ok  	github.com/jf550-kent/jsgo/parser	0.002s
+?   	github.com/jf550-kent/jsgo/run	[no test files]
+PASS
+ok  	github.com/jf550-kent/jsgo/token	0.002s
