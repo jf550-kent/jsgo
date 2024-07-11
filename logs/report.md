@@ -1,0 +1,11 @@
+6/07
+Today I managed to build the lexer for my programming language. I have decided to represent token as an integer to keep the size of each token small. It is the lexer jobs to correctly get each token and the corresponding literal of the token. On top of that I have added support for floating number token in my lexer. 
+
+I have also added errors on to the lexer struct. The design decision here is to ensure that there are errors reporting in the lexer and the parser.
+
+For the lexer, the errors represent the errors by characters, wherelse for in parsers it is reponsible fo checking errors in terms grammers
+
+The next step is to see how does go, does positioning and then I can starting to port some the features into my language.
+
+8/07
+For the last 2 days, I initially wanted to represent the token as just an token int, however I realised that I wanted to track position. This means that i need to change the token into a struct to accomodate the changes. This design changes forcess me to re build majority of the lexer implementation, however I am able include postioning down to each token. Which is really helpful for further componet of the software because it allows me to track position. I have also written tests for each componet of the lexer to improve confident of my program. Implementing test really helped me into catching cases that I did not consider in my coding logic. For instance, when building the position of the character and advacing the charcter in the lexer. The test that I have built have allowed me fix the off by one col and line field. In conclusion, using test and begging helped me saves signigifcant amount of time. And allows me to catch error early on of building the program. Look at [TestLexerLineAndCol]. I have also updated the documentation of my code. Go has a really nice development tools, forstance it allows comment as docuems this can help you to show the code intend when you have the right LSP. [Picture of the lsp]. I have also writteb a benchmark [BenchmarkLex]

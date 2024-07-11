@@ -1,2 +1,2 @@
 # jsgo
-JSGO a JavaScript Compiler built with Go
+JavaScript compiler built in go
