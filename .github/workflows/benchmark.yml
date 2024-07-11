@@ -8,7 +8,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Run benchmark
-        run: date +%s > "$(date +"%Y-%m-%d_%H-%M-%S")_${GITHUB_SHA}.txt"
+        run: go test ./... -bench=. -count=10 -run='^#' -benchmem | tee "performance/$(date +"%Y-%m-%d_%H-%M-%S")_${GITHUB_SHA}.txt"
       - name: Commit report
         run: |
           git config --global user.name 'ci'
