@@ -18,6 +18,7 @@ const (
 	SYNTAX_ERROR   = "SyntaxError"
 	TYPE_ERROR     = "TypeError"
 	INTERNAL_ERROR = "InternalError"
+	ILLEGAL_TOKEN = "IllegalToken"
 )
 
 type parser struct {
@@ -27,14 +28,12 @@ type parser struct {
 	currentToken token.Token
 	nextToken    token.Token
 
-	errorList []error
-
 	unaryExpressionFuncs map[token.TokenType]unaryExpressionFunc
 	binaryExpressionFunc map[token.TokenType]binaryExpressionFunc
 }
 
 func new(filename string, l *lexer.Lexer) *parser {
-	p := &parser{l: l, errorList: []error{}, name: filename}
+	p := &parser{l: l, name: filename}
 
 	p.binaryExpressionFunc = map[token.TokenType]binaryExpressionFunc{}
 
@@ -47,7 +46,7 @@ func new(filename string, l *lexer.Lexer) *parser {
 	return p
 }
 
-func Parse(filename string, src []byte) (*ast.Main, error) {
+func Parse(filename string, src []byte) *ast.Main {
 	l := lexer.New(src)
 
 	p := new(filename, l)
@@ -66,7 +65,7 @@ func Parse(filename string, src []byte) (*ast.Main, error) {
 		p.next()
 	}
 
-	return main, processError(p.errorList)
+	return main
 }
 
 func (p *parser) parse() ast.Statement {
@@ -82,13 +81,13 @@ func (p *parser) parseVarStatement() ast.Statement {
 
 	if !p.peekExpect(token.IDENT) {
 		errMsg := varStmt.String() + "expect variable when declaring var"
-		p.addError(errMsg, SYNTAX_ERROR, varStmt.Start())
+		p.panicError(errMsg, SYNTAX_ERROR, varStmt.Start())
 		return nil
 	}
 
 	ident, ok := p.parseIdent().(*ast.Identifier)
 	if !ok {
-		p.addError("", INTERNAL_ERROR, varStmt.End())
+		p.panicError("failed to parse identifier", INTERNAL_ERROR, varStmt.End())
 		return nil
 	}
 	varStmt.Variable = ident
@@ -112,7 +111,7 @@ func (p *parser) parseExpression(precedence int) ast.Expression {
 	unaryFunc, ok := p.unaryExpressionFuncs[p.currentToken.TokenType]
 	if !ok {
 		errMsg := fmt.Sprintf("unary expression not found for %s", p.currentToken)
-		p.addError(errMsg, SYNTAX_ERROR, p.currentToken.Start)
+		p.panicError(errMsg, SYNTAX_ERROR, p.currentToken.Start)
 		return nil
 	}
 	result := unaryFunc()
@@ -136,7 +135,7 @@ func (p *parser) parseIdent() ast.Expression {
 func (p *parser) parseNumber() ast.Expression {
 	v, err := strconv.ParseInt(p.currentToken.Literal, 10, 64)
 	if err != nil {
-		p.addError("unable to convert number", INTERNAL_ERROR, p.currentToken.Start)
+		p.panicError("unable to convert number", INTERNAL_ERROR, p.currentToken.Start)
 		return nil
 	}
 
@@ -146,7 +145,7 @@ func (p *parser) parseNumber() ast.Expression {
 func (p *parser) parseFloat() ast.Expression {
 	f, err := strconv.ParseFloat(p.currentToken.Literal, 64)
 	if err != nil {
-		p.addError("unable to convert float", INTERNAL_ERROR, p.currentToken.Start)
+		p.panicError("unable to convert float", INTERNAL_ERROR, p.currentToken.Start)
 		return nil
 	}
 	return &ast.Float{Token: p.currentToken, Value: f}
@@ -172,17 +171,11 @@ func (p *parser) next() {
 	p.currentToken = p.nextToken
 	ntTok, err := p.l.Lex()
 	if err != nil {
-		p.errorList = append(p.errorList, err)
+		p.panicError(err.Error(), ILLEGAL_TOKEN, ntTok.Start)
 	}
 	p.nextToken = ntTok
 }
 
-func (p *parser) addError(msg, errorType string, pos token.Pos) {
-	err := fmt.Errorf("SyntaxError: %s %s:%d:%d", msg, p.name, pos.Line, pos.Col)
-	p.errorList = append(p.errorList, err)
-}
-
-// TODO: THINK HAVE A BETTER WAY IN REPRESENTING THIS FUNCTIONS
-func processError(e []error) error {
-	return nil
+func (p *parser) panicError(msg, errorType string, pos token.Pos) {
+	panic(fmt.Errorf("%s: %s %s:%d:%d", errorType, msg, p.name, pos.Line, pos.Col))
 }
