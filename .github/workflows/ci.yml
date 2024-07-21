@@ -5,6 +5,10 @@ on:
     permissions:
       contents: write
 
+# on:
+#   push:
+#     branches:
+#       - main
 jobs:
   tests:
     name: Tests
@@ -13,10 +17,12 @@ jobs:
       - name: Checkout out code
         uses: actions/checkout@v4
 
-      - name: Fetch PR title
-        env:
-          TITLE: ${{ github.event.pull_request.title }}
-        run: echo The Title of your PR is $TITLE
+      - name: Get PR Commit Info
+        id: pr-info
+        run: |
+          PR_COMMIT=$(jq -r .pull_request.head.sha "$GITHUB_EVENT_PATH")
+          echo "PR_COMMIT=$PR_COMMIT" >> $GITHUB_ENV
+          echo "The commit SHA for this PR is $PR_COMMIT"
 
       - name: Create a file with PR title
         run: |
