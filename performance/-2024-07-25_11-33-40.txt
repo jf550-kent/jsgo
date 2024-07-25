@@ -4,9 +4,9 @@ goos: linux
 goarch: amd64
 pkg: github.com/jf550-kent/jsgo/lexer
 cpu: AMD EPYC 7763 64-Core Processor                
-BenchmarkLex-4   	16857640	        70.94 ns/op	       8 B/op	       1 allocs/op
+BenchmarkLex-4   	16716253	        71.09 ns/op	       8 B/op	       1 allocs/op
 PASS
-ok  	github.com/jf550-kent/jsgo/lexer	1.273s
+ok  	github.com/jf550-kent/jsgo/lexer	1.265s
 PASS
 ok  	github.com/jf550-kent/jsgo/parser	0.002s
 ?   	github.com/jf550-kent/jsgo/run	[no test files]
