@@ -1,0 +1,51 @@
+name: CI 
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  tests:
+    name: Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout out code
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22.4'
+      
+      - name: Check format
+        run: test -z $(go fmt ./...) 
+
+      - name: Install staticcheck
+        run: go install honnef.co/go/tools/cmd/staticcheck@latest
+      
+      - name: Run staticcheck
+        run: staticcheck ./...
+      
+      - name: Run test
+        run: go test ./... -cover
+      
+      - name: Get PR Title 
+        id: pr-title
+        run: |
+          PR_TITLE=$(jq -r .pull_request.title "$GITHUB_EVENT_PATH")
+          echo "PR_TITLE=$PR_TITLE" >> $GITHUB_ENV
+
+      - name: Run benchmark and write to file
+        run:  |
+          PR_TITLE=$(jq -r .pull_request.title "$GITHUB_EVENT_PATH")
+          FILENAME="performance/$($PR_TITLE)-$(date +"%Y-%m-%d_%H-%M-%S").txt"
+          go test ./... -bench=. -count=1 -benchmem -run '^#' > tee "${FILENAME}"
+
+      - name: Commit and push the 
+        run: |
+          git config --global user.name 'ci'
+          git config --global user.email 'jf550-kent@users.noreply.github.com'
+          git add .
+          git commit -m "Record performance for ${FILENAME}"
+          git push
