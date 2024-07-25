@@ -5,8 +5,8 @@ import (
 )
 
 type Pos struct {
-	Line int 
-	Col int
+	Line int
+	Col  int
 }
 
 // Token is samllest valid element of the language
@@ -19,6 +19,7 @@ type Token struct {
 
 // TokenType represent the set of valid token type in the language
 type TokenType int
+
 const (
 	ILLEGAL TokenType = iota
 	EOF

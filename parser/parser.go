@@ -18,7 +18,7 @@ const (
 	SYNTAX_ERROR   = "SyntaxError"
 	TYPE_ERROR     = "TypeError"
 	INTERNAL_ERROR = "InternalError"
-	ILLEGAL_TOKEN = "IllegalToken"
+	ILLEGAL_TOKEN  = "IllegalToken"
 )
 
 func Parse(filename string, src []byte) *ast.Main {

@@ -7,9 +7,9 @@ import (
 )
 
 func TestParserError(t *testing.T) {
-	tests := []struct{
+	tests := []struct {
 		filename string
-		src []byte
+		src      []byte
 	}{
 		{"@", []byte("jdks@")},
 		{"var statement", []byte("var 8988")},
@@ -31,9 +31,9 @@ func shouldPanic(t *testing.T, filename string, src []byte) {
 
 func TestVar(t *testing.T) {
 	input := []byte("var apple = 89;")
-	tests := []struct{
-		input string
-		expectedVariable string
+	tests := []struct {
+		input              string
+		expectedVariable   string
 		expectedExpression any
 	}{
 		{"var apple = 10;", "apple", 10},
