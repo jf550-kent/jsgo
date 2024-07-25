@@ -111,6 +111,8 @@ func (p *parser) parseVarStatement() ast.Statement {
 		return nil
 	}
 
+	print(p.pred())
+
 	p.next()
 
 	return varStmt
