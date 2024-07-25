@@ -6,17 +6,20 @@ import (
 	"github.com/jf550-kent/jsgo/token"
 )
 
+// Node is the smallest element in the abstract syntax tree of JSGO.
 type Node interface {
 	Start() token.Pos // The first position of the [Node]'s first [token.Token]
 	End() token.Pos   // The last position of the [Node]'s last character of the [token.Token]
 	String() string
 }
 
+// Statement is the node in the ast that represent statement in JSGO.
 type Statement interface {
 	Node
 	statementNode()
 }
 
+// Expression is the node in the ast that represent expression in JSGO, expression in JSGO produce value.
 type Expression interface {
 	Node
 	expressionNode()
@@ -52,6 +55,7 @@ func (m *Main) String() string {
 	return m.Name
 }
 
+// Identifier is the node that represent an identifier.
 type Identifier struct {
 	Token   token.Token
 	Literal string
