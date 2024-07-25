@@ -21,6 +21,28 @@ const (
 	ILLEGAL_TOKEN = "IllegalToken"
 )
 
+func Parse(filename string, src []byte) *ast.Main {
+	l := lexer.New(src)
+
+	p := new(filename, l)
+
+	// fill up the first 2 token in parser
+	p.next()
+	p.next()
+
+	main := &ast.Main{Name: filename, Statements: []ast.Statement{}}
+
+	for p.currentToken.TokenType != token.EOF {
+		stmt := p.parse()
+		if stmt != nil {
+			main.Statements = append(main.Statements, stmt)
+		}
+		p.next()
+	}
+
+	return main
+}
+
 type parser struct {
 	l    *lexer.Lexer
 	name string
@@ -46,28 +68,6 @@ func new(filename string, l *lexer.Lexer) *parser {
 	return p
 }
 
-func Parse(filename string, src []byte) *ast.Main {
-	l := lexer.New(src)
-
-	p := new(filename, l)
-
-	// fill up the first 2 token in parser
-	p.next()
-	p.next()
-
-	main := &ast.Main{Name: filename, Statements: []ast.Statement{}}
-
-	for p.currentToken.TokenType != token.EOF {
-		stmt := p.parse()
-		if stmt != nil {
-			main.Statements = append(main.Statements, stmt)
-		}
-		p.next()
-	}
-
-	return main
-}
-
 func (p *parser) parse() ast.Statement {
 	switch p.currentToken.TokenType {
 	case token.VAR:
@@ -85,6 +85,8 @@ func (p *parser) parseVarStatement() ast.Statement {
 		return nil
 	}
 
+	p.next()
+
 	ident, ok := p.parseIdent().(*ast.Identifier)
 	if !ok {
 		p.panicError("failed to parse identifier", INTERNAL_ERROR, varStmt.End())
@@ -94,11 +96,22 @@ func (p *parser) parseVarStatement() ast.Statement {
 
 	p.next()
 
+	if !p.expect(token.ASSIGN) {
+		errMsg := varStmt.String() + "expect = after identifier when declaring var"
+		p.panicError(errMsg, SYNTAX_ERROR, varStmt.Start())
+		return nil
+	}
+	p.next()
+
 	varStmt.Expression = p.parseExpression(1)
 
-	if p.expect(token.SEMICOLON) {
-		p.next()
+	if !p.peekExpect(token.SEMICOLON) {
+		errMsg := varStmt.String() + "expect ; after expression when declaring var"
+		p.panicError(errMsg, SYNTAX_ERROR, varStmt.Start())
+		return nil
 	}
+
+	p.next()
 
 	return varStmt
 }
@@ -115,8 +128,9 @@ func (p *parser) parseExpression(precedence int) ast.Expression {
 		return nil
 	}
 	result := unaryFunc()
-
-	for !p.expect(token.SEMICOLON) && precedence < p.peekPred() {
+	a := p.peekPred()
+	print(a)
+	for !p.peekExpect(token.SEMICOLON) && precedence < p.peekPred() {
 		binaryFunc, ok := p.binaryExpressionFunc[p.nextToken.TokenType]
 		if !ok {
 			return result
