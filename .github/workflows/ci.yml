@@ -22,6 +22,9 @@ jobs:
           PR_TITLE=$(jq -r .pull_request.title "$GITHUB_EVENT_PATH")
           echo "PR_TITLE=$PR_TITLE" >> $GITHUB_ENV
           echo "The title of this PR is $PR_TITLE"
+      - name: Get Title
+        id: get-title
+        run: echo "$PR_TITLE"
 
       # - name: Setup Go
       #   uses: actions/setup-go@v5
