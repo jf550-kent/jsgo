@@ -33,12 +33,15 @@ jobs:
         run: |
           PR_TITLE=$(jq -r .pull_request.title "$GITHUB_EVENT_PATH")
           echo "PR_TITLE=$PR_TITLE" >> $GITHUB_ENV
+          echo $PR_TITLE
+          echo $GITHUB_ENV
 
       - name: Run benchmark and write to file
         run:  |
           PR_TITLE=$(jq -r .pull_request.title "$GITHUB_EVENT_PATH")
+          echo $PR_TITLE
           FILENAME="performance/$($PR_TITLE)-$(date +"%Y-%m-%d_%H-%M-%S").txt"
-          echo FILENAME
+          echo $FILENAME
           echo "FILENAME=$FILENAME" >> $GITHUB_ENV
           go test ./... -bench=. -count=1 -benchmem -run '^#' > "${FILENAME}"
 
