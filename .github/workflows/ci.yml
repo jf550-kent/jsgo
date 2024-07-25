@@ -16,33 +16,12 @@ jobs:
       - name: Checkout out code
         uses: actions/checkout@v4
 
-      - name: Print Event Information
-        run: |
-          echo "Event Name: ${{ github.event_name }}"
-          echo "Repository: ${{ github.repository }}"
-          echo "Actor: ${{ github.actor }}"
-          echo "Commit SHA: ${{ github.sha }}"
-          echo "Ref: ${{ github.ref }}"
-          echo "Head Ref: ${{ github.head_ref }}"
-          echo "Base Ref: ${{ github.base_ref }}"
-          echo "Run ID: ${{ github.run_id }}"
-          echo "Run Number: ${{ github.run_number }}"
-
       - name: Get PR Commit Info
         id: pr-info
         run: |
-          PR_COMMIT=$(jq -r .pull_request.head.sha "$GITHUB_EVENT_PATH")
           PR_TITLE=$(jq -r .pull_request.title "$GITHUB_EVENT_PATH")
-          PR_BODY=$(jq -r .pull_request.body "$GITHUB_EVENT_PATH")
-          PR_USER=$(jq -r .pull_request.user.login "$GITHUB_EVENT_PATH")
-          echo "PR_COMMIT=$PR_COMMIT" >> $GITHUB_ENV
           echo "PR_TITLE=$PR_TITLE" >> $GITHUB_ENV
-          echo "PR_BODY=$PR_BODY" >> $GITHUB_ENV
-          echo "PR_USER=$PR_USER" >> $GITHUB_ENV
-          echo "The commit SHA for this PR is $PR_COMMIT"
           echo "The title of this PR is $PR_TITLE"
-          echo "The body of this PR is $PR_BODY"
-          echo "The user who created this PR is $PR_USER"
 
       # - name: Setup Go
       #   uses: actions/setup-go@v5
@@ -69,7 +48,8 @@ jobs:
 
       # - name: Run benchmark and write to file
       #   run:  |
-      #     FILENAME="performance/$(date +"%Y-%m-%d_%H-%M-%S")_${GITHUB_SHA}.txt"
+      #     PR_TITLE=$(jq -r .pull_request.title "$GITHUB_EVENT_PATH")
+      #     FILENAME="performance/$($PR_TITLE)/$(date +"%Y-%m-%d_%H-%M-%S").txt"
       #     go test ./... -bench=. -count=1 -benchmem -run '^#' > tee "${FILENAME}"
 
       # - name: Commit and push the 
