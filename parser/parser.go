@@ -63,6 +63,8 @@ func new(filename string, l *lexer.Lexer) *parser {
 		token.IDENT:  p.parseIdent,
 		token.NUMBER: p.parseNumber,
 		token.FLOAT:  p.parseFloat,
+		token.TRUE: p.parseBoolean,
+		token.FALSE: p.parseBoolean,
 	}
 
 	return p
@@ -75,7 +77,7 @@ func (p *parser) parse() ast.Statement {
 	case token.RETURN:
 		return p.parseReturnStatement()
 	}
-	return p.parseExprStmt()
+	return p.parseExpressionStatement()
 }
 
 func (p *parser) parseVarStatement() ast.Statement {
@@ -135,7 +137,7 @@ func (p *parser) parseReturnStatement() ast.Statement {
 	return st
 }
 
-func (p *parser) parseExprStmt() ast.Statement {
+func (p *parser) parseExpressionStatement() ast.Statement {
 	return nil
 }
 
@@ -147,8 +149,6 @@ func (p *parser) parseExpression(precedence int) ast.Expression {
 		return nil
 	}
 	result := unaryFunc()
-	a := p.peekPred()
-	print(a)
 	for !p.peekExpect(token.SEMICOLON) && precedence < p.peekPred() {
 		binaryFunc, ok := p.binaryExpressionFunc[p.nextToken.TokenType]
 		if !ok {
@@ -182,6 +182,10 @@ func (p *parser) parseFloat() ast.Expression {
 		return nil
 	}
 	return &ast.Float{Token: p.currentToken, Value: f}
+}
+
+func (p *parser) parseBoolean() ast.Expression {
+	return &ast.Boolean{Token: p.currentToken, Value: p.expect(token.TRUE)}
 }
 
 func (p *parser) peekPred() int {

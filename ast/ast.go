@@ -136,6 +136,11 @@ type (
 		Token token.Token
 		Value float64
 	}
+
+	Boolean struct {
+		Token token.Token
+		Value bool
+	}
 )
 
 func (n *Number) expressionNode()  {}
@@ -147,3 +152,8 @@ func (f *Float) expressionNode()  {}
 func (f *Float) Start() token.Pos { return f.Token.Start }
 func (f *Float) End() token.Pos   { return f.Token.End }
 func (f *Float) String() string   { return f.Token.Literal }
+
+func (f *Boolean) expressionNode()  {}
+func (f *Boolean) Start() token.Pos { return f.Token.Start }
+func (f *Boolean) End() token.Pos   { return f.Token.End }
+func (f *Boolean) String() string   { return f.Token.Literal }
