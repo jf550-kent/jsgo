@@ -32,7 +32,7 @@ jobs:
         run:  |
           FILENAME="performance/$(date +"%Y-%m-%d_%H-%M-%S").txt"
           echo "FILENAME=$FILENAME" >> $GITHUB_ENV
-          go test ./... -bench=. -count=1 -benchmem -run '^#' > "${FILENAME}"
+          go test ./... -bench=. -count=30 -benchmem -run '^#' > "${FILENAME}"
 
       - name: Commit and push the 
         run: |
