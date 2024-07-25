@@ -16,16 +16,6 @@ jobs:
       - name: Checkout out code
         uses: actions/checkout@v4
 
-      - name: Get PR Commit Info
-        id: pr-info
-        run: |
-          PR_TITLE=$(jq -r .pull_request.title "$GITHUB_EVENT_PATH")
-          echo "PR_TITLE=$PR_TITLE" >> $GITHUB_ENV
-          echo "The title of this PR is $PR_TITLE"
-      - name: Get Title
-        id: get-title
-        run: echo "$PR_TITLE"
-
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
@@ -40,14 +30,19 @@ jobs:
       - name: Run staticcheck
         run: staticcheck ./...
 
-      - name: Install gosec
-        run: go install honnef.co/go/tools/cmd/staticcheck@latest
-      
-      - name: Run gosec
-        run: gosec ./...
+      - name: Run Gosec Security Scanner
+        uses: securego/gosec@master
+        with:
+          args: ./...
       
       - name: Run test
         run: go test ./... -cover
+      
+      - name: Get PR Title 
+        id: pr-title
+        run: |
+          PR_TITLE=$(jq -r .pull_request.title "$GITHUB_EVENT_PATH")
+          echo "PR_TITLE=$PR_TITLE" >> $GITHUB_ENV
 
       - name: Run benchmark and write to file
         run:  |
