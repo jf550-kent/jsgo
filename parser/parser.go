@@ -72,6 +72,8 @@ func (p *parser) parse() ast.Statement {
 	switch p.currentToken.TokenType {
 	case token.VAR:
 		return p.parseVarStatement()
+	case token.RETURN:
+		return p.parseReturnStatement()
 	}
 	return p.parseExprStmt()
 }
@@ -97,7 +99,7 @@ func (p *parser) parseVarStatement() ast.Statement {
 	p.next()
 
 	if !p.expect(token.ASSIGN) {
-		errMsg := varStmt.String() + "expect = after identifier when declaring var"
+		errMsg := varStmt.String() + " :expect = after identifier when declaring var"
 		p.panicError(errMsg, SYNTAX_ERROR, varStmt.Start())
 		return nil
 	}
@@ -106,7 +108,7 @@ func (p *parser) parseVarStatement() ast.Statement {
 	varStmt.Expression = p.parseExpression(1)
 
 	if !p.peekExpect(token.SEMICOLON) {
-		errMsg := varStmt.String() + "expect ; after expression when declaring var"
+		errMsg := varStmt.String() + " :expect ; after expression when declaring var"
 		p.panicError(errMsg, SYNTAX_ERROR, varStmt.Start())
 		return nil
 	}
@@ -114,6 +116,23 @@ func (p *parser) parseVarStatement() ast.Statement {
 	p.next()
 
 	return varStmt
+}
+
+func (p *parser) parseReturnStatement() ast.Statement {
+	st := &ast.ReturnStatement{Token: p.currentToken}
+	
+	p.next()
+
+	st.ReturnExpression = p.parseExpression(1)
+
+	if !p.peekExpect(token.SEMICOLON) {
+		errMsg := st.String() + " :expect ; after expression in return statement"
+		p.panicError(errMsg, SYNTAX_ERROR, st.End())
+		return nil
+	}
+
+	p.next()
+	return st
 }
 
 func (p *parser) parseExprStmt() ast.Statement {

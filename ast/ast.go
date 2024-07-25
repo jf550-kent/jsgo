@@ -75,6 +75,13 @@ type (
 		Variable   *Identifier
 		Expression Expression
 	}
+
+	// Return represetn the return node
+	// return <expression>;
+	ReturnStatement struct {
+		Token token.Token
+		ReturnExpression Expression
+	}
 )
 
 func (v *VarStatement) statementNode()   {}
@@ -94,6 +101,25 @@ func (v *VarStatement) String() string {
 	s.WriteString(" = ")
 	if v.Expression != nil {
 		s.WriteString(v.Expression.String())
+	}
+	s.WriteString(";")
+	return s.String()
+}
+
+func (r *ReturnStatement) statementNode() {}
+func (r *ReturnStatement) Start() token.Pos { return r.Token.Start }
+func (r *ReturnStatement) End() token.Pos { 
+	if r.ReturnExpression != nil {
+		return r.ReturnExpression.End()
+	}
+	return r.Token.End
+}
+func (r *ReturnStatement) String() string {
+	var s strings.Builder
+	s.WriteString(r.Token.String())
+	s.WriteString(" ")
+	if r.ReturnExpression != nil {
+		s.WriteString(r.ReturnExpression.String())
 	}
 	s.WriteString(";")
 	return s.String()
