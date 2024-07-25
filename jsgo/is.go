@@ -2,7 +2,6 @@ package main
 
 import "github.com/jf550-kent/jsgo/ast"
 
-
 // if I design Is such that it reports errors
 func Is(main ast.Main) bool {
 	if len(main.Statements) != 0 {
@@ -12,7 +11,7 @@ func Is(main ast.Main) bool {
 			}
 		}
 	}
-	return true 
+	return true
 }
 
 func isStatement(stmt ast.Statement) bool {

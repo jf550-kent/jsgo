@@ -1,10 +1,8 @@
 name: CI 
 
-on: 
-  push:
-    permissions:
-      contents: write
-
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
 jobs:
   tests:
     name: Tests
@@ -13,53 +11,19 @@ jobs:
       - name: Checkout out code
         uses: actions/checkout@v4
 
-      - name: Fetch PR title
-        id: get_pr_title
-        run: |
-          PR_TITLE=$(curl -s -H "Accept: application/vnd.github.v3+json" \
-                     -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-                     "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}" \
-                     | jq -r '.title')
-          echo "PR_TITLE=$PR_TITLE" >> $GITHUB_ENV
-
-      - name: Create a file with PR title
-        run: |
-          FILENAME="$(date +"%Y-%m-%d_%H-%M-%S")_${{ env.PR_TITLE }}.txt"
-          echo "This file was created for PR: ${{ env.PR_TITLE }}" > "${FILENAME}"
-          echo "Created file: ${FILENAME}"
-
-      # - name: Setup Go
-      #   uses: actions/setup-go@v5
-      #   with:
-      #     go-version: '1.22'
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22.4'
       
-      # - name: Check format
-      #   run: test -z $(go fmt ./...) 
+      - name: Check format
+        run: test -z $(go fmt ./...) 
 
-      # - name: Install staticcheck
-      #   run: go install honnef.co/go/tools/cmd/staticcheck@latest
+      - name: Install staticcheck
+        run: go install honnef.co/go/tools/cmd/staticcheck@latest
       
-      # - name: Run staticcheck
-      #   run: staticcheck ./...
-
-      # - name: Install gosec
-      #   run: go install honnef.co/go/tools/cmd/staticcheck@latest
+      - name: Run staticcheck
+        run: staticcheck ./...
       
-      # - name: Run gosec
-      #   run: gosec ./...
-      
-      # - name: Run test
-      #   run: go test ./... -cover
-
-      # - name: Run benchmark and write to file
-      #   run:  |
-      #     FILENAME="performance/$(date +"%Y-%m-%d_%H-%M-%S")_${GITHUB_SHA}.txt"
-      #     go test ./... -bench=. -count=1 -benchmem -run '^#' > tee "${FILENAME}"
-
-      # - name: Commit and push the 
-      #   run: |
-      #     git config --global user.name 'ci'
-      #     git config --global user.email 'jf550-kent@users.noreply.github.com'
-      #     git add .
-      #     git commit -m "Record performance for ${FILENAME}"
-      #     git push
+      - name: Run test
+        run: go test ./... -cover
