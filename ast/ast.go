@@ -79,13 +79,13 @@ type (
 	// Return represent the return node
 	// return <expression>;
 	ReturnStatement struct {
-		Token token.Token
+		Token            token.Token
 		ReturnExpression Expression
 	}
 
 	// BlockStatement represent statements contian in a block
 	BlockStatement struct {
-		Token token.Token
+		Token      token.Token
 		Statements []Statement
 	}
 )
@@ -112,9 +112,9 @@ func (v *VarStatement) String() string {
 	return s.String()
 }
 
-func (r *ReturnStatement) statementNode() {}
+func (r *ReturnStatement) statementNode()   {}
 func (r *ReturnStatement) Start() token.Pos { return r.Token.Start }
-func (r *ReturnStatement) End() token.Pos { 
+func (r *ReturnStatement) End() token.Pos {
 	if r.ReturnExpression != nil {
 		return r.ReturnExpression.End()
 	}
@@ -133,6 +133,17 @@ func (r *ReturnStatement) String() string {
 
 func (bs *BlockStatement) statementNode()       {}
 func (bs *BlockStatement) TokenLiteral() string { return bs.Token.Literal }
+func (bs *BlockStatement) Start() token.Pos     { return bs.Token.Start }
+func (bs *BlockStatement) End() token.Pos {
+	end := bs.Token.End
+
+	lastStmt := bs.Statements[len(bs.Statements)-1]
+	if lastStmt != nil {
+		end = lastStmt.End()
+	}
+
+	return end
+}
 func (bs *BlockStatement) String() string {
 	var out strings.Builder
 
@@ -141,6 +152,7 @@ func (bs *BlockStatement) String() string {
 	}
 	return out.String()
 }
+
 // expression
 type (
 	Number struct {
@@ -159,10 +171,10 @@ type (
 	}
 
 	IFExpression struct {
-		Token token.Token
+		Token     token.Token
 		Condition Expression
-		Body *BlockStatement
-		Else *BlockStatement
+		Body      *BlockStatement
+		Else      *BlockStatement
 	}
 )
 
@@ -181,9 +193,9 @@ func (f *Boolean) Start() token.Pos { return f.Token.Start }
 func (f *Boolean) End() token.Pos   { return f.Token.End }
 func (f *Boolean) String() string   { return f.Token.Literal }
 
-func (i *IFExpression) expressionNode() {}
+func (i *IFExpression) expressionNode()  {}
 func (i *IFExpression) Start() token.Pos { return i.Token.Start }
-func (i *IFExpression) End() token.Pos   { 
+func (i *IFExpression) End() token.Pos {
 	end := i.Token.End
 
 	if i.Condition != nil {
@@ -200,7 +212,26 @@ func (i *IFExpression) End() token.Pos   {
 
 	return end
 }
-func (i *IFExpression) String() string { 
+func (i *IFExpression) String() string {
+	var st strings.Builder
 
+	st.WriteString(i.Token.Literal)
+	st.WriteString(" (")
+	if i.Condition != nil {
+		st.WriteString(i.Condition.String())
+	}
+	st.WriteString(") {")
+
+	if i.Body != nil {
+		st.WriteString(i.Body.String())
+	}
+
+	st.WriteString(" }")
+	if i.Else != nil {
+		st.WriteString(" else {")
+		st.WriteString(i.Else.String())
+		st.WriteString(" }")
+	}
+	st.WriteString(";")
+	return st.String()
 }
-
