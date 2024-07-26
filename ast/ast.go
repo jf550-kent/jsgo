@@ -76,11 +76,17 @@ type (
 		Expression Expression
 	}
 
-	// Return represetn the return node
+	// Return represent the return node
 	// return <expression>;
 	ReturnStatement struct {
 		Token token.Token
 		ReturnExpression Expression
+	}
+
+	// BlockStatement represent statements contian in a block
+	BlockStatement struct {
+		Token token.Token
+		Statements []Statement
 	}
 )
 
@@ -125,6 +131,16 @@ func (r *ReturnStatement) String() string {
 	return s.String()
 }
 
+func (bs *BlockStatement) statementNode()       {}
+func (bs *BlockStatement) TokenLiteral() string { return bs.Token.Literal }
+func (bs *BlockStatement) String() string {
+	var out strings.Builder
+
+	for _, s := range bs.Statements {
+		out.WriteString(s.String())
+	}
+	return out.String()
+}
 // expression
 type (
 	Number struct {
@@ -140,6 +156,13 @@ type (
 	Boolean struct {
 		Token token.Token
 		Value bool
+	}
+
+	IFExpression struct {
+		Token token.Token
+		Condition Expression
+		Body *BlockStatement
+		Else *BlockStatement
 	}
 )
 
@@ -157,3 +180,27 @@ func (f *Boolean) expressionNode()  {}
 func (f *Boolean) Start() token.Pos { return f.Token.Start }
 func (f *Boolean) End() token.Pos   { return f.Token.End }
 func (f *Boolean) String() string   { return f.Token.Literal }
+
+func (i *IFExpression) expressionNode() {}
+func (i *IFExpression) Start() token.Pos { return i.Token.Start }
+func (i *IFExpression) End() token.Pos   { 
+	end := i.Token.End
+
+	if i.Condition != nil {
+		end = i.Condition.End()
+	}
+
+	if i.Else != nil {
+		return i.Else.End()
+	}
+
+	if i.Body != nil {
+		return i.Body.End()
+	}
+
+	return end
+}
+func (i *IFExpression) String() string { 
+
+}
+
