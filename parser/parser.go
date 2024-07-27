@@ -8,7 +8,7 @@ import (
 	"github.com/jf550-kent/jsgo/lexer"
 	"github.com/jf550-kent/jsgo/token"
 )
-// If, Funtion, Call, Binary 
+
 type (
 	unaryExpressionFunc  func() ast.Expression
 	binaryExpressionFunc func(ast.Expression) ast.Expression
@@ -89,7 +89,6 @@ func (p *parser) parseVarStatement() ast.Statement {
 		p.panicError(errMsg, SYNTAX_ERROR, varStmt.Start())
 		return nil
 	}
-
 	p.next()
 
 	ident, ok := p.parseIdent().(*ast.Identifier)
@@ -98,7 +97,6 @@ func (p *parser) parseVarStatement() ast.Statement {
 		return nil
 	}
 	varStmt.Variable = ident
-
 	p.next()
 
 	if !p.expect(token.ASSIGN) {
@@ -115,7 +113,6 @@ func (p *parser) parseVarStatement() ast.Statement {
 		p.panicError(errMsg, SYNTAX_ERROR, varStmt.Start())
 		return nil
 	}
-
 	p.next()
 
 	return varStmt
@@ -123,7 +120,6 @@ func (p *parser) parseVarStatement() ast.Statement {
 
 func (p *parser) parseReturnStatement() ast.Statement {
 	st := &ast.ReturnStatement{Token: p.currentToken}
-	
 	p.next()
 
 	st.ReturnExpression = p.parseExpression(1)
@@ -133,8 +129,8 @@ func (p *parser) parseReturnStatement() ast.Statement {
 		p.panicError(errMsg, SYNTAX_ERROR, st.End())
 		return nil
 	}
-
 	p.next()
+
 	return st
 }
 
@@ -149,7 +145,9 @@ func (p *parser) parseExpression(precedence int) ast.Expression {
 		p.panicError(errMsg, SYNTAX_ERROR, p.currentToken.Start)
 		return nil
 	}
+
 	result := unaryFunc()
+
 	for !p.peekExpect(token.SEMICOLON) && precedence < p.peekPred() {
 		binaryFunc, ok := p.binaryExpressionFunc[p.nextToken.TokenType]
 		if !ok {
@@ -160,6 +158,58 @@ func (p *parser) parseExpression(precedence int) ast.Expression {
 	}
 
 	return result
+}
+
+func (p *parser) parseIFExpression() ast.Expression {
+	exp := &ast.IFExpression{Token: p.currentToken}
+
+	if !p.peekExpect(token.LPAREN) {
+		errMsg := exp.String() + " : missing ( " 
+		p.panicError(errMsg, SYNTAX_ERROR, exp.End())
+	}
+	p.next()
+
+	exp.Condition = p.parseExpression(1)
+
+	if !p.peekExpect(token.RPAREN) {
+		errMsg := exp.String() + " missing )"
+		p.panicError(errMsg, SYNTAX_ERROR, exp.End())
+	}
+	p.next()
+
+	if !p.peekExpect(token.LBRACE) {
+		errMsg := exp.String() + " missing {"
+		p.panicError(errMsg, SYNTAX_ERROR, exp.End())
+	}
+	p.next()
+
+	exp.Body = p.parseBlockStatement()
+
+	// if p.expect(token.ELSE) {
+
+	// }
+
+	if !p.peekExpect(token.SEMICOLON) {
+		err := exp.String() + " : expected ; after if expression"
+		p.panicError(err, SYNTAX_ERROR, exp.End())
+	}
+	p.next()
+
+	return exp
+}
+
+func (p *parser) parseBlockStatement() *ast.BlockStatement {
+	block := &ast.BlockStatement{Token: p.currentToken}
+	block.Statements = []ast.Statement{}
+
+	for !p.expect(token.SEMICOLON) && !p.expect(token.EOF) {
+		stmt := p.parse()
+		if stmt != nil {
+			block.Statements = append(block.Statements, stmt)
+		}
+		p.next()
+	}
+	return block
 }
 
 func (p *parser) parseIdent() ast.Expression {
@@ -187,60 +237,6 @@ func (p *parser) parseFloat() ast.Expression {
 
 func (p *parser) parseBoolean() ast.Expression {
 	return &ast.Boolean{Token: p.currentToken, Value: p.expect(token.TRUE)}
-}
-
-func (p *parser) parseIFExpression() ast.Expression {
-	exp := &ast.IFExpression{Token: p.currentToken}
-
-	if !p.peekExpect(token.LPAREN) {
-		errMsg := exp.String() + " : missing ( " 
-		p.panicError(errMsg, SYNTAX_ERROR, exp.End())
-	}
-
-	p.next()
-	exp.Condition = p.parseExpression(1)
-
-	if !p.peekExpect(token.RPAREN) {
-		errMsg := exp.String() + " missing )"
-		p.panicError(errMsg, SYNTAX_ERROR, exp.End())
-	}
-
-	p.next()
-
-	if !p.peekExpect(token.LBRACE) {
-		errMsg := exp.String() + " missing {"
-		p.panicError(errMsg, SYNTAX_ERROR, exp.End())
-	}
-
-	p.next()
-
-	exp.Body = p.parseBlockStatement()
-
-	if p.expect(token.ELSE) {
-
-	}
-
-	if !p.peekExpect(token.SEMICOLON) {
-		err := exp.String() + " : expected ; after if expression"
-		p.panicError(err, SYNTAX_ERROR, exp.End())
-	}
-	p.next()
-
-	return exp
-}
-
-func (p *parser) parseBlockStatement() *ast.BlockStatement {
-	block := &ast.BlockStatement{Token: p.currentToken}
-	block.Statements = []ast.Statement{}
-
-	for !p.expect(token.SEMICOLON) && !p.expect(token.EOF) {
-		stmt := p.parse()
-		if stmt != nil {
-			block.Statements = append(block.Statements, stmt)
-		}
-		p.next()
-	}
-	return block
 }
 
 func (p *parser) peekPred() int {
