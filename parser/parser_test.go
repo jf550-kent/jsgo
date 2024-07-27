@@ -39,7 +39,7 @@ func TestVar(t *testing.T) {
 		{"var apple = 10;", "apple", 10},
 		{"var yellow = true;", "yellow", true},
 		{"var numApp = 10.1;", "numApp", 10.1},
-		{"var numApp = apple;", "numApp", 10.1},
+		{"var numApp = apple;", "numApp", "apple"},
 	}
 
 	for _, tt := range tests {
