@@ -88,6 +88,12 @@ type (
 		Token      token.Token
 		Statements []Statement
 	}
+
+	// ExpressionStatement represent expression in a statement
+	ExpressionStatement struct {
+		Token token.Token
+		Expression Expression 
+	}
 )
 
 func (v *VarStatement) statementNode()   {}
@@ -151,6 +157,25 @@ func (bs *BlockStatement) String() string {
 		out.WriteString(s.String())
 	}
 	return out.String()
+}
+
+func (e *ExpressionStatement) statementNode()       {}
+func (e *ExpressionStatement) TokenLiteral() string { return e.Token.Literal }
+func (e *ExpressionStatement) Start() token.Pos     { return e.Token.Start }
+func (e *ExpressionStatement) End() token.Pos {
+	end := e.Token.End
+
+	if e.Expression != nil {
+		end = e.Expression.End()
+	}
+
+	return end
+}
+func (e *ExpressionStatement) String() string {
+	if e.Expression != nil {
+		return e.String()
+	}
+	return e.Token.String()
 }
 
 // expression

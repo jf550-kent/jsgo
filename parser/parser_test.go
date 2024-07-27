@@ -47,16 +47,13 @@ func TestVar(t *testing.T) {
 		if len(main.Statements) != 1 {
 			t.Errorf("main should have 1 statement. got=%d", len(main.Statements))
 		}
-		varStmt, ok := main.Statements[0].(*ast.VarStatement)
-		if !ok {
-			t.Errorf("wrong statement. expected=%T got=%T", &ast.VarStatement{}, main.Statements[0])
-		}
-	
+
+		varStmt := checkStatement[*ast.VarStatement](t, main.Statements[0])
 		if varStmt.Variable.Literal != tt.expectedVariable {
 			t.Errorf("wrong variable. expected=%s, got=%s", tt.expectedVariable, varStmt.Variable.Literal)
 		}
 
-		if !testValueExpression(t, varStmt.Expression, tt.expectedExpression) { return }
+		testValueExpression(t, varStmt.Expression, tt.expectedExpression)
 	}
 }
 
@@ -78,20 +75,99 @@ func TestReturn(t *testing.T) {
 				len(main.Statements))
 		}
 
-		stmt := main.Statements[0]
-		returnStmt, ok := stmt.(*ast.ReturnStatement)
-		if !ok {
-			t.Errorf("stmt not *ast.returnStatement. got=%T", stmt)
-		}
+		returnStmt := checkStatement[*ast.ReturnStatement](t, main.Statements[0])
 		if returnStmt.Token.String() != "return" {
-			t.Fatalf("returnStmt.TokenLiteral not 'return', got %q",
-				returnStmt.Token.String())
+			t.Fatalf("returnStmt.TokenLiteral not 'return', got %q", returnStmt.Token.String())
 		}
-		if testValueExpression(t, returnStmt.ReturnExpression, tt.expectedValue) {
-			return
-		}
+
+		testValueExpression(t, returnStmt.ReturnExpression, tt.expectedValue)
 	}
 }
+
+func TestIfExpression(t *testing.T) {
+	input := `if (x) { x; };`
+	main := Parse("", []byte(input))
+
+	if len(main.Statements) != 1 {
+		t.Fatalf("main.Body does not contain 1 statement. got=%d\n", len(main.Statements))
+	}
+	exprSt := checkStatement[*ast.ExpressionStatement](t, main.Statements[0])
+	ifExpr := checkExpression[*ast.IFExpression](t, exprSt.Expression)
+
+	if ifExpr.Condition == nil {
+		t.Fatalf("*ast.IfExpression condition is nil")
+	}
+	testValueExpression(t, ifExpr.Condition, "x") 
+
+	body := checkStatement[*ast.BlockStatement](t, ifExpr.Body)
+	if len(body.Statements) != 1 {
+		t.Errorf("body has more than one statement")
+	}
+
+	bodyExpr := checkStatement[*ast.ExpressionStatement](t, body.Statements[0])
+	testValueExpression(t, bodyExpr.Expression, "x")
+
+	if ifExpr.Else != nil {
+		t.Errorf("*ast.IfExpression has an unexpected else clause")
+	}
+}
+
+
+func TestIfElseExpression(t *testing.T) {
+	input := `if (x) { x; } else { 10; };`
+	main := Parse("", []byte(input))
+
+	if len(main.Statements) != 1 {
+		t.Fatalf("main.Body does not contain 1 statement. got=%d\n", len(main.Statements))
+	}
+	exprSt := checkStatement[*ast.ExpressionStatement](t, main.Statements[0])
+	ifExpr := checkExpression[*ast.IFExpression](t, exprSt.Expression)
+
+	if ifExpr.Condition == nil {
+		t.Fatalf("*ast.IfExpression condition is nil")
+	}
+	testValueExpression(t, ifExpr.Condition, "x") 
+
+	body := checkStatement[*ast.BlockStatement](t, ifExpr.Body)
+	if len(body.Statements) != 1 {
+		t.Errorf("body has more than one statement")
+	}
+
+	bodyExpr := checkStatement[*ast.ExpressionStatement](t, body.Statements[0])
+	testValueExpression(t, bodyExpr.Expression, "x")
+
+	elseSt := checkStatement[*ast.BlockStatement](t, ifExpr.Else)
+	if len(elseSt.Statements) != 1 {
+		t.Error("else block has more than one statement")
+	}
+
+	elseExpr := checkStatement[*ast.ExpressionStatement](t, elseSt.Statements[0])
+	testValueExpression(t, elseExpr.Expression, 10)
+}
+
+func checkStatement[expected any](t *testing.T, stmt ast.Statement) expected {
+	if stmt == nil {
+		t.Fatal("statement is nil")
+	}
+	v, ok := stmt.(expected)
+	if !ok {
+		t.Fatalf("statement wrong type: got=%T expected=%T", stmt, v)
+	}
+	return v
+}
+
+func checkExpression[expected any](t *testing.T, expr ast.Expression) expected {
+	if expr == nil {
+		t.Fatal("expression is nil")
+	}
+
+	v, ok := expr.(expected)
+	if !ok {
+		t.Fatalf("exppresion wrong type: got=%T expected=%T", expr, v)
+	}
+	return v
+}
+
 
 func testValueExpression(t *testing.T, exp ast.Expression, expected any) bool {
 	switch v := expected.(type) {
