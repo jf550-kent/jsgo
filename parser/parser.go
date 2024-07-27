@@ -93,6 +93,7 @@ func new(filename string, l *lexer.Lexer) *parser {
 		token.IF: p.parseIFExpression,
 		token.MINUS: p.parseUnaryExpression,
 		token.BANG: p.parseUnaryExpression, 
+		token.FUNCTION: p.parseFunctionDeclaration,
 	}
 
 	p.binaryExpressionFunc = map[token.TokenType]binaryExpressionFunc{
@@ -278,6 +279,58 @@ func (p *parser) parseIFExpression() ast.Expression {
 	}
 
 	return exp
+}
+
+func (p *parser) parseFunctionDeclaration() ast.Expression {
+	f := &ast.FunctionDeclaration{Token: p.currentToken}
+	p.next()
+
+	// function () function (a, b, t) {}
+	if !p.expect(token.LPAREN) {
+		err := f.String() + " : expected ( for function declaration"
+		p.panicError(err, SYNTAX_ERROR, f.End())
+	}
+	
+	f.Parameters = p.parseFunctionParameters()
+	p.next()
+	if !p.peekExpect(token.LBRACE) {
+		err := f.String() +  " : missing { for function declaration"
+		p.panicError(err, SYNTAX_ERROR, f.End())
+	}
+	p.next()
+
+	f.Body = p.parseBlockStatement()
+
+	if !p.peekExpect(token.SEMICOLON) {
+		err := f.String() + " : missing ; for function declaration"
+		p.panicError(err, SYNTAX_ERROR, f.End())
+	}
+	return f
+}
+
+func (p *parser) parseFunctionParameters() []*ast.Identifier {
+	r := []*ast.Identifier{}
+
+	if p.peekExpect(token.RPAREN) { return r }
+	p.next()
+	if !p.expect(token.IDENT) {
+		err := "only identifier allowed in funciton parameters"
+		p.panicError(err, SYNTAX_ERROR, p.currentToken.End)
+	}
+
+	for p.expect(token.IDENT) {
+		id := &ast.Identifier{Token: p.currentToken, Literal: p.currentToken.Literal}
+		r = append(r, id)
+
+		if p.peekExpect(token.RPAREN) { break }
+		if !p.peekExpect(token.COMMA) {
+			err := "missing , in function parameters"
+			p.panicError(err, SYNTAX_ERROR, id.End())
+		}
+		p.next()
+		p.next()
+	}
+	return r
 }
 
 // parseBlockStatement always start the when the current token in the parser is { and ends at }

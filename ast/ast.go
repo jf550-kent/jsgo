@@ -214,6 +214,12 @@ type (
 		Operator string
 		Expression Expression
 	}
+
+	FunctionDeclaration struct {
+		Token token.Token
+		Parameters []*Identifier
+		Body *BlockStatement
+	}
 )
 
 func (n *Number) expressionNode()  {}
@@ -319,5 +325,37 @@ func (u *UnaryExpression) String() string {
 		s.WriteString(u.Expression.String())
 	}
 	s.WriteString(")")
+	return s.String()
+}
+
+func (f *FunctionDeclaration) expressionNode()  {}
+func (f *FunctionDeclaration) Start() token.Pos { return f.Token.Start }
+func (f *FunctionDeclaration) End() token.Pos {
+	if f.Body != nil {
+		return f.Body.End()
+	}
+
+	if len(f.Parameters) != 0 {
+		return f.Parameters[len(f.Parameters) -1].End()
+	}
+	return f.Token.End
+}
+func (f *FunctionDeclaration) String() string   {
+	var s strings.Builder
+
+	s.WriteString("function (")
+
+	if f.Parameters != nil {
+		for _, p := range f.Parameters {
+			s.WriteString(p.String())
+			s.WriteString(", ")
+		}
+	}
+
+	s.WriteString(") {")
+	if f.Body != nil {
+		s.WriteString(f.Body.String())
+	}
+	s.WriteString("};")
 	return s.String()
 }

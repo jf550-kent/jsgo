@@ -153,6 +153,40 @@ func TestUnaryExpression(t *testing.T) {
 	}
 }
 
+func TestFunctionDeclaration(t *testing.T) {
+	input := "function (a, b) { x; };"
+	expectedParameter := []string{"a", "b"}
+
+	main := Parse("func", []byte(input))
+	if len(main.Statements) != 1 {
+		t.Fatal("statement is not one")
+	}
+
+	exprStmt := checkStatement[*ast.ExpressionStatement](t, main.Statements[0])
+	funcExprs := checkExpression[*ast.FunctionDeclaration](t, exprStmt.Expression)
+
+	if funcExprs.Token.Literal != "function" {
+		t.Errorf("wrong function literal, got=%s, expected=function", funcExprs.Token.Literal)
+	}
+
+	if len(funcExprs.Parameters) != 2 {
+		t.Error("functions paramters is not 2")
+	}
+
+	for i, p := range funcExprs.Parameters {
+		testValueExpression(t, p, expectedParameter[i])
+	}
+
+	block := checkStatement[*ast.BlockStatement](t, funcExprs.Body)
+	if len(block.Statements) != 1 {
+		t.Error("block statement is not 1")
+	}
+	blockExprStmt := checkStatement[*ast.ExpressionStatement](t, block.Statements[0])
+	blockExpr := checkExpression[*ast.Identifier](t, blockExprStmt.Expression)
+
+	testValueExpression(t, blockExpr, "x")
+}
+
 func testBinaryExpression(t *testing.T, exp ast.Expression, left any, operator string, right any) bool {
 	binExpr := checkExpression[*ast.BinaryExpression](t, exp)
 	testValueExpression(t, binExpr.Left, left) 
