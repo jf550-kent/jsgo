@@ -208,6 +208,12 @@ type (
 		Operator string
 		Right Expression
 	}
+
+	UnaryExpression struct {
+		Token token.Token
+		Operator string
+		Expression Expression
+	}
 )
 
 func (n *Number) expressionNode()  {}
@@ -294,5 +300,24 @@ func (b *BinaryExpression) String() string   {
 		s.WriteString(b.Right.String())
 	}
 	s.WriteString(") ")
+	return s.String()
+}
+
+func (u *UnaryExpression) expressionNode()  {}
+func (u *UnaryExpression) Start() token.Pos { return u.Token.Start }
+func (u *UnaryExpression) End() token.Pos   {
+	if u.Expression != nil {
+		return u.Expression.End()
+	}
+	return u.Token.End
+}
+func (u *UnaryExpression) String() string { 
+	var s strings.Builder
+	s.WriteString(u.Operator)
+	s.WriteString("(")
+	if u.Expression != nil {
+		s.WriteString(u.Expression.String())
+	}
+	s.WriteString(")")
 	return s.String()
 }
