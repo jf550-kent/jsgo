@@ -9,6 +9,8 @@ import (
 	"github.com/jf550-kent/jsgo/token"
 )
 
+// every parse<> needs to make the current parser to point at ; then is up to the line:37 to skip ;
+
 type (
 	unaryExpressionFunc  func() ast.Expression
 	binaryExpressionFunc func(ast.Expression) ast.Expression
@@ -135,7 +137,20 @@ func (p *parser) parseReturnStatement() ast.Statement {
 }
 
 func (p *parser) parseExpressionStatement() ast.Statement {
-	return nil
+	stmt := &ast.ExpressionStatement{Token: p.currentToken}
+
+	stmt.Expression = p.parseExpression(1)
+	if stmt.Expression == nil {
+		return nil
+	}
+
+	if !p.peekExpect(token.SEMICOLON) {
+		err := fmt.Sprintf("%s: missing ;", stmt.String())
+		p.panicError(err, SYNTAX_ERROR, stmt.End())
+	}
+
+	p.next()
+	return stmt
 }
 
 func (p *parser) parseExpression(precedence int) ast.Expression {
@@ -168,6 +183,7 @@ func (p *parser) parseIFExpression() ast.Expression {
 		p.panicError(errMsg, SYNTAX_ERROR, exp.End())
 	}
 	p.next()
+	p.next()
 
 	exp.Condition = p.parseExpression(1)
 
@@ -185,24 +201,32 @@ func (p *parser) parseIFExpression() ast.Expression {
 
 	exp.Body = p.parseBlockStatement()
 
-	// if p.expect(token.ELSE) {
-
-	// }
+	if p.peekExpect(token.ELSE) {
+		p.next()
+		
+		if !p.peekExpect(token.LBRACE) {
+			errMsg := exp.String() + " missing {"
+			p.panicError(errMsg, SYNTAX_ERROR, exp.End())
+		}
+		p.next()
+		exp.Else = p.parseBlockStatement()
+	}
 
 	if !p.peekExpect(token.SEMICOLON) {
 		err := exp.String() + " : expected ; after if expression"
 		p.panicError(err, SYNTAX_ERROR, exp.End())
 	}
-	p.next()
 
 	return exp
 }
 
+// parseBlockStatement always start the when the current token in the parser is { and ends at }
 func (p *parser) parseBlockStatement() *ast.BlockStatement {
-	block := &ast.BlockStatement{Token: p.currentToken}
+	block := &ast.BlockStatement{Token: p.currentToken,}
 	block.Statements = []ast.Statement{}
+	p.next()
 
-	for !p.expect(token.SEMICOLON) && !p.expect(token.EOF) {
+	for !p.expect(token.RBRACE) && !p.expect(token.EOF) {
 		stmt := p.parse()
 		if stmt != nil {
 			block.Statements = append(block.Statements, stmt)
