@@ -60,6 +60,39 @@ func TestVar(t *testing.T) {
 	}
 }
 
+func TestReturn(t *testing.T) {
+	tests := []struct {
+		input         string
+		expectedValue interface{}
+	}{
+		{"return 10;", 10},
+		{"return true;", true},
+		{"return apple;", "apple"},
+	}
+
+	for _, tt := range tests {
+		main := Parse("", []byte(tt.input))
+
+		if len(main.Statements) != 1 {
+			t.Fatalf("program.Statements does not contain 1 statements. got=%d",
+				len(main.Statements))
+		}
+
+		stmt := main.Statements[0]
+		returnStmt, ok := stmt.(*ast.ReturnStatement)
+		if !ok {
+			t.Errorf("stmt not *ast.returnStatement. got=%T", stmt)
+		}
+		if returnStmt.Token.String() != "return" {
+			t.Fatalf("returnStmt.TokenLiteral not 'return', got %q",
+				returnStmt.Token.String())
+		}
+		if testValueExpression(t, returnStmt.ReturnExpression, tt.expectedValue) {
+			return
+		}
+	}
+}
+
 func testValueExpression(t *testing.T, exp ast.Expression, expected any) bool {
 	switch v := expected.(type) {
 	case int:
