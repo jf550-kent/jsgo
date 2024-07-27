@@ -84,6 +84,55 @@ func TestReturn(t *testing.T) {
 	}
 }
 
+func TestBinaryExpression(t *testing.T) {
+	tests := []struct {
+		input      string
+		left  any
+		operator   string
+		right any
+	}{
+		{"5 + 5;", 5, "+", 5},
+		{"5 - 5;", 5, "-", 5},
+		{"5 * 5;", 5, "*", 5},
+		{"5 / 5;", 5, "/", 5},
+		{"5 > 5;", 5, ">", 5},
+		{"5 < 5;", 5, "<", 5},
+		{"5 == 5;", 5, "==", 5},
+		{"5 != 5;", 5, "!=", 5},
+		{"foobar + barfoo;", "foobar", "+", "barfoo"},
+		{"foobar - barfoo;", "foobar", "-", "barfoo"},
+		{"foobar * barfoo;", "foobar", "*", "barfoo"},
+		{"foobar / barfoo;", "foobar", "/", "barfoo"},
+		{"foobar > barfoo;", "foobar", ">", "barfoo"},
+		{"foobar < barfoo;", "foobar", "<", "barfoo"},
+		{"foobar == barfoo;", "foobar", "==", "barfoo"},
+		{"foobar != barfoo;", "foobar", "!=", "barfoo"},
+		{"true == true;", true, "==", true},
+		{"true != false;", true, "!=", false},
+		{"false == false;", false, "==", false},
+	}
+
+	for _, tt := range tests {
+		main := Parse(tt.input, []byte(tt.input))
+		if len(main.Statements) != 1 {
+			t.Fatal("number of main Statements is not 1")
+		}
+		exprStmt := checkStatement[*ast.ExpressionStatement](t, main.Statements[0])
+		testBinaryExpression(t, exprStmt.Expression, tt.left, tt.operator, tt.right)
+	}
+}
+
+func testBinaryExpression(t *testing.T, exp ast.Expression, left any, operator string, right any) bool {
+	binExpr := checkExpression[*ast.BinaryExpression](t, exp)
+	testValueExpression(t, binExpr.Left, left) 
+	if binExpr.Operator != operator {
+		t.Errorf("exp.Operator is not %q. got=%q", operator, binExpr.Operator)
+		return false
+	}
+	testValueExpression(t, binExpr.Right, right)
+	return true
+}
+
 func TestIfExpression(t *testing.T) {
 	input := `if (x) { x; };`
 	main := Parse("", []byte(input))
@@ -143,6 +192,37 @@ func TestIfElseExpression(t *testing.T) {
 
 	elseExpr := checkStatement[*ast.ExpressionStatement](t, elseSt.Statements[0])
 	testValueExpression(t, elseExpr.Expression, 10)
+}
+
+// add negative test case
+func TestExpressionStatement(t *testing.T) {
+	tests := []struct{
+		input string
+		value any
+	}{
+		{"5;", 5},
+		{"10;", 10},
+		{"900;", 900},
+		{"9223372036854775807;", 9223372036854775807},
+		{"5.98;", 5.98},
+		{"7.89;", 7.89},
+		{"true;", true},
+		{"false;", false},
+	}
+
+	for _, tt := range tests {
+		main := Parse(tt.input, []byte(tt.input))
+
+		if len(main.Statements) != 1 {
+			t.Fatal("number of main Statements is not 1")
+		}
+		exprStmt := checkStatement[*ast.ExpressionStatement](t, main.Statements[0])
+
+		if exprStmt.Expression == nil {
+			t.Fatal("expression is nil")
+		}
+		testValueExpression(t, exprStmt.Expression, tt.value)
+	}
 }
 
 func checkStatement[expected any](t *testing.T, stmt ast.Statement) expected {

@@ -70,6 +70,17 @@ func new(filename string, l *lexer.Lexer) *parser {
 		token.IF: p.parseIFExpression, 
 	}
 
+	p.binaryExpressionFunc = map[token.TokenType]binaryExpressionFunc{
+		token.ADD: p.parseBinaryExpression,
+		token.MINUS: p.parseBinaryExpression,
+		token.MUL: p.parseBinaryExpression,
+		token.DIVIDE: p.parseBinaryExpression,
+		token.LSS: p.parseBinaryExpression,
+		token.GTR: p.parseBinaryExpression,
+		token.NOT_EQUAL: p.parseBinaryExpression,
+		token.EQUAL: p.parseBinaryExpression,
+	}
+
 	return p
 }
 
@@ -173,6 +184,19 @@ func (p *parser) parseExpression(precedence int) ast.Expression {
 	}
 
 	return result
+}
+
+func (p *parser) parseBinaryExpression(left ast.Expression) ast.Expression {
+	expr := &ast.BinaryExpression{
+		Token: p.currentToken,
+		Left: left,
+		Operator: p.currentToken.Literal,
+	}
+
+	pred := p.pred()
+	p.next()
+	expr.Right = p.parseExpression(pred)
+	return expr
 }
 
 func (p *parser) parseIFExpression() ast.Expression {

@@ -173,7 +173,7 @@ func (e *ExpressionStatement) End() token.Pos {
 }
 func (e *ExpressionStatement) String() string {
 	if e.Expression != nil {
-		return e.String()
+		return e.Expression.String()
 	}
 	return e.Token.String()
 }
@@ -200,6 +200,13 @@ type (
 		Condition Expression
 		Body      *BlockStatement
 		Else      *BlockStatement
+	}
+
+	BinaryExpression struct {
+		Token token.Token
+		Left Expression
+		Operator string
+		Right Expression
 	}
 )
 
@@ -259,4 +266,33 @@ func (i *IFExpression) String() string {
 	}
 	st.WriteString(";")
 	return st.String()
+}
+
+
+func (b *BinaryExpression) expressionNode()  {}
+func (b *BinaryExpression) Start() token.Pos { 
+	if b.Left != nil {
+		return b.Left.Start()
+	}
+	return b.Token.Start
+}
+func (b *BinaryExpression) End() token.Pos   { 
+	if b.Right != nil {
+		return b.Right.End()
+	}
+	return b.Token.End
+}
+func (b *BinaryExpression) String() string   {
+	var s strings.Builder
+	s.WriteString("(")
+	if b.Left != nil {
+		s.WriteString(b.Left.String())
+	}
+
+	s.WriteString(") " + b.Operator + "( ")
+	if b.Right != nil {
+		s.WriteString(b.Right.String())
+	}
+	s.WriteString(") ")
+	return s.String()
 }
