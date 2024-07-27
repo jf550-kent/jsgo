@@ -35,15 +35,15 @@ const (
 )
 
 var precedences = map[token.TokenType]int{
-	token.EQUAL:       EQUALS,
-	token.NOT_EQUAL:   EQUALS,
+	token.EQUAL:     EQUALS,
+	token.NOT_EQUAL: EQUALS,
 	token.GTR:       LESSGREATER,
 	token.LSS:       LESSGREATER,
-	token.ADD:     SUM,
-	token.MINUS:    SUM,
+	token.ADD:       SUM,
+	token.MINUS:     SUM,
 	token.DIVIDE:    PRODUCT,
-	token.MUL: PRODUCT,
-	token.LPAREN:   CALL,
+	token.MUL:       PRODUCT,
+	token.LPAREN:    CALL,
 }
 
 func Parse(filename string, src []byte) *ast.Main {
@@ -85,26 +85,26 @@ func new(filename string, l *lexer.Lexer) *parser {
 	p.binaryExpressionFunc = map[token.TokenType]binaryExpressionFunc{}
 
 	p.unaryExpressionFuncs = map[token.TokenType]unaryExpressionFunc{
-		token.IDENT:  p.parseIdent,
-		token.NUMBER: p.parseNumber,
-		token.FLOAT:  p.parseFloat,
-		token.TRUE: p.parseBoolean,
-		token.FALSE: p.parseBoolean,
-		token.IF: p.parseIFExpression,
-		token.MINUS: p.parseUnaryExpression,
-		token.BANG: p.parseUnaryExpression, 
+		token.IDENT:    p.parseIdent,
+		token.NUMBER:   p.parseNumber,
+		token.FLOAT:    p.parseFloat,
+		token.TRUE:     p.parseBoolean,
+		token.FALSE:    p.parseBoolean,
+		token.IF:       p.parseIFExpression,
+		token.MINUS:    p.parseUnaryExpression,
+		token.BANG:     p.parseUnaryExpression,
 		token.FUNCTION: p.parseFunctionDeclaration,
 	}
 
 	p.binaryExpressionFunc = map[token.TokenType]binaryExpressionFunc{
-		token.ADD: p.parseBinaryExpression,
-		token.MINUS: p.parseBinaryExpression,
-		token.MUL: p.parseBinaryExpression,
-		token.DIVIDE: p.parseBinaryExpression,
-		token.LSS: p.parseBinaryExpression,
-		token.GTR: p.parseBinaryExpression,
+		token.ADD:       p.parseBinaryExpression,
+		token.MINUS:     p.parseBinaryExpression,
+		token.MUL:       p.parseBinaryExpression,
+		token.DIVIDE:    p.parseBinaryExpression,
+		token.LSS:       p.parseBinaryExpression,
+		token.GTR:       p.parseBinaryExpression,
 		token.NOT_EQUAL: p.parseBinaryExpression,
-		token.EQUAL: p.parseBinaryExpression,
+		token.EQUAL:     p.parseBinaryExpression,
 	}
 
 	return p
@@ -214,8 +214,8 @@ func (p *parser) parseExpression(precedence int) ast.Expression {
 
 func (p *parser) parseBinaryExpression(left ast.Expression) ast.Expression {
 	expr := &ast.BinaryExpression{
-		Token: p.currentToken,
-		Left: left,
+		Token:    p.currentToken,
+		Left:     left,
 		Operator: p.currentToken.Literal,
 	}
 
@@ -227,7 +227,7 @@ func (p *parser) parseBinaryExpression(left ast.Expression) ast.Expression {
 
 func (p *parser) parseUnaryExpression() ast.Expression {
 	ury := &ast.UnaryExpression{
-		Token: p.currentToken,
+		Token:    p.currentToken,
 		Operator: p.currentToken.Literal,
 	}
 	p.next()
@@ -240,7 +240,7 @@ func (p *parser) parseIFExpression() ast.Expression {
 	exp := &ast.IFExpression{Token: p.currentToken}
 
 	if !p.peekExpect(token.LPAREN) {
-		errMsg := exp.String() + " : missing ( " 
+		errMsg := exp.String() + " : missing ( "
 		p.panicError(errMsg, SYNTAX_ERROR, exp.End())
 	}
 	p.next()
@@ -264,7 +264,7 @@ func (p *parser) parseIFExpression() ast.Expression {
 
 	if p.peekExpect(token.ELSE) {
 		p.next()
-		
+
 		if !p.peekExpect(token.LBRACE) {
 			errMsg := exp.String() + " missing {"
 			p.panicError(errMsg, SYNTAX_ERROR, exp.End())
@@ -290,11 +290,11 @@ func (p *parser) parseFunctionDeclaration() ast.Expression {
 		err := f.String() + " : expected ( for function declaration"
 		p.panicError(err, SYNTAX_ERROR, f.End())
 	}
-	
+
 	f.Parameters = p.parseFunctionParameters()
 	p.next()
 	if !p.peekExpect(token.LBRACE) {
-		err := f.String() +  " : missing { for function declaration"
+		err := f.String() + " : missing { for function declaration"
 		p.panicError(err, SYNTAX_ERROR, f.End())
 	}
 	p.next()
@@ -311,7 +311,9 @@ func (p *parser) parseFunctionDeclaration() ast.Expression {
 func (p *parser) parseFunctionParameters() []*ast.Identifier {
 	r := []*ast.Identifier{}
 
-	if p.peekExpect(token.RPAREN) { return r }
+	if p.peekExpect(token.RPAREN) {
+		return r
+	}
 	p.next()
 	if !p.expect(token.IDENT) {
 		err := "only identifier allowed in funciton parameters"
@@ -322,7 +324,9 @@ func (p *parser) parseFunctionParameters() []*ast.Identifier {
 		id := &ast.Identifier{Token: p.currentToken, Literal: p.currentToken.Literal}
 		r = append(r, id)
 
-		if p.peekExpect(token.RPAREN) { break }
+		if p.peekExpect(token.RPAREN) {
+			break
+		}
 		if !p.peekExpect(token.COMMA) {
 			err := "missing , in function parameters"
 			p.panicError(err, SYNTAX_ERROR, id.End())
@@ -335,7 +339,7 @@ func (p *parser) parseFunctionParameters() []*ast.Identifier {
 
 // parseBlockStatement always start the when the current token in the parser is { and ends at }
 func (p *parser) parseBlockStatement() *ast.BlockStatement {
-	block := &ast.BlockStatement{Token: p.currentToken,}
+	block := &ast.BlockStatement{Token: p.currentToken}
 	block.Statements = []ast.Statement{}
 	p.next()
 

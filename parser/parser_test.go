@@ -86,10 +86,10 @@ func TestReturn(t *testing.T) {
 
 func TestBinaryExpression(t *testing.T) {
 	tests := []struct {
-		input      string
-		left  any
-		operator   string
-		right any
+		input    string
+		left     any
+		operator string
+		right    any
 	}{
 		{"5 + 5;", 5, "+", 5},
 		{"5 - 5;", 5, "-", 5},
@@ -145,7 +145,6 @@ func TestUnaryExpression(t *testing.T) {
 		exprStmt := checkStatement[*ast.ExpressionStatement](t, main.Statements[0])
 		expr := checkExpression[*ast.UnaryExpression](t, exprStmt.Expression)
 
-
 		if expr.Operator != tt.operator {
 			t.Fatalf("exp.Operator is not %q, got=%q", tt.operator, expr.Operator)
 		}
@@ -189,7 +188,7 @@ func TestFunctionDeclaration(t *testing.T) {
 
 func testBinaryExpression(t *testing.T, exp ast.Expression, left any, operator string, right any) bool {
 	binExpr := checkExpression[*ast.BinaryExpression](t, exp)
-	testValueExpression(t, binExpr.Left, left) 
+	testValueExpression(t, binExpr.Left, left)
 	if binExpr.Operator != operator {
 		t.Errorf("exp.Operator is not %q. got=%q", operator, binExpr.Operator)
 		return false
@@ -211,7 +210,7 @@ func TestIfExpression(t *testing.T) {
 	if ifExpr.Condition == nil {
 		t.Fatalf("*ast.IfExpression condition is nil")
 	}
-	testValueExpression(t, ifExpr.Condition, "x") 
+	testValueExpression(t, ifExpr.Condition, "x")
 
 	body := checkStatement[*ast.BlockStatement](t, ifExpr.Body)
 	if len(body.Statements) != 1 {
@@ -226,7 +225,6 @@ func TestIfExpression(t *testing.T) {
 	}
 }
 
-
 func TestIfElseExpression(t *testing.T) {
 	input := `if (x) { x; } else { 10; };`
 	main := Parse("", []byte(input))
@@ -240,7 +238,7 @@ func TestIfElseExpression(t *testing.T) {
 	if ifExpr.Condition == nil {
 		t.Fatalf("*ast.IfExpression condition is nil")
 	}
-	testValueExpression(t, ifExpr.Condition, "x") 
+	testValueExpression(t, ifExpr.Condition, "x")
 
 	body := checkStatement[*ast.BlockStatement](t, ifExpr.Body)
 	if len(body.Statements) != 1 {
@@ -261,7 +259,7 @@ func TestIfElseExpression(t *testing.T) {
 
 // add negative test case
 func TestExpressionStatement(t *testing.T) {
-	tests := []struct{
+	tests := []struct {
 		input string
 		value any
 	}{
@@ -312,7 +310,6 @@ func checkExpression[expected any](t *testing.T, expr ast.Expression) expected {
 	}
 	return v
 }
-
 
 func testValueExpression(t *testing.T, exp ast.Expression, expected any) bool {
 	switch v := expected.(type) {
@@ -380,7 +377,7 @@ func testIdentifier(t *testing.T, exp ast.Expression, i string) bool {
 }
 
 func testBoolean(t *testing.T, exp ast.Expression, b bool) bool {
-	boo, ok := exp.(*ast.Boolean) 
+	boo, ok := exp.(*ast.Boolean)
 	if !ok {
 		t.Errorf("node not *ast.Boolean: got=%T", exp)
 		return false

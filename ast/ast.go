@@ -91,8 +91,8 @@ type (
 
 	// ExpressionStatement represent expression in a statement
 	ExpressionStatement struct {
-		Token token.Token
-		Expression Expression 
+		Token      token.Token
+		Expression Expression
 	}
 )
 
@@ -203,22 +203,22 @@ type (
 	}
 
 	BinaryExpression struct {
-		Token token.Token
-		Left Expression
+		Token    token.Token
+		Left     Expression
 		Operator string
-		Right Expression
+		Right    Expression
 	}
 
 	UnaryExpression struct {
-		Token token.Token
-		Operator string
+		Token      token.Token
+		Operator   string
 		Expression Expression
 	}
 
 	FunctionDeclaration struct {
-		Token token.Token
+		Token      token.Token
 		Parameters []*Identifier
-		Body *BlockStatement
+		Body       *BlockStatement
 	}
 )
 
@@ -280,21 +280,20 @@ func (i *IFExpression) String() string {
 	return st.String()
 }
 
-
-func (b *BinaryExpression) expressionNode()  {}
-func (b *BinaryExpression) Start() token.Pos { 
+func (b *BinaryExpression) expressionNode() {}
+func (b *BinaryExpression) Start() token.Pos {
 	if b.Left != nil {
 		return b.Left.Start()
 	}
 	return b.Token.Start
 }
-func (b *BinaryExpression) End() token.Pos   { 
+func (b *BinaryExpression) End() token.Pos {
 	if b.Right != nil {
 		return b.Right.End()
 	}
 	return b.Token.End
 }
-func (b *BinaryExpression) String() string   {
+func (b *BinaryExpression) String() string {
 	var s strings.Builder
 	s.WriteString("(")
 	if b.Left != nil {
@@ -311,13 +310,13 @@ func (b *BinaryExpression) String() string   {
 
 func (u *UnaryExpression) expressionNode()  {}
 func (u *UnaryExpression) Start() token.Pos { return u.Token.Start }
-func (u *UnaryExpression) End() token.Pos   {
+func (u *UnaryExpression) End() token.Pos {
 	if u.Expression != nil {
 		return u.Expression.End()
 	}
 	return u.Token.End
 }
-func (u *UnaryExpression) String() string { 
+func (u *UnaryExpression) String() string {
 	var s strings.Builder
 	s.WriteString(u.Operator)
 	s.WriteString("(")
@@ -336,11 +335,11 @@ func (f *FunctionDeclaration) End() token.Pos {
 	}
 
 	if len(f.Parameters) != 0 {
-		return f.Parameters[len(f.Parameters) -1].End()
+		return f.Parameters[len(f.Parameters)-1].End()
 	}
 	return f.Token.End
 }
-func (f *FunctionDeclaration) String() string   {
+func (f *FunctionDeclaration) String() string {
 	var s strings.Builder
 
 	s.WriteString("function (")
