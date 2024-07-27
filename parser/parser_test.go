@@ -122,6 +122,37 @@ func TestBinaryExpression(t *testing.T) {
 	}
 }
 
+func TestUnaryExpression(t *testing.T) {
+	tests := []struct {
+		input    string
+		operator string
+		value    any
+	}{
+		{"!5;", "!", 5},
+		{"-15;", "-", 15},
+		{"!foobar;", "!", "foobar"},
+		{"-foobar;", "-", "foobar"},
+		{"!true;", "!", true},
+		{"!false;", "!", false},
+	}
+
+	for _, tt := range tests {
+		main := Parse(tt.input, []byte(tt.input))
+
+		if len(main.Statements) != 1 {
+			t.Fatalf("main.Statements does not contain %d statements. got=%d\n", 1, len(main.Statements))
+		}
+		exprStmt := checkStatement[*ast.ExpressionStatement](t, main.Statements[0])
+		expr := checkExpression[*ast.UnaryExpression](t, exprStmt.Expression)
+
+
+		if expr.Operator != tt.operator {
+			t.Fatalf("exp.Operator is not %q, got=%q", tt.operator, expr.Operator)
+		}
+		testValueExpression(t, expr.Expression, tt.value)
+	}
+}
+
 func testBinaryExpression(t *testing.T, exp ast.Expression, left any, operator string, right any) bool {
 	binExpr := checkExpression[*ast.BinaryExpression](t, exp)
 	testValueExpression(t, binExpr.Left, left) 
