@@ -23,6 +23,29 @@ const (
 	ILLEGAL_TOKEN  = "IllegalToken"
 )
 
+const (
+	_ int = iota
+	LOWEST
+	EQUALS      // ==
+	LESSGREATER // > or <
+	SUM         // +
+	PRODUCT     // *
+	PREFIX      // -x or !x
+	CALL        // function()
+)
+
+var precedences = map[token.TokenType]int{
+	token.EQUAL:       EQUALS,
+	token.NOT_EQUAL:   EQUALS,
+	token.GTR:       LESSGREATER,
+	token.LSS:       LESSGREATER,
+	token.ADD:     SUM,
+	token.MINUS:    SUM,
+	token.DIVIDE:    PRODUCT,
+	token.MUL: PRODUCT,
+	token.LPAREN:   CALL,
+}
+
 func Parse(filename string, src []byte) *ast.Main {
 	l := lexer.New(src)
 
@@ -67,7 +90,9 @@ func new(filename string, l *lexer.Lexer) *parser {
 		token.FLOAT:  p.parseFloat,
 		token.TRUE: p.parseBoolean,
 		token.FALSE: p.parseBoolean,
-		token.IF: p.parseIFExpression, 
+		token.IF: p.parseIFExpression,
+		token.MINUS: p.parseUnaryExpression,
+		token.BANG: p.parseUnaryExpression, 
 	}
 
 	p.binaryExpressionFunc = map[token.TokenType]binaryExpressionFunc{
@@ -199,6 +224,17 @@ func (p *parser) parseBinaryExpression(left ast.Expression) ast.Expression {
 	return expr
 }
 
+func (p *parser) parseUnaryExpression() ast.Expression {
+	ury := &ast.UnaryExpression{
+		Token: p.currentToken,
+		Operator: p.currentToken.Literal,
+	}
+	p.next()
+	ury.Expression = p.parseExpression(6)
+
+	return ury
+}
+
 func (p *parser) parseIFExpression() ast.Expression {
 	exp := &ast.IFExpression{Token: p.currentToken}
 
@@ -288,11 +324,19 @@ func (p *parser) parseBoolean() ast.Expression {
 }
 
 func (p *parser) peekPred() int {
-	return p.nextToken.Precedence()
+	pr, ok := precedences[p.nextToken.TokenType]
+	if !ok {
+		return LOWEST
+	}
+	return pr
 }
 
 func (p *parser) pred() int {
-	return p.currentToken.Precedence()
+	pr, ok := precedences[p.currentToken.TokenType]
+	if !ok {
+		return LOWEST
+	}
+	return pr
 }
 
 func (p *parser) expect(t token.TokenType) bool {
