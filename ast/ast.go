@@ -220,6 +220,12 @@ type (
 		Parameters []*Identifier
 		Body       *BlockStatement
 	}
+
+	CallExpression struct {
+		Token token.Token
+		Function Expression
+		Arguments []Expression
+	}
 )
 
 func (n *Number) expressionNode()  {}
@@ -357,4 +363,34 @@ func (f *FunctionDeclaration) String() string {
 	}
 	s.WriteString("};")
 	return s.String()
+}
+
+func (c *CallExpression) expressionNode()      {}
+func (c *CallExpression) Start() token.Pos {
+	if c.Function != nil {
+		return c.Function.Start()
+	}
+
+	return c.Token.Start
+}
+func (c *CallExpression) End() token.Pos {
+	if len(c.Arguments) != 0 {
+		return c.Arguments[len(c.Arguments) -1].End()
+	}
+
+	return c.Token.End
+}
+func (c *CallExpression) String() string {
+	var out strings.Builder
+
+	args := []string{}
+	for _, a := range c.Arguments {
+		args = append(args, a.String())
+	}
+	out.WriteString(c.Function.String())
+	out.WriteString("(")
+	out.WriteString(strings.Join(args, ", "))
+	out.WriteString(")")
+
+	return out.String()
 }

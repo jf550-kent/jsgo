@@ -105,6 +105,7 @@ func new(filename string, l *lexer.Lexer) *parser {
 		token.GTR:       p.parseBinaryExpression,
 		token.NOT_EQUAL: p.parseBinaryExpression,
 		token.EQUAL:     p.parseBinaryExpression,
+		token.LPAREN: p.parseCallExpression,
 	}
 
 	return p
@@ -223,6 +224,35 @@ func (p *parser) parseBinaryExpression(left ast.Expression) ast.Expression {
 	p.next()
 	expr.Right = p.parseExpression(pred)
 	return expr
+}
+
+func (p *parser) parseCallExpression(left ast.Expression) ast.Expression {
+	c := &ast.CallExpression{Token: p.currentToken, Function: left}
+
+	c.Arguments = []ast.Expression{}
+
+	if p.peekExpect(token.RPAREN) {
+		p.next()
+		p.next()
+		return c
+	}
+
+	p.next()
+
+	c.Arguments = append(c.Arguments, p.parseExpression(LOWEST))
+
+	for p.peekExpect(token.COMMA) {
+		p.next()
+		p.next()
+		c.Arguments = append(c.Arguments, p.parseExpression(LOWEST))
+	}
+
+	if !p.peekExpect(token.RPAREN) {
+		err := c.String() + " : missing ) "
+		p.panicError(err, SYNTAX_ERROR, c.End())
+	}
+	p.next()
+	return c
 }
 
 func (p *parser) parseUnaryExpression() ast.Expression {

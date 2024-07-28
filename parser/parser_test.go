@@ -2,11 +2,25 @@ package parser
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/jf550-kent/jsgo/ast"
 )
 
+func BenchmarkExample(b *testing.B) {
+	byt, err := os.ReadFile("./example.js")
+	if err != nil {
+		b.Fatal("failed to read file", err)
+	}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		main := Parse("", byt)
+		if len(main.Statements) != 4 {
+			b.Fatal("parser failed")
+		}
+	}
+}
 func TestParserError(t *testing.T) {
 	tests := []struct {
 		filename string
@@ -184,6 +198,29 @@ func TestFunctionDeclaration(t *testing.T) {
 	blockExpr := checkExpression[*ast.Identifier](t, blockExprStmt.Expression)
 
 	testValueExpression(t, blockExpr, "x")
+}
+
+func TestCallExpressionParsing(t *testing.T) {
+	input := "add(1, 2 * 3, 4 + 5);"
+
+	main := Parse("", []byte(input))
+
+	if len(main.Statements) != 1 {
+		t.Fatalf("main.Statements does not contain %d statements. got=%d\n",
+			1, len(main.Statements))
+	}
+
+	stmt := checkStatement[*ast.ExpressionStatement](t, main.Statements[0])
+	expr := checkExpression[*ast.CallExpression](t, stmt.Expression)
+
+	testValueExpression(t, expr.Function, "add")
+	if len(expr.Arguments) != 3 {
+		t.Fatalf("wrong length of arguments. got=%d", len(expr.Arguments))
+	}
+
+	testValueExpression(t, expr.Arguments[0], 1)
+	testBinaryExpression(t, expr.Arguments[1], 2, "*", 3)
+	testBinaryExpression(t, expr.Arguments[2], 4, "+", 5)
 }
 
 func testBinaryExpression(t *testing.T, exp ast.Expression, left any, operator string, right any) bool {
