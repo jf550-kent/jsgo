@@ -306,11 +306,11 @@ func (b *BinaryExpression) String() string {
 		s.WriteString(b.Left.String())
 	}
 
-	s.WriteString(") " + b.Operator + "( ")
+	s.WriteString(" " + b.Operator + " (")
 	if b.Right != nil {
 		s.WriteString(b.Right.String())
 	}
-	s.WriteString(") ")
+	s.WriteString(")")
 	return s.String()
 }
 
@@ -324,8 +324,8 @@ func (u *UnaryExpression) End() token.Pos {
 }
 func (u *UnaryExpression) String() string {
 	var s strings.Builder
-	s.WriteString(u.Operator)
 	s.WriteString("(")
+	s.WriteString(u.Operator)
 	if u.Expression != nil {
 		s.WriteString(u.Expression.String())
 	}

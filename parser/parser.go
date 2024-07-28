@@ -94,6 +94,7 @@ func new(filename string, l *lexer.Lexer) *parser {
 		token.MINUS:    p.parseUnaryExpression,
 		token.BANG:     p.parseUnaryExpression,
 		token.FUNCTION: p.parseFunctionDeclaration,
+		token.LPAREN: p.parseGroupedExpression,
 	}
 
 	p.binaryExpressionFunc = map[token.TokenType]binaryExpressionFunc{
@@ -381,6 +382,16 @@ func (p *parser) parseBlockStatement() *ast.BlockStatement {
 		p.next()
 	}
 	return block
+}
+
+func (p *parser) parseGroupedExpression() ast.Expression {
+	p.next()
+	exp := p.parseExpression(LOWEST)
+	if !p.peekExpect(token.RPAREN) {
+		return nil
+	}
+	p.next()
+	return exp
 }
 
 func (p *parser) parseIdent() ast.Expression {
