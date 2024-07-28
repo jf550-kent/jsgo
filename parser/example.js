@@ -4,8 +4,10 @@ var add = function(a, b) {
 };
 
 var foo = function(a, func) {
-  return a;
+  return a + func(a, a);
 };
+
+foo(num, add);
 
 var total = num * 90;
 

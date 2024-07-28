@@ -222,8 +222,8 @@ type (
 	}
 
 	CallExpression struct {
-		Token token.Token
-		Function Expression
+		Token     token.Token
+		Function  Expression
 		Arguments []Expression
 	}
 )
@@ -365,7 +365,7 @@ func (f *FunctionDeclaration) String() string {
 	return s.String()
 }
 
-func (c *CallExpression) expressionNode()      {}
+func (c *CallExpression) expressionNode() {}
 func (c *CallExpression) Start() token.Pos {
 	if c.Function != nil {
 		return c.Function.Start()
@@ -375,7 +375,7 @@ func (c *CallExpression) Start() token.Pos {
 }
 func (c *CallExpression) End() token.Pos {
 	if len(c.Arguments) != 0 {
-		return c.Arguments[len(c.Arguments) -1].End()
+		return c.Arguments[len(c.Arguments)-1].End()
 	}
 
 	return c.Token.End

@@ -16,7 +16,7 @@ func BenchmarkExample(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		main := Parse("", byt)
-		if len(main.Statements) != 4 {
+		if len(main.Statements) != 5 {
 			b.Fatal("parser failed")
 		}
 	}

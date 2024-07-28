@@ -94,7 +94,7 @@ func new(filename string, l *lexer.Lexer) *parser {
 		token.MINUS:    p.parseUnaryExpression,
 		token.BANG:     p.parseUnaryExpression,
 		token.FUNCTION: p.parseFunctionDeclaration,
-		token.LPAREN: p.parseGroupedExpression,
+		token.LPAREN:   p.parseGroupedExpression,
 	}
 
 	p.binaryExpressionFunc = map[token.TokenType]binaryExpressionFunc{
@@ -106,7 +106,7 @@ func new(filename string, l *lexer.Lexer) *parser {
 		token.GTR:       p.parseBinaryExpression,
 		token.NOT_EQUAL: p.parseBinaryExpression,
 		token.EQUAL:     p.parseBinaryExpression,
-		token.LPAREN: p.parseCallExpression,
+		token.LPAREN:    p.parseCallExpression,
 	}
 
 	return p
