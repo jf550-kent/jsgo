@@ -8,7 +8,7 @@ import (
 )
 
 func BenchmarkLex(b *testing.B) {
-	byt, err := os.ReadFile("./example.gs")
+	byt, err := os.ReadFile("./example.js")
 	if err != nil {
 		b.Fatal("failed to read file", err)
 	}
@@ -119,7 +119,7 @@ func TestLexSingleToken(t *testing.T) {
 }
 
 func TestLexSourceFile(t *testing.T) {
-	byt, err := os.ReadFile("./example.gs")
+	byt, err := os.ReadFile("./example.js")
 	if err != nil {
 		t.Fatal("failed to read file", err)
 	}

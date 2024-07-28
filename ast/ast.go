@@ -75,6 +75,25 @@ type (
 		Variable   *Identifier
 		Expression Expression
 	}
+
+	// Return represent the return node
+	// return <expression>;
+	ReturnStatement struct {
+		Token            token.Token
+		ReturnExpression Expression
+	}
+
+	// BlockStatement represent statements contian in a block
+	BlockStatement struct {
+		Token      token.Token
+		Statements []Statement
+	}
+
+	// ExpressionStatement represent expression in a statement
+	ExpressionStatement struct {
+		Token      token.Token
+		Expression Expression
+	}
 )
 
 func (v *VarStatement) statementNode()   {}
@@ -99,6 +118,66 @@ func (v *VarStatement) String() string {
 	return s.String()
 }
 
+func (r *ReturnStatement) statementNode()   {}
+func (r *ReturnStatement) Start() token.Pos { return r.Token.Start }
+func (r *ReturnStatement) End() token.Pos {
+	if r.ReturnExpression != nil {
+		return r.ReturnExpression.End()
+	}
+	return r.Token.End
+}
+func (r *ReturnStatement) String() string {
+	var s strings.Builder
+	s.WriteString(r.Token.String())
+	s.WriteString(" ")
+	if r.ReturnExpression != nil {
+		s.WriteString(r.ReturnExpression.String())
+	}
+	s.WriteString(";")
+	return s.String()
+}
+
+func (bs *BlockStatement) statementNode()       {}
+func (bs *BlockStatement) TokenLiteral() string { return bs.Token.Literal }
+func (bs *BlockStatement) Start() token.Pos     { return bs.Token.Start }
+func (bs *BlockStatement) End() token.Pos {
+	end := bs.Token.End
+
+	lastStmt := bs.Statements[len(bs.Statements)-1]
+	if lastStmt != nil {
+		end = lastStmt.End()
+	}
+
+	return end
+}
+func (bs *BlockStatement) String() string {
+	var out strings.Builder
+
+	for _, s := range bs.Statements {
+		out.WriteString(s.String())
+	}
+	return out.String()
+}
+
+func (e *ExpressionStatement) statementNode()       {}
+func (e *ExpressionStatement) TokenLiteral() string { return e.Token.Literal }
+func (e *ExpressionStatement) Start() token.Pos     { return e.Token.Start }
+func (e *ExpressionStatement) End() token.Pos {
+	end := e.Token.End
+
+	if e.Expression != nil {
+		end = e.Expression.End()
+	}
+
+	return end
+}
+func (e *ExpressionStatement) String() string {
+	if e.Expression != nil {
+		return e.Expression.String()
+	}
+	return e.Token.String()
+}
+
 // expression
 type (
 	Number struct {
@@ -109,6 +188,43 @@ type (
 	Float struct {
 		Token token.Token
 		Value float64
+	}
+
+	Boolean struct {
+		Token token.Token
+		Value bool
+	}
+
+	IFExpression struct {
+		Token     token.Token
+		Condition Expression
+		Body      *BlockStatement
+		Else      *BlockStatement
+	}
+
+	BinaryExpression struct {
+		Token    token.Token
+		Left     Expression
+		Operator string
+		Right    Expression
+	}
+
+	UnaryExpression struct {
+		Token      token.Token
+		Operator   string
+		Expression Expression
+	}
+
+	FunctionDeclaration struct {
+		Token      token.Token
+		Parameters []*Identifier
+		Body       *BlockStatement
+	}
+
+	CallExpression struct {
+		Token     token.Token
+		Function  Expression
+		Arguments []Expression
 	}
 )
 
@@ -121,3 +237,160 @@ func (f *Float) expressionNode()  {}
 func (f *Float) Start() token.Pos { return f.Token.Start }
 func (f *Float) End() token.Pos   { return f.Token.End }
 func (f *Float) String() string   { return f.Token.Literal }
+
+func (f *Boolean) expressionNode()  {}
+func (f *Boolean) Start() token.Pos { return f.Token.Start }
+func (f *Boolean) End() token.Pos   { return f.Token.End }
+func (f *Boolean) String() string   { return f.Token.Literal }
+
+func (i *IFExpression) expressionNode()  {}
+func (i *IFExpression) Start() token.Pos { return i.Token.Start }
+func (i *IFExpression) End() token.Pos {
+	end := i.Token.End
+
+	if i.Condition != nil {
+		end = i.Condition.End()
+	}
+
+	if i.Else != nil {
+		return i.Else.End()
+	}
+
+	if i.Body != nil {
+		return i.Body.End()
+	}
+
+	return end
+}
+func (i *IFExpression) String() string {
+	var st strings.Builder
+
+	st.WriteString(i.Token.Literal)
+	st.WriteString(" (")
+	if i.Condition != nil {
+		st.WriteString(i.Condition.String())
+	}
+	st.WriteString(") {")
+
+	if i.Body != nil {
+		st.WriteString(i.Body.String())
+	}
+
+	st.WriteString(" }")
+	if i.Else != nil {
+		st.WriteString(" else {")
+		st.WriteString(i.Else.String())
+		st.WriteString(" }")
+	}
+	st.WriteString(";")
+	return st.String()
+}
+
+func (b *BinaryExpression) expressionNode() {}
+func (b *BinaryExpression) Start() token.Pos {
+	if b.Left != nil {
+		return b.Left.Start()
+	}
+	return b.Token.Start
+}
+func (b *BinaryExpression) End() token.Pos {
+	if b.Right != nil {
+		return b.Right.End()
+	}
+	return b.Token.End
+}
+func (b *BinaryExpression) String() string {
+	var s strings.Builder
+	s.WriteString("(")
+	if b.Left != nil {
+		s.WriteString(b.Left.String())
+	}
+
+	s.WriteString(" " + b.Operator + " (")
+	if b.Right != nil {
+		s.WriteString(b.Right.String())
+	}
+	s.WriteString(")")
+	return s.String()
+}
+
+func (u *UnaryExpression) expressionNode()  {}
+func (u *UnaryExpression) Start() token.Pos { return u.Token.Start }
+func (u *UnaryExpression) End() token.Pos {
+	if u.Expression != nil {
+		return u.Expression.End()
+	}
+	return u.Token.End
+}
+func (u *UnaryExpression) String() string {
+	var s strings.Builder
+	s.WriteString("(")
+	s.WriteString(u.Operator)
+	if u.Expression != nil {
+		s.WriteString(u.Expression.String())
+	}
+	s.WriteString(")")
+	return s.String()
+}
+
+func (f *FunctionDeclaration) expressionNode()  {}
+func (f *FunctionDeclaration) Start() token.Pos { return f.Token.Start }
+func (f *FunctionDeclaration) End() token.Pos {
+	if f.Body != nil {
+		return f.Body.End()
+	}
+
+	if len(f.Parameters) != 0 {
+		return f.Parameters[len(f.Parameters)-1].End()
+	}
+	return f.Token.End
+}
+func (f *FunctionDeclaration) String() string {
+	var s strings.Builder
+
+	s.WriteString("function (")
+
+	if f.Parameters != nil {
+		for _, p := range f.Parameters {
+			s.WriteString(p.String())
+			s.WriteString(", ")
+		}
+	}
+
+	s.WriteString(") {")
+	if f.Body != nil {
+		s.WriteString(f.Body.String())
+	}
+	s.WriteString("};")
+	return s.String()
+}
+
+func (c *CallExpression) expressionNode() {}
+func (c *CallExpression) Start() token.Pos {
+	if c.Function != nil {
+		return c.Function.Start()
+	}
+
+	return c.Token.Start
+}
+func (c *CallExpression) End() token.Pos {
+	if len(c.Arguments) != 0 {
+		return c.Arguments[len(c.Arguments)-1].End()
+	}
+
+	return c.Token.End
+}
+func (c *CallExpression) String() string {
+	var out strings.Builder
+
+	args := []string{}
+	for _, a := range c.Arguments {
+		args = append(args, a.String())
+	}
+	out.WriteString(c.Function.String())
+	out.WriteString("(")
+	out.WriteString(strings.Join(args, ", "))
+	out.WriteString(")")
+
+	return out.String()
+}

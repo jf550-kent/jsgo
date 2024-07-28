@@ -133,7 +133,7 @@ func (t Token) Precedence() int {
 	case DIVIDE, MUL:
 		return 5
 	case LPAREN:
-		return 6
+		return 7
 	}
 	return 1
 }
