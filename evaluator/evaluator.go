@@ -86,6 +86,12 @@ func eval(node ast.Node, env *object.Environment) object.Object {
 		return evalBlockStatements(node, env)
 	case *ast.IFExpression:
 		return evalIfExpression(node, env)
+	case *ast.ReturnStatement:
+		val := eval(node.ReturnExpression, env)
+		if isError(val) {
+			return val
+		}
+		return &object.ReturnValue{Value: val}
 	}
 	return nil
 }
