@@ -16,8 +16,8 @@ const (
 	Yellow  = "\033[33m"
 	Green   = "\033[32m"
 	WARNING = Yellow
-	ERROR = Red
-	RESULT = Green
+	ERROR   = Red
+	RESULT  = Green
 )
 
 func main() {
@@ -36,7 +36,7 @@ func main() {
 	}()
 
 	printOut("\nWelcome to JSGO 🔥🔥🔥 🚀🚀 🔥🔥🔥 \n", RESULT)
-	content , err := os.ReadFile(fileName)
+	content, err := os.ReadFile(fileName)
 	if err != nil {
 		printError(err.Error())
 	}
@@ -47,7 +47,7 @@ func main() {
 	}
 
 	result := evaluator.Eval(main)
-	if err , ok := result.(*object.Error); ok {
+	if err, ok := result.(*object.Error); ok {
 		printError(err.Error())
 	}
 
