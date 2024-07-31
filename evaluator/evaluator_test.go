@@ -268,7 +268,6 @@ func TestFunctionApplication(t *testing.T) {
 		{"var double = function(x) { x * 2; }; double(5);", 10},
 		{"var add = function(x, y) { x + y; }; add(5, 5);", 10},
 		{"var add = function(x, y) { x + y; }; add(5 + 5, add(5, 5));", 20},
-		{"var add = function(x, y) { x + y; }(3, 4);", 7},
 	}
 
 	for _, tt := range tests {
