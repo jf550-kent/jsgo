@@ -11,15 +11,14 @@ import (
 type ObjectType string
 
 const (
-	NUMBER_OBJECT ObjectType = "NUMBER"
-	FLOAT_OBJECT ObjectType = "FLOAT"
-	BOOLEAN_OBJECT ObjectType = "BOOLEAN"
-	NULL_OBJECT ObjectType= "NULL"
+	NUMBER_OBJECT       ObjectType = "NUMBER"
+	FLOAT_OBJECT        ObjectType = "FLOAT"
+	BOOLEAN_OBJECT      ObjectType = "BOOLEAN"
+	NULL_OBJECT         ObjectType = "NULL"
 	RETURN_VALUE_OBJECT ObjectType = "RETURN_VALUE"
-	ERROR_OBJECT ObjectType = "ERROR"
-	FUNCTION_OBJECT ObjectType = "FUNCTION"
+	ERROR_OBJECT        ObjectType = "ERROR"
+	FUNCTION_OBJECT     ObjectType = "FUNCTION"
 )
-
 
 // Object is used in the evaluator to represent value in when evaluating the AST of JSGO.
 type Object interface {
@@ -32,13 +31,14 @@ type Number struct {
 	Value int64
 }
 
-func (n *Number) String() string { return fmt.Sprintf("%d", n.Value)}
+func (n *Number) String() string   { return fmt.Sprintf("%d", n.Value) }
 func (n *Number) Type() ObjectType { return NUMBER_OBJECT }
 
 type Float struct {
 	Value float64
 }
-func (f *Float) String() string { return strconv.FormatFloat(f.Value, 'f', -1, 64) }
+
+func (f *Float) String() string   { return strconv.FormatFloat(f.Value, 'f', -1, 64) }
 func (f *Float) Type() ObjectType { return FLOAT_OBJECT }
 
 // Boolean represent the boolean value in the language when evaluating the ast
@@ -46,21 +46,22 @@ type Boolean struct {
 	Value bool
 }
 
-func (b *Boolean) String() string  { return fmt.Sprintf("%t", b.Value) }
+func (b *Boolean) String() string   { return fmt.Sprintf("%t", b.Value) }
 func (b *Boolean) Type() ObjectType { return ObjectType(BOOLEAN_OBJECT) }
 
 // Null represent the NULL value in the language, it means that there is no value
 type Null struct{}
 
-func (n *Null) String() string  { return "NULL" }
+func (n *Null) String() string   { return "NULL" }
 func (n *Null) Type() ObjectType { return NULL_OBJECT }
 
 // Function represent the Function declaration.
 type Function struct {
 	Parameters []*ast.Identifier
-	Body *ast.BlockStatement
-	Env *Environment
+	Body       *ast.BlockStatement
+	Env        *Environment
 }
+
 func (f *Function) String() string {
 	var out strings.Builder
 
@@ -80,13 +81,12 @@ func (f *Function) String() string {
 }
 func (f *Function) Type() ObjectType { return FUNCTION_OBJECT }
 
-
 // ReturnValue represent the value that is being returned
 type ReturnValue struct {
 	Value Object
 }
 
-func (rv *ReturnValue) String() string  { return rv.Value.String() }
+func (rv *ReturnValue) String() string   { return rv.Value.String() }
 func (rv *ReturnValue) Type() ObjectType { return RETURN_VALUE_OBJECT }
 
 // Error represent the error object in when evaluating the AST.
@@ -95,6 +95,5 @@ type Error struct {
 }
 
 func (e *Error) Type() ObjectType { return ERROR_OBJECT }
-func (e *Error) String() string { return "error: " + e.Message }
-func (e *Error) Error() string { return e.Message }
-
+func (e *Error) String() string   { return "error: " + e.Message }
+func (e *Error) Error() string    { return e.Message }

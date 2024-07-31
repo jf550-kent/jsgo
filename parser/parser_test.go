@@ -9,7 +9,7 @@ import (
 )
 
 func BenchmarkExample(b *testing.B) {
-	byt, err := os.ReadFile("./example.js")
+	byt, err := os.ReadFile("./../benchmark/example.js")
 	if err != nil {
 		b.Fatal("failed to read file", err)
 	}

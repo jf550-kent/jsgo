@@ -7,7 +7,6 @@ import (
 	"github.com/jf550-kent/jsgo/parser"
 )
 
-
 func main() {
 	b, _ := os.ReadFile("example.js")
 	main := parser.Parse("", b)
