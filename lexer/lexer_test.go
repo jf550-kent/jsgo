@@ -4,11 +4,12 @@ import (
 	"os"
 	"testing"
 
+	"github.com/jf550-kent/jsgo/benchmark"
 	"github.com/jf550-kent/jsgo/token"
 )
 
 func BenchmarkLex(b *testing.B) {
-	byt, err := os.ReadFile("./example.js")
+	byt, err := os.ReadFile(benchmark.EXAMPLE_FILE_PATH)
 	if err != nil {
 		b.Fatal("failed to read file", err)
 	}
@@ -119,7 +120,7 @@ func TestLexSingleToken(t *testing.T) {
 }
 
 func TestLexSourceFile(t *testing.T) {
-	byt, err := os.ReadFile("./example.js")
+	byt, err := os.ReadFile("./lexer_test_file.js")
 	if err != nil {
 		t.Fatal("failed to read file", err)
 	}
