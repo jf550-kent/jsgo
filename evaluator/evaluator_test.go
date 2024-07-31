@@ -4,9 +4,25 @@ import (
 	"os"
 	"testing"
 
+	"github.com/jf550-kent/jsgo/benchmark"
 	"github.com/jf550-kent/jsgo/object"
 	"github.com/jf550-kent/jsgo/parser"
 )
+
+func BenchmarkExample(b *testing.B) {
+	byt, err := os.ReadFile(benchmark.EXAMPLE_FILE_PATH)
+	if err != nil {
+		b.Error(err)
+	}
+	main := parser.Parse("", byt)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		result := Eval(main)
+		if result.Type() == object.ERROR_OBJECT {
+			b.Error("failed to evalulate main")
+		}
+	}
+}
 
 func TestEval(t *testing.T) {
 	b, _ := os.ReadFile("./example.js")
@@ -16,8 +32,8 @@ func TestEval(t *testing.T) {
 }
 
 func TestVarStatement(t *testing.T) {
-	tests := []struct{
-		input string
+	tests := []struct {
+		input    string
 		expected int
 	}{
 		{"var a = 5; a;", 5},
@@ -152,7 +168,7 @@ func TestIfElseCondition(t *testing.T) {
 
 	for _, tt := range tests {
 		evaluated := evalSetup(tt.input)
-		result , ok := tt.expected.(int)
+		result, ok := tt.expected.(int)
 		if ok {
 			testNumber(t, evaluated, int64(result))
 		} else {
@@ -188,8 +204,8 @@ func TestReturnStatements(t *testing.T) {
 }
 
 func TestErrorHandling(t *testing.T) {
-	tests := []struct{
-		input string
+	tests := []struct {
+		input           string
 		expectedMessage string
 	}{
 		{"5 + true;", "type mismatch: NUMBER + BOOLEAN"},
@@ -259,8 +275,8 @@ ourFunction(20) + first + second;`
 }
 
 func TestFunctionApplication(t *testing.T) {
-	tests := []struct{
-		input string
+	tests := []struct {
+		input    string
 		expected int
 	}{
 		{"var a = function(x) { x; }; a(5);", 5},
@@ -333,4 +349,3 @@ func testNullObject(t *testing.T, obj object.Object) bool {
 	}
 	return true
 }
-

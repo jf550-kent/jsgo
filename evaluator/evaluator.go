@@ -15,7 +15,7 @@ var (
 
 func Eval(main *ast.Main) object.Object {
 	obj := eval(main, object.NewEnvironment())
-	err , ok := obj.(*object.Error)
+	err, ok := obj.(*object.Error)
 	if ok {
 		panic(err.Error())
 	}
@@ -67,7 +67,7 @@ func eval(node ast.Node, env *object.Environment) object.Object {
 			return right
 		}
 		return evalBinaryExpression(left, right, node.Operator)
-	
+
 	case *ast.FunctionDeclaration:
 		params := node.Parameters
 		body := node.Body
@@ -126,7 +126,7 @@ func evalExpressions(epxs []ast.Expression, env *object.Environment) []object.Ob
 }
 
 func applyFunction(fn object.Object, args []object.Object) object.Object {
-	function, ok := fn.(*object.Function) 
+	function, ok := fn.(*object.Function)
 	if !ok {
 		return newError("not a function: %s", function.Type())
 	}

@@ -3,9 +3,9 @@ package object
 import "sync"
 
 type Environment struct {
-	mu sync.RWMutex 
+	mu     sync.RWMutex
 	values map[string]Object
-	outer *Environment
+	outer  *Environment
 }
 
 func NewEnvironment() *Environment {
