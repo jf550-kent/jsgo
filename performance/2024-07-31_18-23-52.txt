@@ -1,0 +1,117 @@
+?   	github.com/jf550-kent/jsgo	[no test files]
+PASS
+ok  	github.com/jf550-kent/jsgo/ast	0.002s
+?   	github.com/jf550-kent/jsgo/benchmark	[no test files]
+goos: linux
+goarch: amd64
+pkg: github.com/jf550-kent/jsgo/evaluator
+cpu: AMD EPYC 7763 64-Core Processor                
+BenchmarkExample-4   	 1404892	       854.2 ns/op	     912 B/op	      14 allocs/op
+BenchmarkExample-4   	 1379836	       850.6 ns/op	     912 B/op	      14 allocs/op
+BenchmarkExample-4   	 1339990	       855.5 ns/op	     912 B/op	      14 allocs/op
+BenchmarkExample-4   	 1405803	       859.2 ns/op	     912 B/op	      14 allocs/op
+BenchmarkExample-4   	 1403644	       887.0 ns/op	     912 B/op	      14 allocs/op
+BenchmarkExample-4   	 1391293	       859.3 ns/op	     912 B/op	      14 allocs/op
+BenchmarkExample-4   	 1395538	       858.5 ns/op	     912 B/op	      14 allocs/op
+BenchmarkExample-4   	 1373584	       855.7 ns/op	     912 B/op	      14 allocs/op
+BenchmarkExample-4   	 1395890	       853.8 ns/op	     912 B/op	      14 allocs/op
+BenchmarkExample-4   	 1401180	       861.7 ns/op	     912 B/op	      14 allocs/op
+BenchmarkExample-4   	 1402635	       858.6 ns/op	     912 B/op	      14 allocs/op
+BenchmarkExample-4   	 1406942	       856.5 ns/op	     912 B/op	      14 allocs/op
+BenchmarkExample-4   	 1336940	       898.6 ns/op	     912 B/op	      14 allocs/op
+BenchmarkExample-4   	 1388103	       853.4 ns/op	     912 B/op	      14 allocs/op
+BenchmarkExample-4   	 1403173	       859.1 ns/op	     912 B/op	      14 allocs/op
+BenchmarkExample-4   	 1405281	       877.3 ns/op	     912 B/op	      14 allocs/op
+BenchmarkExample-4   	 1403634	       855.4 ns/op	     912 B/op	      14 allocs/op
+BenchmarkExample-4   	 1401086	       855.8 ns/op	     912 B/op	      14 allocs/op
+BenchmarkExample-4   	 1398436	       858.0 ns/op	     912 B/op	      14 allocs/op
+BenchmarkExample-4   	 1398824	       858.6 ns/op	     912 B/op	      14 allocs/op
+BenchmarkExample-4   	 1398826	       855.6 ns/op	     912 B/op	      14 allocs/op
+BenchmarkExample-4   	 1408138	       855.3 ns/op	     912 B/op	      14 allocs/op
+BenchmarkExample-4   	 1406595	       855.3 ns/op	     912 B/op	      14 allocs/op
+BenchmarkExample-4   	 1397793	       854.9 ns/op	     912 B/op	      14 allocs/op
+BenchmarkExample-4   	 1403097	       863.9 ns/op	     912 B/op	      14 allocs/op
+BenchmarkExample-4   	 1369654	       857.9 ns/op	     912 B/op	      14 allocs/op
+BenchmarkExample-4   	 1399959	       856.8 ns/op	     912 B/op	      14 allocs/op
+BenchmarkExample-4   	 1397628	       860.3 ns/op	     912 B/op	      14 allocs/op
+BenchmarkExample-4   	 1403376	       859.1 ns/op	     912 B/op	      14 allocs/op
+BenchmarkExample-4   	 1402060	       858.6 ns/op	     912 B/op	      14 allocs/op
+PASS
+ok  	github.com/jf550-kent/jsgo/evaluator	62.095s
+?   	github.com/jf550-kent/jsgo/jsgo	[no test files]
+goos: linux
+goarch: amd64
+pkg: github.com/jf550-kent/jsgo/lexer
+cpu: AMD EPYC 7763 64-Core Processor                
+BenchmarkLex-4   	19128655	        62.45 ns/op	       8 B/op	       1 allocs/op
+BenchmarkLex-4   	18773844	        62.44 ns/op	       8 B/op	       1 allocs/op
+BenchmarkLex-4   	18844628	        62.63 ns/op	       8 B/op	       1 allocs/op
+BenchmarkLex-4   	18824158	        62.50 ns/op	       8 B/op	       1 allocs/op
+BenchmarkLex-4   	18682909	        62.49 ns/op	       8 B/op	       1 allocs/op
+BenchmarkLex-4   	18710426	        62.58 ns/op	       8 B/op	       1 allocs/op
+BenchmarkLex-4   	18897686	        62.46 ns/op	       8 B/op	       1 allocs/op
+BenchmarkLex-4   	18852650	        62.54 ns/op	       8 B/op	       1 allocs/op
+BenchmarkLex-4   	18689905	        62.51 ns/op	       8 B/op	       1 allocs/op
+BenchmarkLex-4   	17515690	        62.85 ns/op	       8 B/op	       1 allocs/op
+BenchmarkLex-4   	18821068	        62.57 ns/op	       8 B/op	       1 allocs/op
+BenchmarkLex-4   	18643669	        62.59 ns/op	       8 B/op	       1 allocs/op
+BenchmarkLex-4   	18762027	        62.49 ns/op	       8 B/op	       1 allocs/op
+BenchmarkLex-4   	18663146	        62.39 ns/op	       8 B/op	       1 allocs/op
+BenchmarkLex-4   	18697748	        62.45 ns/op	       8 B/op	       1 allocs/op
+BenchmarkLex-4   	18654067	        62.51 ns/op	       8 B/op	       1 allocs/op
+BenchmarkLex-4   	18680482	        62.62 ns/op	       8 B/op	       1 allocs/op
+BenchmarkLex-4   	18778438	        62.75 ns/op	       8 B/op	       1 allocs/op
+BenchmarkLex-4   	18765169	        62.55 ns/op	       8 B/op	       1 allocs/op
+BenchmarkLex-4   	18815208	        62.50 ns/op	       8 B/op	       1 allocs/op
+BenchmarkLex-4   	18746775	        62.71 ns/op	       8 B/op	       1 allocs/op
+BenchmarkLex-4   	18831477	        62.47 ns/op	       8 B/op	       1 allocs/op
+BenchmarkLex-4   	18810838	        62.57 ns/op	       8 B/op	       1 allocs/op
+BenchmarkLex-4   	18714074	        62.55 ns/op	       8 B/op	       1 allocs/op
+BenchmarkLex-4   	18731762	        62.62 ns/op	       8 B/op	       1 allocs/op
+BenchmarkLex-4   	18755030	        62.81 ns/op	       8 B/op	       1 allocs/op
+BenchmarkLex-4   	18768727	        62.52 ns/op	       8 B/op	       1 allocs/op
+BenchmarkLex-4   	18799689	        62.41 ns/op	       8 B/op	       1 allocs/op
+BenchmarkLex-4   	18808080	        62.78 ns/op	       8 B/op	       1 allocs/op
+BenchmarkLex-4   	18777385	        62.59 ns/op	       8 B/op	       1 allocs/op
+PASS
+ok  	github.com/jf550-kent/jsgo/lexer	37.162s
+?   	github.com/jf550-kent/jsgo/object	[no test files]
+goos: linux
+goarch: amd64
+pkg: github.com/jf550-kent/jsgo/parser
+cpu: AMD EPYC 7763 64-Core Processor                
+BenchmarkExample-4   	  251089	      4686 ns/op	    3787 B/op	      80 allocs/op
+BenchmarkExample-4   	  250182	      4688 ns/op	    3787 B/op	      80 allocs/op
+BenchmarkExample-4   	  246493	      4683 ns/op	    3787 B/op	      80 allocs/op
+BenchmarkExample-4   	  240709	      4729 ns/op	    3787 B/op	      80 allocs/op
+BenchmarkExample-4   	  247414	      4696 ns/op	    3787 B/op	      80 allocs/op
+BenchmarkExample-4   	  241015	      4695 ns/op	    3787 B/op	      80 allocs/op
+BenchmarkExample-4   	  248258	      4700 ns/op	    3787 B/op	      80 allocs/op
+BenchmarkExample-4   	  242803	      4689 ns/op	    3787 B/op	      80 allocs/op
+BenchmarkExample-4   	  245856	      4725 ns/op	    3787 B/op	      80 allocs/op
+BenchmarkExample-4   	  247453	      4705 ns/op	    3787 B/op	      80 allocs/op
+BenchmarkExample-4   	  235252	      4773 ns/op	    3787 B/op	      80 allocs/op
+BenchmarkExample-4   	  238096	      4693 ns/op	    3787 B/op	      80 allocs/op
+BenchmarkExample-4   	  240109	      4674 ns/op	    3787 B/op	      80 allocs/op
+BenchmarkExample-4   	  244617	      4700 ns/op	    3787 B/op	      80 allocs/op
+BenchmarkExample-4   	  240082	      4685 ns/op	    3787 B/op	      80 allocs/op
+BenchmarkExample-4   	  245841	      4733 ns/op	    3787 B/op	      80 allocs/op
+BenchmarkExample-4   	  248749	      4719 ns/op	    3787 B/op	      80 allocs/op
+BenchmarkExample-4   	  243949	      4691 ns/op	    3787 B/op	      80 allocs/op
+BenchmarkExample-4   	  249549	      4680 ns/op	    3787 B/op	      80 allocs/op
+BenchmarkExample-4   	  241639	      4689 ns/op	    3787 B/op	      80 allocs/op
+BenchmarkExample-4   	  240097	      4699 ns/op	    3787 B/op	      80 allocs/op
+BenchmarkExample-4   	  243116	      4701 ns/op	    3787 B/op	      80 allocs/op
+BenchmarkExample-4   	  245307	      4719 ns/op	    3787 B/op	      80 allocs/op
+BenchmarkExample-4   	  246944	      4728 ns/op	    3787 B/op	      80 allocs/op
+BenchmarkExample-4   	  240415	      4725 ns/op	    3787 B/op	      80 allocs/op
+BenchmarkExample-4   	  247764	      4731 ns/op	    3787 B/op	      80 allocs/op
+BenchmarkExample-4   	  247240	      4718 ns/op	    3787 B/op	      80 allocs/op
+BenchmarkExample-4   	  244426	      4761 ns/op	    3787 B/op	      80 allocs/op
+BenchmarkExample-4   	  248054	      4749 ns/op	    3787 B/op	      80 allocs/op
+BenchmarkExample-4   	  249692	      4688 ns/op	    3787 B/op	      80 allocs/op
+PASS
+ok  	github.com/jf550-kent/jsgo/parser	36.109s
+?   	github.com/jf550-kent/jsgo/run	[no test files]
+PASS
+ok  	github.com/jf550-kent/jsgo/token	0.002s
