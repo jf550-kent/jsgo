@@ -183,10 +183,12 @@ func (p *parser) parseExpressionStatement() ast.Statement {
 		return nil
 	}
 
-	if p.peekExpect(token.SEMICOLON) {
-		p.next()
+	if !p.peekExpect(token.SEMICOLON) {
+		err := fmt.Sprintf("%s: missing ;", stmt.String())
+		p.panicError(err, SYNTAX_ERROR, stmt.End())
 	}
 
+	p.next()
 	return stmt
 }
 
@@ -302,6 +304,11 @@ func (p *parser) parseIFExpression() ast.Expression {
 		exp.Else = p.parseBlockStatement()
 	}
 
+	if !p.peekExpect(token.SEMICOLON) {
+		err := exp.String() + " : expected ; after if expression"
+		p.panicError(err, SYNTAX_ERROR, exp.End())
+	}
+
 	return exp
 }
 
@@ -309,6 +316,7 @@ func (p *parser) parseFunctionDeclaration() ast.Expression {
 	f := &ast.FunctionDeclaration{Token: p.currentToken}
 	p.next()
 
+	// function () function (a, b, t) {}
 	if !p.expect(token.LPAREN) {
 		err := f.String() + " : expected ( for function declaration"
 		p.panicError(err, SYNTAX_ERROR, f.End())
@@ -324,6 +332,10 @@ func (p *parser) parseFunctionDeclaration() ast.Expression {
 
 	f.Body = p.parseBlockStatement()
 
+	if !p.peekExpect(token.SEMICOLON) {
+		err := f.String() + " : missing ; for function declaration"
+		p.panicError(err, SYNTAX_ERROR, f.End())
+	}
 	return f
 }
 
