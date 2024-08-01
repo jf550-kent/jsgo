@@ -234,7 +234,6 @@ func (p *parser) parseCallExpression(left ast.Expression) ast.Expression {
 
 	if p.peekExpect(token.RPAREN) {
 		p.next()
-		p.next()
 		return c
 	}
 

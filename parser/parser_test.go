@@ -6,10 +6,11 @@ import (
 	"testing"
 
 	"github.com/jf550-kent/jsgo/ast"
+	"github.com/jf550-kent/jsgo/benchmark"
 )
 
 func BenchmarkExample(b *testing.B) {
-	byt, err := os.ReadFile("./../benchmark/example.js")
+	byt, err := os.ReadFile(benchmark.EXAMPLE_FILE_PATH)
 	if err != nil {
 		b.Fatal("failed to read file", err)
 	}
@@ -330,6 +331,25 @@ func TestCallExpressionParsing(t *testing.T) {
 	testValueExpression(t, expr.Arguments[0], 1)
 	testBinaryExpression(t, expr.Arguments[1], 2, "*", 3)
 	testBinaryExpression(t, expr.Arguments[2], 4, "+", 5)
+}
+
+func TestCallExpressionNoArgument(t *testing.T) {
+	input := "add();"
+
+	main := Parse("", []byte(input))
+
+	if len(main.Statements) != 1 {
+		t.Fatalf("main.Statements does not contain %d statements. got=%d\n",
+			1, len(main.Statements))
+	}
+
+	stmt := checkStatement[*ast.ExpressionStatement](t, main.Statements[0])
+	expr := checkExpression[*ast.CallExpression](t, stmt.Expression)
+
+	testValueExpression(t, expr.Function, "add")
+	if len(expr.Arguments) != 0 {
+		t.Fatalf("wrong length of arguments. got=%d", len(expr.Arguments))
+	}
 }
 
 func testBinaryExpression(t *testing.T, exp ast.Expression, left any, operator string, right any) bool {
