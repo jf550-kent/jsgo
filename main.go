@@ -18,15 +18,22 @@ const (
 	WARNING = Yellow
 	ERROR   = Red
 	RESULT  = Green
+	VERSION = "v0.3.0"
 )
 
 func main() {
 	if len(os.Args) < 2 {
 		printError("Please provide file name as the first argument to be run by jsgo\n")
-		printOut("usage ./jsgo <filename> -debug=<false | true >", WARNING)
+		printOut("usage ./jsgo <filename> [-debug=<false | true >] [-version]", WARNING)
 		os.Exit(1)
 	}
-	debug := *flag.Bool("debug", false, "enable debug mode")
+	version := flag.Bool("version", false, "current version of JSGO")
+	debug := flag.Bool("debug", false, "enable debug mode")
+	flag.Parse()
+	if *version {
+		printOut(VERSION, RESULT)
+		return
+	}
 	fileName := os.Args[1]
 	defer func() {
 		if r := recover(); r != nil {
@@ -58,7 +65,7 @@ func main() {
 	out := fmt.Sprintf("%+v", result)
 	printOut(out, RESULT)
 
-	if debug {
+	if *debug {
 		print("in debug mode")
 	}
 }
