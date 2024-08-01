@@ -105,6 +105,7 @@ func TestLexSingleToken(t *testing.T) {
 		{"return", token.Token{TokenType: token.RETURN, Literal: "return", Start: token.Pos{Line: 1, Col: 1}, End: token.Pos{Line: 1, Col: 6}}},
 		{"false", token.Token{TokenType: token.FALSE, Literal: "false", Start: token.Pos{Line: 1, Col: 1}, End: token.Pos{Line: 1, Col: 5}}},
 		{"true", token.Token{TokenType: token.TRUE, Literal: "true", Start: token.Pos{Line: 1, Col: 1}, End: token.Pos{Line: 1, Col: 4}}},
+		{`"true"`, token.Token{TokenType: token.STRING, Literal: `"true"`, Start: token.Pos{Line: 1, Col: 1}, End: token.Pos{Line: 1, Col: 6}}},
 	}
 
 	for _, test := range tests {

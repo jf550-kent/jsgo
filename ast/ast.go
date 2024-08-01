@@ -1,6 +1,7 @@
 package ast
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/jf550-kent/jsgo/token"
@@ -226,6 +227,22 @@ type (
 		Function  Expression
 		Arguments []Expression
 	}
+
+	String struct {
+		Token token.Token
+		Value string
+	}
+
+	Array struct {
+		Token token.Token
+		Elements []Expression
+	}
+
+	IndexExpression struct {
+		Token token.Token // The [ token
+		Left Expression
+		Index Expression
+	}
 )
 
 func (n *Number) expressionNode()  {}
@@ -394,3 +411,42 @@ func (c *CallExpression) String() string {
 
 	return out.String()
 }
+
+
+func (n *String) expressionNode()  {}
+func (n *String) Start() token.Pos { return n.Token.Start }
+func (n *String) End() token.Pos   { return n.Token.End }
+func (n *String) String() string   { return fmt.Sprintf("%q", n.Value)}
+
+func (n *Array) expressionNode()  {}
+func (n *Array) Start() token.Pos { return n.Token.Start }
+func (n *Array) End() token.Pos   { 
+	end := n.Token.End
+
+	if len(n.Elements) != 0 {
+		if n.Elements[len(n.Elements) -1] != nil {
+			return n.Elements[len(n.Elements) -1].End()
+		}
+	}
+
+	return end
+}
+func (n *Array) String() string   { 
+	var out strings.Builder
+
+	elements := []string{}
+	for _, el := range n.Elements {
+		elements = append(elements, el.String())
+	}
+
+	out.WriteString("[")
+	out.WriteString(strings.Join(elements, ", "))
+	out.WriteString("]")
+
+	return out.String()
+}
+
+// func (n *String) expressionNode()  {}
+// func (n *String) Start() token.Pos { return n.Token.Start }
+// func (n *String) End() token.Pos   { return n.Token.End }
+// func (n *String) String() string   { return fmt.Sprintf("%q", n.Value)}

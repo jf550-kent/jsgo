@@ -75,6 +75,8 @@ func (l *Lexer) Lex() (token.Token, error) {
 	case '<':
 		pos := l.currentPos()
 		tok = newToken(token.LSS, "<", pos, pos)
+	case '"':
+		tok = l.readString()
 	case '!':
 		start := l.currentPos()
 		if l.peekByte() == '=' {
@@ -186,6 +188,25 @@ func (l *Lexer) peekByte() byte {
 		return 0 // 0 represent End of file
 	}
 	return l.src[l.nextPosition]
+}
+
+func (l *Lexer) readString() token.Token {
+	start := l.position
+	strTok := token.Token{TokenType: token.STRING, Start: l.currentPos(), }
+	l.next()
+	for {
+		l.next()
+
+		if l.ch == '"' || l.ch == 0 {
+			prvPos := l.position -1 // this logic needs to be improve, we cannot just minus one to get the last position
+			if l.src[prvPos] != '\\' {
+				break
+			}
+		}
+	}
+	strTok.End = l.currentPos()
+	strTok.Literal = string(l.src[start:l.nextPosition])
+	return strTok
 }
 
 // skipWhitespace skips all the current whitespace in [Lexer.src]
