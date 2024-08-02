@@ -459,6 +459,8 @@ func TestAssignmentStatement(t *testing.T) {
 	main := Parse("", []byte(input))
 
 	stmt := checkStatement[*ast.AssignmentStatement](t, main.Statements[0])
+	testIdentifier(t, stmt.Identifier, "a")
+	testNumberValue(t, stmt.Expression, 10)
 }
 
 func checkStatement[expected any](t *testing.T, stmt ast.Statement) expected {

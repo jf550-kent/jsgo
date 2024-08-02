@@ -291,6 +291,8 @@ func TestFunctionApplication(t *testing.T) {
 	}
 }
 
+func TestAssignment()
+
 func checkObject[expected any](t *testing.T, obj object.Object) expected {
 	if obj == nil {
 		t.Fatal("object is nil")
