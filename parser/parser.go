@@ -120,6 +120,9 @@ func (p *parser) parse() ast.Statement {
 	case token.RETURN:
 		return p.parseReturnStatement()
 	case token.IDENT:
+		if !p.peekExpect(token.ASSIGN) {
+			break
+		}
 		return p.parseAssignmentStatement()
 	}
 	return p.parseExpressionStatement()
