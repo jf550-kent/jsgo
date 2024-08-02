@@ -118,6 +118,8 @@ func (p *parser) parse() ast.Statement {
 		return p.parseVarStatement()
 	case token.RETURN:
 		return p.parseReturnStatement()
+	case token.IDENT:
+		return p.parseAssignmentStatement()
 	}
 	return p.parseExpressionStatement()
 }
@@ -190,6 +192,30 @@ func (p *parser) parseExpressionStatement() ast.Statement {
 
 	p.next()
 	return stmt
+}
+
+func (p *parser) parseAssignmentStatement() ast.Statement {
+	p.check(token.IDENT)
+	assign := &ast.AssignmentStatement{Token: p.currentToken}
+	ident := p.parseIdent()
+	if i, ok := ident.(*ast.Identifier); ok {
+		assign.Identifier = i
+	}
+
+	if assign.Identifier == nil {
+		p.panicError("compiler unable to parse identifier", INTERNAL_ERROR, p.currentToken.Start)
+	}
+	p.next()
+	if !p.expect(token.ASSIGN) {
+		p.panicError("for assignment expected to have = after identifier", SYNTAX_ERROR, assign.End())
+	}
+	p.next()
+	assign.Expression = p.parseExpression(1)
+
+	if p.peekExpect(token.SEMICOLON) {
+		p.next()
+	}
+	return assign
 }
 
 func (p *parser) parseExpression(precedence int) ast.Expression {
@@ -455,4 +481,13 @@ func (p *parser) next() {
 
 func (p *parser) panicError(msg, errorType string, pos token.Pos) {
 	panic(fmt.Errorf("%s: %s %s:%d:%d", errorType, msg, p.name, pos.Line, pos.Col))
+}
+
+// check should be used to check if tok is the parser current token. 
+// if not it will panic. In the parser, it is up to the developer to advance the token
+// therefore check() acts as an check for before creating the ast to verify the expected token
+func (p *parser) check(tok token.TokenType) {
+	if p.currentToken.TokenType != tok {
+		p.panicError(INTERNAL_ERROR, "expecting " + tok.String(), p.currentToken.Start)
+	}
 }

@@ -94,6 +94,13 @@ type (
 		Token      token.Token
 		Expression Expression
 	}
+
+	// AssignmentStatement represent an assignment to a variable such as a = 10;
+	AssignmentStatement struct {
+		Token token.Token
+		Identifier *Identifier
+		Expression Expression
+	}
 )
 
 func (v *VarStatement) statementNode()   {}
@@ -176,6 +183,24 @@ func (e *ExpressionStatement) String() string {
 		return e.Expression.String()
 	}
 	return e.Token.String()
+}
+
+func (bs *AssignmentStatement) statementNode()       {}
+func (bs *AssignmentStatement) TokenLiteral() string { return bs.Token.Literal }
+func (bs *AssignmentStatement) Start() token.Pos     { return bs.Token.Start }
+func (bs *AssignmentStatement) End() token.Pos {
+	if bs.Expression != nil { return bs.Expression.End() }
+	return bs.Token.End
+}
+func (bs *AssignmentStatement) String() string {
+	var out strings.Builder
+
+	out.WriteString(bs.Token.Literal)
+	out.WriteString(" = ")
+	if bs.Expression != nil {
+		out.WriteString(bs.Expression.String())
+	}
+	return out.String()
 }
 
 // expression

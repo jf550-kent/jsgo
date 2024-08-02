@@ -152,6 +152,19 @@ func (t Token) String() string {
 	return s
 }
 
+func (t TokenType) String() string {
+	s := ""
+
+	if t >= 0 && int(t) < len(tokens) {
+		s = tokens[t]
+	}
+
+	if s == "" {
+		s = "token(" + strconv.Itoa(int(t)) + ") does not exist"
+	}
+	return s
+}
+
 // IsLiteral determine if the token is a literal in the language
 func (t Token) IsLiteral() bool { return literalBegin < t.TokenType && t.TokenType < literalEnd }
 
