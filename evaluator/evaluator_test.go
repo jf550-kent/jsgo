@@ -291,6 +291,14 @@ func TestFunctionApplication(t *testing.T) {
 	}
 }
 
+func TestForLoop(t *testing.T) {
+	input := `
+	for (let i = 0; i < 10; i++) {
+		add(i);
+	};
+	`
+}
+
 func checkObject[expected any](t *testing.T, obj object.Object) expected {
 	if obj == nil {
 		t.Fatal("object is nil")

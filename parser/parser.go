@@ -95,6 +95,7 @@ func new(filename string, l *lexer.Lexer) *parser {
 		token.BANG:     p.parseUnaryExpression,
 		token.FUNCTION: p.parseFunctionDeclaration,
 		token.LPAREN:   p.parseGroupedExpression,
+		token.FOR: p.parseForExpression,
 	}
 
 	p.binaryExpressionFunc = map[token.TokenType]binaryExpressionFunc{
@@ -303,12 +304,58 @@ func (p *parser) parseIFExpression() ast.Expression {
 		exp.Else = p.parseBlockStatement()
 	}
 
-	if !p.peekExpect(token.SEMICOLON) {
-		err := exp.String() + " : expected ; after if expression"
-		p.panicError(err, SYNTAX_ERROR, exp.End())
-	}
 
 	return exp
+}
+
+func (p *parser) parseForExpression() ast.Expression {
+	// Ensure we start with the 'for' keyword
+	if !p.expect(token.FOR) {
+		// Handle error: expected 'for' keyword
+		p.error("expected 'for' keyword")
+		return nil
+	}
+
+	// Create the AST node for the 'for' expression
+	forExpr := &ast.ForExpression{Token: p.currentToken}
+
+	// Move to the next token
+	p.next()
+	if !p.expect(token.LPAREN) {
+		// Handle error: expected '('
+		p.error("expected '(' after 'for'")
+		return nil
+	}
+	p.next()
+
+	// Parse the initialization statement
+	forExpr.Init = p.parseVarStatement()
+
+	p.next()
+
+	// Parse the loop condition
+	forExpr.Condition = p.parseExpression(1)
+	
+	p.next()if !p.expect(token.SEMICOLON) {
+		// Handle error: expected ';'
+		p.error("expected ';' after condition in 'for' loop")
+		return nil
+	}
+	p.next()
+
+	// Parse the post-loop expression
+	forExpr.Post = p.parseExpression(1)	p.next()
+	if !p.expect(token.RPAREN) {
+		// Handle error: expected ')'
+		p.error("expected ')' after 'for' loop clauses")
+		return nil
+	}
+	p.next()
+
+	// Parse the loop body
+	forExpr.Body = p.parseBlockStatement()
+
+	return forExpr
 }
 
 func (p *parser) parseFunctionDeclaration() ast.Expression {
@@ -331,10 +378,6 @@ func (p *parser) parseFunctionDeclaration() ast.Expression {
 
 	f.Body = p.parseBlockStatement()
 
-	if !p.peekExpect(token.SEMICOLON) {
-		err := f.String() + " : missing ; for function declaration"
-		p.panicError(err, SYNTAX_ERROR, f.End())
-	}
 	return f
 }
 
