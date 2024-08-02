@@ -38,6 +38,18 @@ func eval(node ast.Node, env *object.Environment) object.Object {
 			return newError("failed to set variable")
 		}
 		return v
+	case *ast.AssignmentStatement:
+		val := eval(node.Expression, env)
+		if isError(val) {
+			return val
+		}
+		env.Set(node.Identifier.Literal, val)
+
+		v, ok := env.Get(node.Identifier.Literal)
+		if !ok {
+			return newError("failed to set variable")
+		}
+		return v
 	case *ast.Number:
 		return &object.Number{Value: node.Value}
 	case *ast.Float:
