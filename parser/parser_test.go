@@ -454,6 +454,13 @@ func TestExpressionStatement(t *testing.T) {
 	}
 }
 
+func TestAssignmentStatement(t *testing.T) {
+	input := "a = 10;"
+	main := Parse("", []byte(input))
+
+	stmt := checkStatement[*ast.AssignmentStatement](t, main.Statements[0])
+}
+
 func checkStatement[expected any](t *testing.T, stmt ast.Statement) expected {
 	if stmt == nil {
 		t.Fatal("statement is nil")
