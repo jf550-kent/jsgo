@@ -97,7 +97,7 @@ type (
 
 	// AssignmentStatement represent an assignment to a variable such as a = 10;
 	AssignmentStatement struct {
-		Token token.Token
+		Token      token.Token
 		Identifier *Identifier
 		Expression Expression
 	}
@@ -189,7 +189,9 @@ func (bs *AssignmentStatement) statementNode()       {}
 func (bs *AssignmentStatement) TokenLiteral() string { return bs.Token.Literal }
 func (bs *AssignmentStatement) Start() token.Pos     { return bs.Token.Start }
 func (bs *AssignmentStatement) End() token.Pos {
-	if bs.Expression != nil { return bs.Expression.End() }
+	if bs.Expression != nil {
+		return bs.Expression.End()
+	}
 	return bs.Token.End
 }
 func (bs *AssignmentStatement) String() string {

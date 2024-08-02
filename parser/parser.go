@@ -486,11 +486,11 @@ func (p *parser) panicError(msg, errorType string, pos token.Pos) {
 	panic(fmt.Errorf("%s: %s %s:%d:%d", errorType, msg, p.name, pos.Line, pos.Col))
 }
 
-// check should be used to check if tok is the parser current token. 
+// check should be used to check if tok is the parser current token.
 // if not it will panic. In the parser, it is up to the developer to advance the token
 // therefore check() acts as an check for before creating the ast to verify the expected token
 func (p *parser) check(tok token.TokenType) {
 	if p.currentToken.TokenType != tok {
-		p.panicError(INTERNAL_ERROR, "expecting " + tok.String(), p.currentToken.Start)
+		p.panicError(INTERNAL_ERROR, "expecting "+tok.String(), p.currentToken.Start)
 	}
 }
