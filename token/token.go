@@ -70,6 +70,7 @@ const (
 	RETURN   // return
 	TRUE     // true
 	FALSE    // false
+	FOR      // for
 
 	keywordEnd
 )
@@ -84,6 +85,7 @@ var keywords = map[string]TokenType{
 	"return":   RETURN,
 	"true":     TRUE,
 	"false":    FALSE,
+	"for":      FOR,
 }
 
 // tokens store the repective string representation of the token
@@ -120,6 +122,7 @@ var tokens = [...]string{
 	RETURN:    "return",
 	TRUE:      "true",
 	FALSE:     "false",
+	FOR:       "for",
 }
 
 func (t Token) Precedence() int {

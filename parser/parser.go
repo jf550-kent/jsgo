@@ -95,6 +95,7 @@ func new(filename string, l *lexer.Lexer) *parser {
 		token.BANG:     p.parseUnaryExpression,
 		token.FUNCTION: p.parseFunctionDeclaration,
 		token.LPAREN:   p.parseGroupedExpression,
+		token.FOR:      p.parseForExpression,
 	}
 
 	p.binaryExpressionFunc = map[token.TokenType]binaryExpressionFunc{
@@ -391,6 +392,42 @@ func (p *parser) parseGroupedExpression() ast.Expression {
 	}
 	p.next()
 	return exp
+}
+
+func (p *parser) parseForExpression() ast.Expression {
+	if !p.expect(token.FOR) {
+		p.panicError("expecting for token to parse for expression", INTERNAL_ERROR, p.currentToken.Start)
+	}
+
+	// for (var i = 90; i < 100; i ++) {};
+	forExpr := &ast.ForExpression{Token: p.currentToken}
+
+	p.next()
+	if !p.expect(token.LPAREN) {
+		p.panicError(fmt.Sprintf("%s : expecting (", p.currentToken), SYNTAX_ERROR, p.currentToken.End)
+	}
+	p.next()
+
+	forExpr.Init = p.parseVarStatement()
+	p.next()
+
+	forExpr.Condition = p.parseExpression(1)
+	p.next()
+	if !p.expect(token.SEMICOLON) {
+		p.panicError(fmt.Sprintf("%s : expecting ; after initialisation", forExpr), SYNTAX_ERROR, p.currentToken.End)
+	}
+	p.next()
+	if !p.expect(token.SEMICOLON) {
+		p.panicError(fmt.Sprintf("%s : expecting ; after initialisation", forExpr), SYNTAX_ERROR, p.currentToken.End)
+	}
+	forExpr.Post = p.parseExpression(1)
+	p.next()
+	if !p.expect(token.RPAREN) {
+		p.panicError(fmt.Sprintf("%s : expecting ; after initialisation", forExpr), SYNTAX_ERROR, p.currentToken.End)
+	}
+	p.next()
+	forExpr.Body = p.parseBlockStatement()
+	return forExpr
 }
 
 func (p *parser) parseIdent() ast.Expression {
