@@ -291,6 +291,23 @@ func TestFunctionApplication(t *testing.T) {
 	}
 }
 
+// add for loop checking
+func TestAssignment(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected any
+	}{
+		{"var a = 90; if (a) { a = 199 }; a;", 199},
+		{"var a = 90; if (a) { var a = 199; }; a; ", 199},
+		{"var a = 90; var add = function() { var a = true; a = 100; }; add(); a;", 90},
+		{"var a = 90; var add = function() { var a = true; return a; }; add();", true},
+	}
+
+	for _, tt := range tests {
+		testValue(t, evalSetup(tt.input), tt.expected)
+	}
+}
+
 func checkObject[expected any](t *testing.T, obj object.Object) expected {
 	if obj == nil {
 		t.Fatal("object is nil")
