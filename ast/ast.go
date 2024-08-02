@@ -253,6 +253,14 @@ type (
 		Function  Expression
 		Arguments []Expression
 	}
+
+	ForExpression struct {
+		Token     token.Token
+		Init      Statement
+		Condition Expression
+		Post      Expression
+		Body      *BlockStatement
+	}
 )
 
 func (n *Number) expressionNode()  {}
@@ -421,3 +429,9 @@ func (c *CallExpression) String() string {
 
 	return out.String()
 }
+
+// PLEASE CHANGE THIS
+func (n *ForExpression) expressionNode()  {}
+func (n *ForExpression) Start() token.Pos { return n.Token.Start }
+func (n *ForExpression) End() token.Pos   { return n.Token.End }
+func (n *ForExpression) String() string   { return n.Token.Literal }
