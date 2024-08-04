@@ -34,12 +34,13 @@ func TestEval(t *testing.T) {
 func TestVarStatement(t *testing.T) {
 	tests := []struct {
 		input    string
-		expected int
+		expected any
 	}{
 		{"var a = 5; a;", 5},
 		{"var a = 5 * 7;", 35},
 		{"var a = 5; var b = a; b;", 5},
 		{"var a = 5; var b = a; var c = a + b + 5; c;", 15},
+		{`var hello = "Hello world"; hello;`, "Hello world"},
 	}
 
 	for _, tt := range tests {
@@ -356,6 +357,8 @@ func testValue(t *testing.T, obj object.Object, expectedValue any) {
 		if obj != v {
 			t.Errorf("expecting null got=%v", v)
 		}
+	case string:
+		testString(t, obj, v)
 	default:
 		t.Errorf("invalid type for expected value")
 	}
@@ -366,6 +369,14 @@ func testBool(t *testing.T, obj object.Object, v bool) {
 
 	if b.Value != v {
 		t.Errorf("wrong boolean value: got=%v expected=%v", b.Value, v)
+	}
+}
+
+func testString(t *testing.T, obj object.Object, v string) {
+	s := checkObject[*object.String](t, obj)
+
+	if s.Value != v {
+		t.Errorf("wrong string value: got=%v expected=%v", s.Value, v)
 	}
 }
 

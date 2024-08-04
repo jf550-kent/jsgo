@@ -95,6 +95,7 @@ func new(filename string, l *lexer.Lexer) *parser {
 		token.BANG:     p.parseUnaryExpression,
 		token.FUNCTION: p.parseFunctionDeclaration,
 		token.LPAREN:   p.parseGroupedExpression,
+		token.STRING:   p.parseStringExpression,
 	}
 
 	p.binaryExpressionFunc = map[token.TokenType]binaryExpressionFunc{
@@ -484,6 +485,11 @@ func (p *parser) parseFloat() ast.Expression {
 
 func (p *parser) parseBoolean() ast.Expression {
 	return &ast.Boolean{Token: p.currentToken, Value: p.expect(token.TRUE)}
+}
+
+func (p *parser) parseStringExpression() ast.Expression {
+	p.check(token.STRING)
+	return &ast.String{Token: p.currentToken, Value: p.currentToken.Literal}
 }
 
 func (p *parser) peekPred() int {
