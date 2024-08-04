@@ -101,6 +101,15 @@ type (
 		Identifier *Identifier
 		Expression Expression
 	}
+
+	// ForStatement represent the for loop in JSGO
+	ForStatement struct {
+		Token     token.Token
+		Init      Statement
+		Condition Expression
+		Post      Statement
+		Body      *BlockStatement
+	}
 )
 
 func (v *VarStatement) statementNode()   {}
@@ -204,6 +213,12 @@ func (bs *AssignmentStatement) String() string {
 	}
 	return out.String()
 }
+
+// PLEASE change
+func (n *ForStatement) statementNode()   {}
+func (n *ForStatement) Start() token.Pos { return n.Token.Start }
+func (n *ForStatement) End() token.Pos   { return n.Token.End }
+func (n *ForStatement) String() string   { return n.Token.Literal }
 
 // expression
 type (

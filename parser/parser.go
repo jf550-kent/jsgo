@@ -123,6 +123,8 @@ func (p *parser) parse() ast.Statement {
 			break
 		}
 		return p.parseAssignmentStatement()
+	case token.FOR:
+		return p.parseForStatement()
 	}
 	return p.parseExpressionStatement()
 }
@@ -154,12 +156,9 @@ func (p *parser) parseVarStatement() ast.Statement {
 
 	varStmt.Expression = p.parseExpression(1)
 
-	if !p.peekExpect(token.SEMICOLON) {
-		errMsg := varStmt.String() + " :expect ; after expression when declaring var"
-		p.panicError(errMsg, SYNTAX_ERROR, varStmt.Start())
-		return nil
+	if p.peekExpect(token.SEMICOLON) {
+		p.next()
 	}
-	p.next()
 
 	return varStmt
 }
@@ -188,12 +187,9 @@ func (p *parser) parseExpressionStatement() ast.Statement {
 		return nil
 	}
 
-	if !p.peekExpect(token.SEMICOLON) {
-		err := fmt.Sprintf("%s: missing ;", stmt.String())
-		p.panicError(err, SYNTAX_ERROR, stmt.End())
+	if p.peekExpect(token.SEMICOLON) {
+		p.next()
 	}
-
-	p.next()
 	return stmt
 }
 
@@ -332,9 +328,8 @@ func (p *parser) parseIFExpression() ast.Expression {
 		exp.Else = p.parseBlockStatement()
 	}
 
-	if !p.peekExpect(token.SEMICOLON) {
-		err := exp.String() + " : expected ; after if expression"
-		p.panicError(err, SYNTAX_ERROR, exp.End())
+	if p.peekExpect(token.SEMICOLON) {
+		p.next()
 	}
 
 	return exp
@@ -360,9 +355,8 @@ func (p *parser) parseFunctionDeclaration() ast.Expression {
 
 	f.Body = p.parseBlockStatement()
 
-	if !p.peekExpect(token.SEMICOLON) {
-		err := f.String() + " : missing ; for function declaration"
-		p.panicError(err, SYNTAX_ERROR, f.End())
+	if p.peekExpect(token.SEMICOLON) {
+		p.next()
 	}
 	return f
 }
@@ -402,6 +396,10 @@ func (p *parser) parseBlockStatement() *ast.BlockStatement {
 	block.Statements = []ast.Statement{}
 	p.next()
 
+	if p.expect(token.RBRACE) {
+		return block
+	}
+
 	for !p.expect(token.RBRACE) && !p.expect(token.EOF) {
 		stmt := p.parse()
 		if stmt != nil {
@@ -420,6 +418,45 @@ func (p *parser) parseGroupedExpression() ast.Expression {
 	}
 	p.next()
 	return exp
+}
+
+func (p *parser) parseForStatement() ast.Statement {
+	p.check(token.FOR)
+	forStmt := &ast.ForStatement{Token: p.currentToken}
+
+	p.next()
+	if !p.expect(token.LPAREN) {
+		p.panicError(fmt.Sprintf("%s : expecting (", p.currentToken), SYNTAX_ERROR, p.currentToken.End)
+	}
+	p.next()
+
+	if !p.expect(token.SEMICOLON) {
+		forStmt.Init = p.parseVarStatement()
+	}
+	p.next()
+
+	forStmt.Condition = p.parseExpression(1)
+	p.next()
+	if !p.expect(token.SEMICOLON) {
+		p.panicError(fmt.Sprintf("%s : expecting ; after condition", forStmt), SYNTAX_ERROR, p.currentToken.End)
+	}
+
+	// account [for (;)] and [for (; i = 9) {} ]
+	p.next()
+	if !p.expect(token.RPAREN) {
+		forStmt.Post = p.parseAssignmentStatement()
+		p.next()
+	}
+	if !p.expect(token.RPAREN) {
+		p.panicError(fmt.Sprintf("%s : expecting ) after post condition", forStmt), SYNTAX_ERROR, p.currentToken.End)
+	}
+	p.next()
+	forStmt.Body = p.parseBlockStatement()
+
+	if p.peekExpect(token.SEMICOLON) {
+		p.next()
+	}
+	return forStmt
 }
 
 func (p *parser) parseIdent() ast.Expression {
@@ -489,6 +526,7 @@ func (p *parser) panicError(msg, errorType string, pos token.Pos) {
 // check should be used to check if tok is the parser current token.
 // if not it will panic. In the parser, it is up to the developer to advance the token
 // therefore check() acts as an check for before creating the ast to verify the expected token
+// ONLY use for developer errors, such as moving token wrongly.
 func (p *parser) check(tok token.TokenType) {
 	if p.currentToken.TokenType != tok {
 		p.panicError(INTERNAL_ERROR, "expecting "+tok.String(), p.currentToken.Start)

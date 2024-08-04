@@ -94,6 +94,8 @@ func eval(node ast.Node, env *object.Environment) object.Object {
 			return args[0]
 		}
 		return applyFunction(function, args)
+	case *ast.ForStatement:
+		return evalForStatement(node, env)
 	case *ast.BlockStatement:
 		return evalBlockStatements(node, env)
 	case *ast.IFExpression:
@@ -220,6 +222,42 @@ func evalUnaryExpression(op string, exp object.Object) object.Object {
 		return evalNegativeOperatorExpression(exp)
 	}
 	return newError(fmt.Sprintf("unkonw operator: %s%s", op, exp.Type()))
+}
+
+func evalForStatement(forStmt *ast.ForStatement, env *object.Environment) object.Object {
+	if forStmt.Init != nil {
+		eval(forStmt.Init, env)
+	}
+
+	for {
+		// Evaluate the condition
+		if forStmt.Condition == nil {
+			panic("for loop does not contain condition : is the middle bit :)")
+		}
+
+		condition := eval(forStmt.Condition, env)
+		if isError(condition) {
+			return condition
+		}
+		if !isTruthy(condition) {
+			break
+		}
+		body := eval(forStmt.Body, env)
+		if isError(body) {
+			return body
+		}
+		if _, ok := body.(*object.ReturnValue); ok {
+			return body
+		}
+		if forStmt.Post != nil {
+			post := eval(forStmt.Post, env)
+			if isError(post) {
+				return post
+			}
+		}
+	}
+
+	return NULL
 }
 
 func evalNumberExpression(left, right object.Object, op string) object.Object {

@@ -463,6 +463,30 @@ func TestAssignmentStatement(t *testing.T) {
 	testNumberValue(t, stmt.Expression, 10)
 }
 
+func TestForExpression(t *testing.T) {
+	input := `
+	for (var i = 0; i < 10; i = i + 1) {
+		var sum = 10 + 10;
+	}`
+
+	main := Parse("", []byte([]byte(input)))
+
+	print(main)
+
+	forStmt := checkStatement[*ast.ForStatement](t, main.Statements[0])
+	initStmt := checkStatement[*ast.VarStatement](t, forStmt.Init)
+	testValueExpression(t, initStmt.Variable, "i")
+	testValueExpression(t, initStmt.Expression, 0)
+
+	condExpr := checkExpression[*ast.BinaryExpression](t, forStmt.Condition)
+	testBinaryExpression(t, condExpr, "i", "<", 10)
+
+	postStmt := checkStatement[*ast.AssignmentStatement](t, forStmt.Post)
+	testValueExpression(t, postStmt.Identifier, "i")
+	postExpr := checkExpression[*ast.BinaryExpression](t, postStmt.Expression)
+	testBinaryExpression(t, postExpr, "i", "+", 1)
+}
+
 func checkStatement[expected any](t *testing.T, stmt ast.Statement) expected {
 	if stmt == nil {
 		t.Fatal("statement is nil")
