@@ -95,7 +95,6 @@ func new(filename string, l *lexer.Lexer) *parser {
 		token.BANG:     p.parseUnaryExpression,
 		token.FUNCTION: p.parseFunctionDeclaration,
 		token.LPAREN:   p.parseGroupedExpression,
-		token.FOR:      p.parseForExpression,
 	}
 
 	p.binaryExpressionFunc = map[token.TokenType]binaryExpressionFunc{
@@ -124,6 +123,8 @@ func (p *parser) parse() ast.Statement {
 			break
 		}
 		return p.parseAssignmentStatement()
+	case token.FOR:
+		return p.parseForStatement()
 	}
 	return p.parseExpressionStatement()
 }
@@ -423,13 +424,9 @@ func (p *parser) parseGroupedExpression() ast.Expression {
 	return exp
 }
 
-func (p *parser) parseForExpression() ast.Expression {
-	if !p.expect(token.FOR) {
-		p.panicError("expecting for token to parse for expression", INTERNAL_ERROR, p.currentToken.Start)
-	}
-
-	// for (var i = 90; i < 100; i ++) {};
-	forExpr := &ast.ForExpression{Token: p.currentToken}
+func (p *parser) parseForStatement() ast.Statement {
+	p.check(token.FOR)
+	forStmt := &ast.ForStatement{Token: p.currentToken}
 
 	p.next()
 	if !p.expect(token.LPAREN) {
@@ -437,26 +434,23 @@ func (p *parser) parseForExpression() ast.Expression {
 	}
 	p.next()
 
-	forExpr.Init = p.parseVarStatement()
+	forStmt.Init = p.parseVarStatement()
 	p.next()
 
-	forExpr.Condition = p.parseExpression(1)
+	forStmt.Condition = p.parseExpression(1)
 	p.next()
 	if !p.expect(token.SEMICOLON) {
-		p.panicError(fmt.Sprintf("%s : expecting ; after initialisation", forExpr), SYNTAX_ERROR, p.currentToken.End)
+		p.panicError(fmt.Sprintf("%s : expecting ; after initialisation", forStmt), SYNTAX_ERROR, p.currentToken.End)
 	}
 	p.next()
-	if !p.expect(token.SEMICOLON) {
-		p.panicError(fmt.Sprintf("%s : expecting ; after initialisation", forExpr), SYNTAX_ERROR, p.currentToken.End)
-	}
-	forExpr.Post = p.parseExpression(1)
+	forStmt.Post = p.parseAssignmentStatement()
 	p.next()
 	if !p.expect(token.RPAREN) {
-		p.panicError(fmt.Sprintf("%s : expecting ; after initialisation", forExpr), SYNTAX_ERROR, p.currentToken.End)
+		p.panicError(fmt.Sprintf("%s : expecting ; after initialisation", forStmt), SYNTAX_ERROR, p.currentToken.End)
 	}
 	p.next()
-	forExpr.Body = p.parseBlockStatement()
-	return forExpr
+	forStmt.Body = p.parseBlockStatement()
+	return forStmt
 }
 
 func (p *parser) parseIdent() ast.Expression {
@@ -526,6 +520,7 @@ func (p *parser) panicError(msg, errorType string, pos token.Pos) {
 // check should be used to check if tok is the parser current token.
 // if not it will panic. In the parser, it is up to the developer to advance the token
 // therefore check() acts as an check for before creating the ast to verify the expected token
+// ONLY use for developer errors, such as moving token wrongly.
 func (p *parser) check(tok token.TokenType) {
 	if p.currentToken.TokenType != tok {
 		p.panicError(INTERNAL_ERROR, "expecting "+tok.String(), p.currentToken.Start)

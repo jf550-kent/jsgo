@@ -308,6 +308,26 @@ func TestAssignment(t *testing.T) {
 	}
 }
 
+func TestFor(t *testing.T) {
+	input := `
+var sum = 0;
+for (var i = 0; i < 10000; i = i + 1) {
+
+  for (var j = 10; i < 10; j = 20) {
+    i = 20 + j;
+  }
+
+  if (i > 200) {
+    sum = i;
+  }; 
+}
+sum;
+	`
+
+	eval := evalSetup(input)
+	testValue(t, eval, 45)
+}
+
 func checkObject[expected any](t *testing.T, obj object.Object) expected {
 	if obj == nil {
 		t.Fatal("object is nil")
