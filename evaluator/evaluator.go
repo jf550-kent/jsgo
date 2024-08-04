@@ -246,6 +246,9 @@ func evalForStatement(forStmt *ast.ForStatement, env *object.Environment) object
 		if isError(body) {
 			return body
 		}
+		if _, ok := body.(*object.ReturnValue); ok {
+			return body
+		}
 		if forStmt.Post != nil {
 			post := eval(forStmt.Post, env)
 			if isError(post) {

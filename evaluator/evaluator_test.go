@@ -309,23 +309,27 @@ func TestAssignment(t *testing.T) {
 }
 
 func TestFor(t *testing.T) {
-	input := `
-var sum = 0;
-for (var i = 0; i < 10000; i = i + 1) {
+	tests := []struct {
+		input    string
+		expected any
+	}{
+		{"for (var i = 0; i < 5; i = i + 1) {}; i;", 5},
+		{"var i = 0; for (; i < 5; i = i + 1) {}; i;", 5},
+		{"for (var i = 5; i < 0; i = i + 1) {}; i;", 5},
+		{"var sum = 0; for (var i = 0; i < 3; i = i + 1) { for (var j = 0; j < 2; j = j + 1) { sum = sum + 1; } }; sum;", 6},
+		{"var sum = 0; for (var i = 0; i < 3; i = i + 1) { for (var j = 0; j < 2; j = j + 1) { for (var k = 0; k < 2; k = k + 1) { sum = sum + 1; } } }; sum;", 12},
+		{"var three = function() { for (var i = 0; i < 5; i = i + 1) { if (i == 3) { return i; } } }; three();", 3},
+		{"for (;false;) {};", NULL},
+		{"var flag = true; for (var i = 0; flag; i = i + 1) { if (i == 200) { flag = false; }}; i;", 201},
+		{"for (var i = 0; i != 10; i = i + 2) {}; i;", 10},
+		{"for (var i = 0; i < 0; i = i + 1) {}; i;", 0},
+		{"var sum = 0; for (var i = 0; i < 10000; i = i + 1) { for (var j = 10; i < 10; j = 20) { i = 20 + j; } if (i > 200) { sum = i; }; }; sum;", 9999},
+	}
 
-  for (var j = 10; i < 10; j = 20) {
-    i = 20 + j;
-  }
-
-  if (i > 200) {
-    sum = i;
-  }; 
-}
-sum;
-	`
-
-	eval := evalSetup(input)
-	testValue(t, eval, 45)
+	for _, tt := range tests {
+		eval := evalSetup(tt.input)
+		testValue(t, eval, tt.expected)
+	}
 }
 
 func checkObject[expected any](t *testing.T, obj object.Object) expected {
@@ -344,15 +348,17 @@ func testValue(t *testing.T, obj object.Object, expectedValue any) {
 	switch v := expectedValue.(type) {
 	case int:
 		testNumber(t, obj, int64(v))
-		return
 	case float64:
 		testFloat(t, obj, v)
-		return
 	case bool:
 		testBool(t, obj, v)
-		return
+	case *object.Null:
+		if obj != v {
+			t.Errorf("expecting null got=%v", v)
+		}
+	default:
+		t.Errorf("invalid type for expected value")
 	}
-	t.Errorf("invalid type for expected value")
 }
 
 func testBool(t *testing.T, obj object.Object, v bool) {

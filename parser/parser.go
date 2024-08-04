@@ -156,12 +156,9 @@ func (p *parser) parseVarStatement() ast.Statement {
 
 	varStmt.Expression = p.parseExpression(1)
 
-	if !p.peekExpect(token.SEMICOLON) {
-		errMsg := varStmt.String() + " :expect ; after expression when declaring var"
-		p.panicError(errMsg, SYNTAX_ERROR, varStmt.Start())
-		return nil
+	if p.peekExpect(token.SEMICOLON) {
+		p.next()
 	}
-	p.next()
 
 	return varStmt
 }
@@ -190,12 +187,9 @@ func (p *parser) parseExpressionStatement() ast.Statement {
 		return nil
 	}
 
-	if !p.peekExpect(token.SEMICOLON) {
-		err := fmt.Sprintf("%s: missing ;", stmt.String())
-		p.panicError(err, SYNTAX_ERROR, stmt.End())
+	if p.peekExpect(token.SEMICOLON) {
+		p.next()
 	}
-
-	p.next()
 	return stmt
 }
 
@@ -334,10 +328,7 @@ func (p *parser) parseIFExpression() ast.Expression {
 		exp.Else = p.parseBlockStatement()
 	}
 
-	if !p.peekExpect(token.SEMICOLON) {
-		err := exp.String() + " : expected ; after if expression"
-		p.panicError(err, SYNTAX_ERROR, exp.End())
-	}
+	if p.peekExpect(token.SEMICOLON) { p.next() }
 
 	return exp
 }
@@ -362,9 +353,8 @@ func (p *parser) parseFunctionDeclaration() ast.Expression {
 
 	f.Body = p.parseBlockStatement()
 
-	if !p.peekExpect(token.SEMICOLON) {
-		err := f.String() + " : missing ; for function declaration"
-		p.panicError(err, SYNTAX_ERROR, f.End())
+	if p.peekExpect(token.SEMICOLON) {
+		p.next()
 	}
 	return f
 }
@@ -404,6 +394,8 @@ func (p *parser) parseBlockStatement() *ast.BlockStatement {
 	block.Statements = []ast.Statement{}
 	p.next()
 
+	if p.expect(token.RBRACE) { return block }
+
 	for !p.expect(token.RBRACE) && !p.expect(token.EOF) {
 		stmt := p.parse()
 		if stmt != nil {
@@ -434,22 +426,30 @@ func (p *parser) parseForStatement() ast.Statement {
 	}
 	p.next()
 
-	forStmt.Init = p.parseVarStatement()
+	if !p.expect(token.SEMICOLON) {
+		forStmt.Init = p.parseVarStatement()
+	}
 	p.next()
 
 	forStmt.Condition = p.parseExpression(1)
 	p.next()
 	if !p.expect(token.SEMICOLON) {
-		p.panicError(fmt.Sprintf("%s : expecting ; after initialisation", forStmt), SYNTAX_ERROR, p.currentToken.End)
+		p.panicError(fmt.Sprintf("%s : expecting ; after condition", forStmt), SYNTAX_ERROR, p.currentToken.End)
 	}
-	p.next()
-	forStmt.Post = p.parseAssignmentStatement()
+
+	// account [for (;)] and [for (; i = 9) {} ]
 	p.next()
 	if !p.expect(token.RPAREN) {
-		p.panicError(fmt.Sprintf("%s : expecting ; after initialisation", forStmt), SYNTAX_ERROR, p.currentToken.End)
+		forStmt.Post = p.parseAssignmentStatement()
+		p.next()
+	}
+	if !p.expect(token.RPAREN) {
+		p.panicError(fmt.Sprintf("%s : expecting ) after post condition", forStmt), SYNTAX_ERROR, p.currentToken.End)
 	}
 	p.next()
 	forStmt.Body = p.parseBlockStatement()
+
+	if p.peekExpect(token.SEMICOLON) { p.next() }
 	return forStmt
 }
 
