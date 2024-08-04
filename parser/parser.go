@@ -328,7 +328,9 @@ func (p *parser) parseIFExpression() ast.Expression {
 		exp.Else = p.parseBlockStatement()
 	}
 
-	if p.peekExpect(token.SEMICOLON) { p.next() }
+	if p.peekExpect(token.SEMICOLON) {
+		p.next()
+	}
 
 	return exp
 }
@@ -394,7 +396,9 @@ func (p *parser) parseBlockStatement() *ast.BlockStatement {
 	block.Statements = []ast.Statement{}
 	p.next()
 
-	if p.expect(token.RBRACE) { return block }
+	if p.expect(token.RBRACE) {
+		return block
+	}
 
 	for !p.expect(token.RBRACE) && !p.expect(token.EOF) {
 		stmt := p.parse()
@@ -449,7 +453,9 @@ func (p *parser) parseForStatement() ast.Statement {
 	p.next()
 	forStmt.Body = p.parseBlockStatement()
 
-	if p.peekExpect(token.SEMICOLON) { p.next() }
+	if p.peekExpect(token.SEMICOLON) {
+		p.next()
+	}
 	return forStmt
 }
 

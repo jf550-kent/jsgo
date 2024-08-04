@@ -215,7 +215,7 @@ func (bs *AssignmentStatement) String() string {
 }
 
 // PLEASE change
-func (n *ForStatement) statementNode()  {}
+func (n *ForStatement) statementNode()   {}
 func (n *ForStatement) Start() token.Pos { return n.Token.Start }
 func (n *ForStatement) End() token.Pos   { return n.Token.End }
 func (n *ForStatement) String() string   { return n.Token.Literal }
