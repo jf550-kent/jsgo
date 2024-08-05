@@ -244,7 +244,7 @@ func newToken(typ token.TokenType, literal string, start, end token.Pos) token.T
 }
 
 func (l *Lexer) isLetter() bool {
-	return 'a' <= l.ch && l.ch <= 'z' || l.ch == '_' || 'A' <= l.ch && l.ch <= 'Z'
+	return 'a' <= l.ch && l.ch <= 'z' || l.ch == '_' || 'A' <= l.ch && l.ch <= 'Z' || l.ch == '.'
 }
 
 func (l *Lexer) isDigit() bool {

@@ -20,6 +20,7 @@ const (
 	FUNCTION_OBJECT     ObjectType = "FUNCTION"
 	STRING_OBJECT       ObjectType = "STRING"
 	ARRAY_OBJECT        ObjectType = "ARRAY"
+	BUITL_IN_OBJECT     ObjectType = "BUILT_IN"
 )
 
 // Object is used in the evaluator to represent value in when evaluating the AST of JSGO.
@@ -109,6 +110,15 @@ func (a *Array) String() string {
 
 	return out.String()
 }
+
+type BuiltInFunction func(args ...Object) Object
+type BuiltIn struct {
+	Name     string
+	Function BuiltInFunction
+}
+
+func (b *BuiltIn) Type() ObjectType { return BUITL_IN_OBJECT }
+func (b *BuiltIn) String() string   { return b.Name }
 
 // ReturnValue represent the value that is being returned
 type ReturnValue struct {
