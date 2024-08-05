@@ -55,6 +55,7 @@ func TestVar(t *testing.T) {
 		{"var yellow = true;", "yellow", true},
 		{"var numApp = 10.1;", "numApp", 10.1},
 		{"var numApp = apple;", "numApp", "apple"},
+		{"var apple = \"Hello world\";", "apple", "Hello world"},
 	}
 
 	for _, tt := range tests {
@@ -517,6 +518,9 @@ func testValueExpression(t *testing.T, exp ast.Expression, expected any) bool {
 	case float64:
 		return testFloatValue(t, exp, v)
 	case string:
+		if str, ok := exp.(*ast.String); ok {
+			return testString(t, str, v)
+		}
 		return testIdentifier(t, exp, v)
 	case bool:
 		return testBoolean(t, exp, v)
@@ -570,6 +574,20 @@ func testIdentifier(t *testing.T, exp ast.Expression, i string) bool {
 
 	if ident.String() != i {
 		t.Errorf("*ast.Identifier wrong Literal: got=%s, expected=%s", ident.String(), i)
+		return false
+	}
+	return true
+}
+
+func testString(t *testing.T, exp ast.Expression, i string) bool {
+	str, ok := exp.(*ast.String)
+	if !ok {
+		t.Errorf("node not *ast.String: got=%T", exp)
+		return false
+	}
+
+	if str.Value != i {
+		t.Errorf("*ast.String wrong string: got=%s, expected=%s", str.Value, i)
 		return false
 	}
 	return true

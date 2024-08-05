@@ -106,6 +106,8 @@ func eval(node ast.Node, env *object.Environment) object.Object {
 			return val
 		}
 		return &object.ReturnValue{Value: val}
+	case *ast.String:
+		return &object.String{Value: node.Value}
 	}
 	return nil
 }

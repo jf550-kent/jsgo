@@ -25,6 +25,7 @@ func BenchmarkLex(b *testing.B) {
 		}
 	}
 }
+
 func TestLexerLineAndCol(t *testing.T) {
 	input := `How are you;
 	
@@ -105,6 +106,7 @@ func TestLexSingleToken(t *testing.T) {
 		{"return", token.Token{TokenType: token.RETURN, Literal: "return", Start: token.Pos{Line: 1, Col: 1}, End: token.Pos{Line: 1, Col: 6}}},
 		{"false", token.Token{TokenType: token.FALSE, Literal: "false", Start: token.Pos{Line: 1, Col: 1}, End: token.Pos{Line: 1, Col: 5}}},
 		{"true", token.Token{TokenType: token.TRUE, Literal: "true", Start: token.Pos{Line: 1, Col: 1}, End: token.Pos{Line: 1, Col: 4}}},
+		{`"hello"`, token.Token{TokenType: token.STRING, Literal: "hello", Start: token.Pos{Line: 1, Col: 1}, End: token.Pos{Line: 1, Col: 7}}},
 	}
 
 	for _, test := range tests {
@@ -115,6 +117,61 @@ func TestLexSingleToken(t *testing.T) {
 		}
 		if tok != test.expectedToken {
 			t.Errorf("Lexer.Lex wrong token. got=%q, expected=%+v", tok, test.expectedToken)
+		}
+	}
+}
+
+func TestStringUnicode(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{
+			input:    `"Hello, World!";`,
+			expected: "Hello, World!",
+		},
+		{
+			input:    `"Line1\nLine2\tTabbed";`,
+			expected: "Line1\nLine2\tTabbed",
+		},
+		{
+			input:    `"She said, \"Hello, World!\"";`,
+			expected: `She said, "Hello, World!"`,
+		},
+		{
+			input:    `"Path\\to\\file";`,
+			expected: "Path\\to\\file",
+		},
+		{
+			input:    `"This is a string\nthat spans multiple lines."`,
+			expected: "This is a string\nthat spans multiple lines.",
+		},
+		{
+			input:    `"Here is a Unicode character: \u2603 (Snowman) \U0001F600";`,
+			expected: "Here is a Unicode character: ☃ (Snowman) 😀",
+		},
+		{
+			input:    `"Mix of text, numbers (12345), and special chars: !@#$%^&*()";`,
+			expected: "Mix of text, numbers (12345), and special chars: !@#$%^&*()",
+		},
+		{
+			input:    `"";`,
+			expected: "",
+		},
+		{
+			input:    `"   This string has spaces at both ends.   ";`,
+			expected: "   This string has spaces at both ends.   ",
+		},
+	}
+
+	for _, test := range tests {
+		l := New([]byte(test.input))
+		tok, err := l.Lex()
+		if err != nil {
+			t.Fatalf("Lexer.Lex Lex error. %v", err)
+		}
+		if tok.Literal != test.expected {
+			t.Errorf("Lexer.Lex wrong token literal. got=%s, expected=%+v", tok.Literal, test.expected)
 		}
 	}
 }
@@ -201,6 +258,7 @@ func TestLexSourceFile(t *testing.T) {
 		{TokenType: token.MUL, Literal: "*", Start: token.Pos{Line: 12, Col: 17}, End: token.Pos{Line: 12, Col: 17}},
 		{TokenType: token.NUMBER, Literal: "90", Start: token.Pos{Line: 12, Col: 19}, End: token.Pos{Line: 12, Col: 20}},
 		{TokenType: token.SEMICOLON, Literal: ";", Start: token.Pos{Line: 12, Col: 21}, End: token.Pos{Line: 12, Col: 21}},
+		{TokenType: token.STRING, Literal: "hello", Start: token.Pos{Line: 14, Col: 1}, End: token.Pos{Line: 14, Col: 7}},
 	}
 
 	l := New(byt)

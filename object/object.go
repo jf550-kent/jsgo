@@ -18,6 +18,7 @@ const (
 	RETURN_VALUE_OBJECT ObjectType = "RETURN_VALUE"
 	ERROR_OBJECT        ObjectType = "ERROR"
 	FUNCTION_OBJECT     ObjectType = "FUNCTION"
+	STRING_OBJECT       ObjectType = "STRING"
 )
 
 // Object is used in the evaluator to represent value in when evaluating the AST of JSGO.
@@ -80,6 +81,13 @@ func (f *Function) String() string {
 	return out.String()
 }
 func (f *Function) Type() ObjectType { return FUNCTION_OBJECT }
+
+type String struct {
+	Value string
+}
+
+func (s *String) String() string   { return s.Value }
+func (s *String) Type() ObjectType { return RETURN_VALUE_OBJECT }
 
 // ReturnValue represent the value that is being returned
 type ReturnValue struct {

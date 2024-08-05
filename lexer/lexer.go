@@ -75,6 +75,8 @@ func (l *Lexer) Lex() (token.Token, error) {
 	case '<':
 		pos := l.currentPos()
 		tok = newToken(token.LSS, "<", pos, pos)
+	case '"':
+		return l.readString()
 	case '!':
 		start := l.currentPos()
 		if l.peekByte() == '=' {
@@ -158,6 +160,38 @@ func (l *Lexer) getLetter() (string, token.Pos) {
 	return letter.String(), end
 }
 
+func (l *Lexer) readString() (token.Token, error) {
+	// "hello"
+	starttPos := l.currentPos()
+	l.next()
+	start := l.position
+	// when is an empty string ""
+	if l.src[l.position] == '"' {
+		endPos := l.currentPos()
+		lit := convertString(l.src[start:l.position])
+
+		tok := newToken(token.STRING, lit, starttPos, endPos)
+		return tok, nil
+	}
+
+	for {
+		prvByt := l.ch
+		l.next()
+
+		if l.ch == '"' || l.ch == 0 {
+			if prvByt != '\\' {
+				break
+			}
+		}
+	}
+	endPos := l.currentPos()
+	lit := convertString(l.src[start:l.position])
+
+	tok := newToken(token.STRING, lit, starttPos, endPos)
+	l.next()
+	return tok, nil
+}
+
 // next moves the current position of the char in [Lexer.data] to the next one
 // it will the [Lexer.ch] to 0 when [Lexer.position] is at the last byte of the [Lexer.src]
 func (l *Lexer) next() {
@@ -209,4 +243,58 @@ func (l *Lexer) isLetter() bool {
 
 func (l *Lexer) isDigit() bool {
 	return '0' <= l.ch && l.ch <= '9'
+}
+
+func convertString(b []byte) string {
+	var result strings.Builder
+
+	for i := 0; i < len(b); i++ {
+		if b[i] != '\\' {
+			result.WriteByte(b[i])
+			continue
+		}
+		if i+1 >= len(b) {
+			break
+		}
+		nextByt := b[i+1]
+		switch nextByt {
+		case 'n':
+			result.WriteByte('\n')
+			i++
+		case 't':
+			result.WriteByte('\t')
+			i++
+		case '"':
+			result.WriteByte('"')
+			i++
+		case '\\':
+			result.WriteByte('\\')
+			i++
+		case 'u':
+			if i+5 < len(b) {
+				hex := string(b[i+2 : i+6])
+				codePoint, err := strconv.ParseInt(hex, 16, 32)
+				if err == nil {
+					result.WriteRune(rune(codePoint))
+					i += 5 // Move past the \uXXXX sequence
+				}
+			} else {
+				result.WriteString("\\")
+			}
+		case 'U':
+			if i+9 < len(b) {
+				hex := string(b[i+2 : i+10])
+				codePoint, err := strconv.ParseInt(hex, 16, 32)
+				if err == nil {
+					result.WriteRune(rune(codePoint))
+					i += 9 // Move past the \UXXXXXXXX sequence
+				}
+			} else {
+				result.WriteString("\\")
+			}
+		default:
+			result.WriteString("\\")
+		}
+	}
+	return result.String()
 }

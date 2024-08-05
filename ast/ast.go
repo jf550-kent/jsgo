@@ -268,6 +268,11 @@ type (
 		Function  Expression
 		Arguments []Expression
 	}
+
+	String struct {
+		Token token.Token
+		Value string
+	}
 )
 
 func (n *Number) expressionNode()  {}
@@ -436,3 +441,8 @@ func (c *CallExpression) String() string {
 
 	return out.String()
 }
+
+func (n *String) expressionNode()  {}
+func (n *String) Start() token.Pos { return n.Token.Start }
+func (n *String) End() token.Pos   { return n.Token.End }
+func (n *String) String() string   { return n.Token.Literal }

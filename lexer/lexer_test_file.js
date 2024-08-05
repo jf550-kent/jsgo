@@ -10,3 +10,5 @@ var foo = function(a, func) {
 foo(4, add);
 
 var total = num * 90;
+
+"hello";
