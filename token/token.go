@@ -89,7 +89,7 @@ var keywords = map[string]TokenType{
 	"true":     TRUE,
 	"false":    FALSE,
 	"for":      FOR,
-	"null": NULL,
+	"null":     NULL,
 }
 
 // tokens store the repective string representation of the token
@@ -129,7 +129,7 @@ var tokens = [...]string{
 	TRUE:      "true",
 	FALSE:     "false",
 	FOR:       "for",
-	NULL: "null",
+	NULL:      "null",
 }
 
 func (t Token) Precedence() int {
