@@ -284,6 +284,10 @@ type (
 		Identifier Expression
 		Index      Expression
 	}
+
+	Null struct {
+		Token token.Token
+	}
 )
 
 func (n *Number) expressionNode()  {}
@@ -490,3 +494,8 @@ func (ie *Index) String() string {
 
 	return out.String()
 }
+
+func (n *Null) expressionNode()  {}
+func (n *Null) Start() token.Pos { return n.Token.Start }
+func (n *Null) End() token.Pos   { return n.Token.End }
+func (n *Null) String() string   { return n.Token.Literal }

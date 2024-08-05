@@ -133,6 +133,8 @@ func eval(node ast.Node, env *object.Environment) object.Object {
 			return index
 		}
 		return evalIndexExpression(ident, index)
+	case *ast.Null:
+		return NULL
 	}
 	return nil
 }
