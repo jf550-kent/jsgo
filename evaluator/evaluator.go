@@ -102,7 +102,7 @@ func eval(node ast.Node, env *object.Environment) object.Object {
 		if isError(function) {
 			return function
 		}
-		return applyFunction(function, args)
+		return callFunction(function, args)
 	case *ast.ForStatement:
 		return evalForStatement(node, env)
 	case *ast.BlockStatement:
@@ -166,15 +166,17 @@ func evalExpressions(epxs []ast.Expression, env *object.Environment) []object.Ob
 	return result
 }
 
-func applyFunction(fn object.Object, args []object.Object) object.Object {
-	function, ok := fn.(*object.Function)
-	if !ok {
-		return newError("not a function: %s", function.Type())
-	}
+func callFunction(fn object.Object, args []object.Object) object.Object {
 
-	extendedEnv := extendFunctionEnv(function, args)
-	evaluated := eval(function.Body, extendedEnv)
-	return unwrapReturnValue(evaluated)
+	switch fn := fn.(type) {
+	case *object.Function:
+		extendedEnv := extendFunctionEnv(fn, args)
+		evaluated := eval(fn.Body, extendedEnv)
+		return unwrapReturnValue(evaluated)
+	case *object.BuiltIn:
+		return fn.Function(args...)
+	}
+	return newError("not a function: %s", fn.Type())
 }
 
 func extendFunctionEnv(fn *object.Function, args []object.Object) *object.Environment {
@@ -383,11 +385,14 @@ func isTruthy(obj object.Object) bool {
 }
 
 func evalIdentifier(node *ast.Identifier, env *object.Environment) object.Object {
-	val, ok := env.Get(node.Literal)
-	if !ok {
-		return newError("identifier not found: " + node.Literal)
+	if val, ok := env.Get(node.Literal); ok {
+		return val
 	}
-	return val
+
+	if val, ok := builtin[node.Literal]; ok {
+		return val
+	}
+	return newError("identifier not found: " + node.Literal)
 }
 
 func evalIndexExpression(left, index object.Object) object.Object {

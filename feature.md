@@ -9,3 +9,9 @@ Planning:
 - Finish the compiler book
 - Read Effective Go and talk about how you can make a changes on the software program.
 
+
+
+Null 
+Hash
+Binary bit operations
+Bebnchmark
