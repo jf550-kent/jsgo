@@ -32,6 +32,7 @@ const (
 	PRODUCT     // *
 	PREFIX      // -x or !x
 	CALL        // function()
+	INDEX // array[index]
 )
 
 var precedences = map[token.TokenType]int{
@@ -44,6 +45,7 @@ var precedences = map[token.TokenType]int{
 	token.DIVIDE:    PRODUCT,
 	token.MUL:       PRODUCT,
 	token.LPAREN:    CALL,
+	token.LBRACKET: INDEX,
 }
 
 func Parse(filename string, src []byte) *ast.Main {
@@ -96,6 +98,7 @@ func new(filename string, l *lexer.Lexer) *parser {
 		token.FUNCTION: p.parseFunctionDeclaration,
 		token.LPAREN:   p.parseGroupedExpression,
 		token.STRING:   p.parseStringExpression,
+		token.LBRACKET: p.parseArrayExpression,
 	}
 
 	p.binaryExpressionFunc = map[token.TokenType]binaryExpressionFunc{
@@ -108,6 +111,7 @@ func new(filename string, l *lexer.Lexer) *parser {
 		token.NOT_EQUAL: p.parseBinaryExpression,
 		token.EQUAL:     p.parseBinaryExpression,
 		token.LPAREN:    p.parseCallExpression,
+		token.LBRACKET: p.parseIndexExpression,
 	}
 
 	return p
@@ -279,6 +283,20 @@ func (p *parser) parseCallExpression(left ast.Expression) ast.Expression {
 	}
 	p.next()
 	return c
+}
+
+func (p *parser) parseIndexExpression(left ast.Expression) ast.Expression {
+	exp := &ast.Index{Token: p.currentToken, Identifier: left}
+
+	p.next()
+	exp.Index = p.parseExpression(LOWEST)
+
+	if !p.peekExpect(token.RBRACKET) {
+		err := exp.String() + " : missing ] "
+		p.panicError(err, SYNTAX_ERROR, p.currentToken.End)
+	}
+	p.next()
+	return exp
 }
 
 func (p *parser) parseUnaryExpression() ast.Expression {
@@ -490,6 +508,39 @@ func (p *parser) parseBoolean() ast.Expression {
 func (p *parser) parseStringExpression() ast.Expression {
 	p.check(token.STRING)
 	return &ast.String{Token: p.currentToken, Value: p.currentToken.Literal}
+}
+
+func (p *parser) parseArrayExpression() ast.Expression {
+	p.check(token.LBRACKET)
+	arr := &ast.Array{Token: p.currentToken}
+
+	arr.Body = p.parseExpressionList(token.RBRACKET)
+	return arr
+}
+
+func (p *parser) parseExpressionList(end token.TokenType) []ast.Expression {
+	list := []ast.Expression{}
+
+	if p.peekExpect(end) {
+		p.next()
+		return list
+	}
+
+	p.next()
+	list = append(list, p.parseExpression(LOWEST))
+
+	for p.peekExpect(token.COMMA) {
+		p.next()
+		p.next()
+		list = append(list, p.parseExpression(LOWEST))
+	}
+
+	if !p.peekExpect(end) {
+		p.panicError("expecting " + end.String(), SYNTAX_ERROR, p.currentToken.End)
+	}
+	p.next()
+
+	return list
 }
 
 func (p *parser) peekPred() int {

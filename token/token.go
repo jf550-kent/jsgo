@@ -57,6 +57,8 @@ const (
 	RPAREN // )
 	LBRACE // {
 	RBRACE // }
+	LBRACKET  // [
+	RBRACKET // ]
 
 	operatorEnd
 
@@ -114,6 +116,8 @@ var tokens = [...]string{
 	RPAREN:    ")",
 	LBRACE:    "{",
 	RBRACE:    "}",
+	LBRACKET: "[",
+	RBRACKET: "]",
 	FUNCTION:  "function",
 	VAR:       "var",
 	IF:        "if",

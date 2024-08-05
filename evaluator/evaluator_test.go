@@ -345,6 +345,101 @@ func checkObject[expected any](t *testing.T, obj object.Object) expected {
 	return v
 }
 
+func TestArrayLiterals(t *testing.T) {
+	input := "[1, 2 * 2, 3 + 3]"
+
+	evaluated := evalSetup(input)
+	result, ok := evaluated.(*object.Array)
+	if !ok {
+		t.Fatalf("object is not Array. got=%T (%+v)", evaluated, evaluated)
+	}
+
+	if len(result.Body) != 3 {
+		t.Fatalf("array has wrong num of elements. got=%d",
+			len(result.Body))
+	}
+
+	testValue(t, result.Body[0], 1)
+	testValue(t, result.Body[1], 4)
+	testValue(t, result.Body[2], 6)
+}
+
+func TestArrayIndexExpressions(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected any
+	}{
+		{
+			"[1, 2, 3][0]",
+			1,
+		},
+		{
+			"[1, 2, 3][1]",
+			2,
+		},
+		{
+			"[1, 2, 3][2]",
+			3,
+		},
+		{
+			"var i = 0; [1][i];",
+			1,
+		},
+		{
+			"[1, 2, 3][1 + 1];",
+			3,
+		},
+		{
+			"var myArray = [1, 2, 3]; myArray[2];",
+			3,
+		},
+		{
+			"var myArray = [1, 2, 3]; myArray[0] + myArray[1] + myArray[2];",
+			6,
+		},
+		{
+			"var myArray = [1, 2, 3]; var i = myArray[0]; myArray[i]",
+			2,
+		},
+		{
+			"[1, 2, 3][3]",
+			nil,
+		},
+		{
+			"[1, 2, 3][-1]",
+			nil,
+		},
+	}
+
+	for _, tt := range tests {
+		evaluated := evalSetup(tt.input)
+		integer, ok := tt.expected.(int)
+		if ok {
+			testValue(t, evaluated, integer)
+		} else {
+			testNullObject(t, evaluated)
+		}
+	}
+}
+
+func TestArrayLength(t *testing.T) {
+	input := `var arr = [1, 3, 4]; arr["length"];`
+	evaluated := evalSetup(input)
+	testValue(t, evaluated, 3)
+}
+
+func TestArrayPush(t *testing.T) {
+	input := `var arr = [1, 3, 4]; arr["push"](9); arr["length"];`
+	evaluated := evalSetup(input)
+	testValue(t, evaluated, 4)
+}
+
+func TestArrayFunctionCall(t *testing.T) {
+	input := `var add = function (a) { return a + a; }; var arr = [1, 3, 4, add]; arr[3](9);`
+	evaluated := evalSetup(input)
+	testValue(t, evaluated, 18)
+}
+
 func testValue(t *testing.T, obj object.Object, expectedValue any) {
 	switch v := expectedValue.(type) {
 	case int:

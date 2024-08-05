@@ -41,6 +41,8 @@ func TestTokenString(t *testing.T) {
 		{RETURN, "return"},
 		{TRUE, "true"},
 		{FALSE, "false"},
+		{LBRACKET, "["},
+		{RBRACKET, "]"},
 	}
 
 	for _, tt := range tests {
@@ -70,7 +72,7 @@ func TestIsLiteral(t *testing.T) {
 }
 
 func TestIsOperator(t *testing.T) {
-	operators := []TokenType{ADD, MINUS, MUL, DIVIDE, LSS, GTR, BANG, ASSIGN, NOT_EQUAL, EQUAL}
+	operators := []TokenType{ADD, MINUS, MUL, DIVIDE, LSS, GTR, BANG, ASSIGN, NOT_EQUAL, EQUAL, LBRACKET, RBRACKET}
 	for _, tt := range operators {
 		token := Token{TokenType: tt}
 		if !token.IsOperator() {
@@ -88,7 +90,7 @@ func TestIsOperator(t *testing.T) {
 }
 
 func TestIsKeyword(t *testing.T) {
-	keywords := []string{"function", "var", "if", "else", "elseif", "return", "true", "false"}
+	keywords := []string{"function", "var", "if", "else", "elseif", "return", "true", "false", "for"}
 
 	for _, keyword := range keywords {
 		if !IsKeyword(keyword) {
