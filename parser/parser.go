@@ -32,7 +32,7 @@ const (
 	PRODUCT     // *
 	PREFIX      // -x or !x
 	CALL        // function()
-	INDEX // array[index]
+	INDEX       // array[index]
 )
 
 var precedences = map[token.TokenType]int{
@@ -45,7 +45,7 @@ var precedences = map[token.TokenType]int{
 	token.DIVIDE:    PRODUCT,
 	token.MUL:       PRODUCT,
 	token.LPAREN:    CALL,
-	token.LBRACKET: INDEX,
+	token.LBRACKET:  INDEX,
 }
 
 func Parse(filename string, src []byte) *ast.Main {
@@ -111,7 +111,7 @@ func new(filename string, l *lexer.Lexer) *parser {
 		token.NOT_EQUAL: p.parseBinaryExpression,
 		token.EQUAL:     p.parseBinaryExpression,
 		token.LPAREN:    p.parseCallExpression,
-		token.LBRACKET: p.parseIndexExpression,
+		token.LBRACKET:  p.parseIndexExpression,
 	}
 
 	return p
@@ -536,7 +536,7 @@ func (p *parser) parseExpressionList(end token.TokenType) []ast.Expression {
 	}
 
 	if !p.peekExpect(end) {
-		p.panicError("expecting " + end.String(), SYNTAX_ERROR, p.currentToken.End)
+		p.panicError("expecting "+end.String(), SYNTAX_ERROR, p.currentToken.End)
 	}
 	p.next()
 

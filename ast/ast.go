@@ -276,13 +276,13 @@ type (
 
 	Array struct {
 		Token token.Token
-		Body []Expression
+		Body  []Expression
 	}
 
 	Index struct {
-		Token token.Token
+		Token      token.Token
 		Identifier Expression
-		Index Expression
+		Index      Expression
 	}
 )
 
@@ -458,7 +458,7 @@ func (n *String) Start() token.Pos { return n.Token.Start }
 func (n *String) End() token.Pos   { return n.Token.End }
 func (n *String) String() string   { return n.Token.Literal }
 
-func (al *Array) expressionNode()      {}
+func (al *Array) expressionNode() {}
 func (n *Array) Start() token.Pos { return n.Token.Start }
 func (n *Array) End() token.Pos   { return n.Token.End }
 func (al *Array) String() string {
@@ -476,7 +476,7 @@ func (al *Array) String() string {
 	return out.String()
 }
 
-func (ie *Index) expressionNode()      {}
+func (ie *Index) expressionNode() {}
 func (n *Index) Start() token.Pos { return n.Token.Start }
 func (n *Index) End() token.Pos   { return n.Token.End }
 func (ie *Index) String() string {
