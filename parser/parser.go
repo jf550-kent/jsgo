@@ -99,6 +99,7 @@ func new(filename string, l *lexer.Lexer) *parser {
 		token.LPAREN:   p.parseGroupedExpression,
 		token.STRING:   p.parseStringExpression,
 		token.LBRACKET: p.parseArrayExpression,
+		token.NULL:     p.parseNullExpression,
 	}
 
 	p.binaryExpressionFunc = map[token.TokenType]binaryExpressionFunc{
@@ -516,6 +517,12 @@ func (p *parser) parseArrayExpression() ast.Expression {
 
 	arr.Body = p.parseExpressionList(token.RBRACKET)
 	return arr
+}
+
+func (p *parser) parseNullExpression() ast.Expression {
+	p.check(token.NULL)
+
+	return &ast.Null{Token: p.currentToken}
 }
 
 func (p *parser) parseExpressionList(end token.TokenType) []ast.Expression {

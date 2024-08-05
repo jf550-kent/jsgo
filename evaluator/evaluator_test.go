@@ -41,6 +41,7 @@ func TestVarStatement(t *testing.T) {
 		{"var a = 5; var b = a; b;", 5},
 		{"var a = 5; var b = a; var c = a + b + 5; c;", 15},
 		{`var hello = "Hello world"; hello;`, "Hello world"},
+		{`var hello = null; hello;`, nil},
 	}
 
 	for _, tt := range tests {
@@ -424,6 +425,8 @@ func testValue(t *testing.T, obj object.Object, expectedValue any) {
 		}
 	case string:
 		testString(t, obj, v)
+	case nil:
+		testNullObject(t, obj)
 	default:
 		t.Errorf("invalid type for expected value")
 	}

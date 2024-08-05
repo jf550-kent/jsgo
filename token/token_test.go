@@ -43,6 +43,7 @@ func TestTokenString(t *testing.T) {
 		{FALSE, "false"},
 		{LBRACKET, "["},
 		{RBRACKET, "]"},
+		{NULL, "null"},
 	}
 
 	for _, tt := range tests {
@@ -90,7 +91,7 @@ func TestIsOperator(t *testing.T) {
 }
 
 func TestIsKeyword(t *testing.T) {
-	keywords := []string{"function", "var", "if", "else", "elseif", "return", "true", "false", "for"}
+	keywords := []string{"function", "var", "if", "else", "elseif", "return", "true", "false", "for", "null"}
 
 	for _, keyword := range keywords {
 		if !IsKeyword(keyword) {
@@ -116,7 +117,7 @@ func TestIsIdentifier(t *testing.T) {
 		}
 	}
 
-	nonIdentifiers := []string{"", "var", "if"}
+	nonIdentifiers := []string{"", "var", "if", "null"}
 
 	for _, nonIdentifier := range nonIdentifiers {
 		if IsIdentifier(nonIdentifier) {
