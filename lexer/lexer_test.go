@@ -258,7 +258,19 @@ func TestLexSourceFile(t *testing.T) {
 		{TokenType: token.MUL, Literal: "*", Start: token.Pos{Line: 12, Col: 17}, End: token.Pos{Line: 12, Col: 17}},
 		{TokenType: token.NUMBER, Literal: "90", Start: token.Pos{Line: 12, Col: 19}, End: token.Pos{Line: 12, Col: 20}},
 		{TokenType: token.SEMICOLON, Literal: ";", Start: token.Pos{Line: 12, Col: 21}, End: token.Pos{Line: 12, Col: 21}},
+
+		// Line 14
 		{TokenType: token.STRING, Literal: "hello", Start: token.Pos{Line: 14, Col: 1}, End: token.Pos{Line: 14, Col: 7}},
+
+		// Line 16
+		{TokenType: token.LBRACKET, Literal: "[", Start: token.Pos{Line: 16, Col: 1}, End: token.Pos{Line: 16, Col: 1}},
+		{TokenType: token.NUMBER, Literal: "1", Start: token.Pos{Line: 16, Col: 2}, End: token.Pos{Line: 16, Col: 2}},
+		{TokenType: token.COMMA, Literal: ",", Start: token.Pos{Line: 16, Col: 3}, End: token.Pos{Line: 16, Col: 3}},
+		{TokenType: token.NUMBER, Literal: "3", Start: token.Pos{Line: 16, Col: 5}, End: token.Pos{Line: 16, Col: 5}},
+		{TokenType: token.COMMA, Literal: ",", Start: token.Pos{Line: 16, Col: 6}, End: token.Pos{Line: 16, Col: 6}},
+		{TokenType: token.NUMBER, Literal: "5", Start: token.Pos{Line: 16, Col: 8}, End: token.Pos{Line: 16, Col: 8}},
+		{TokenType: token.RBRACKET, Literal: "]", Start: token.Pos{Line: 16, Col: 9}, End: token.Pos{Line: 16, Col: 9}},
+		{TokenType: token.SEMICOLON, Literal: ";", Start: token.Pos{Line: 16, Col: 10}, End: token.Pos{Line: 16, Col: 10}},
 	}
 
 	l := New(byt)

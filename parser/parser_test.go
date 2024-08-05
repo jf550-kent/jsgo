@@ -488,6 +488,60 @@ func TestForExpression(t *testing.T) {
 	testBinaryExpression(t, postExpr, "i", "+", 1)
 }
 
+func TestParsingEmptyArray(t *testing.T) {
+	input := "[]"
+
+	main := Parse("", []byte([]byte(input)))
+
+	expr := checkStatement[*ast.ExpressionStatement](t, main.Statements[0])
+	array := checkExpression[*ast.Array](t, expr.Expression)
+
+	if len(array.Body) != 0 {
+		t.Errorf("len(array.Elements) not 0. got=%d", len(array.Body))
+	}
+}
+
+func TestParsingArray(t *testing.T) {
+	input := "[1, 2 * 2, 3 + 3]"
+
+	main := Parse("", []byte([]byte(input)))
+
+	expr := checkStatement[*ast.ExpressionStatement](t, main.Statements[0])
+	array := checkExpression[*ast.Array](t, expr.Expression)
+
+	if len(array.Body) != 3 {
+		t.Fatalf("len(array.Elements) not 3. got=%d", len(array.Body))
+	}
+
+	testValueExpression(t, array.Body[0], 1)
+	testBinaryExpression(t, array.Body[1], 2, "*", 2)
+	testBinaryExpression(t, array.Body[2], 3, "+", 3)
+}
+
+func TestParsingIndex(t *testing.T) {
+	input := "myArray[1 + 1]"
+
+	main := Parse("", []byte([]byte(input)))
+
+	expr := checkStatement[*ast.ExpressionStatement](t, main.Statements[0])
+	index := checkExpression[*ast.Index](t, expr.Expression)
+
+	testIdentifier(t, index.Identifier, "myArray")
+	testBinaryExpression(t, index.Index, 1, "+", 1)
+}
+
+func TestParsingIndexString(t *testing.T) {
+	input := `arr["length"];`
+
+	main := Parse("", []byte([]byte(input)))
+
+	expr := checkStatement[*ast.ExpressionStatement](t, main.Statements[0])
+	index := checkExpression[*ast.Index](t, expr.Expression)
+
+	testIdentifier(t, index.Identifier, "arr")
+	testValueExpression(t, index.Index, "length")
+}
+
 func checkStatement[expected any](t *testing.T, stmt ast.Statement) expected {
 	if stmt == nil {
 		t.Fatal("statement is nil")

@@ -85,13 +85,22 @@ func eval(node ast.Node, env *object.Environment) object.Object {
 		body := node.Body
 		return &object.Function{Parameters: params, Body: body, Env: env}
 	case *ast.CallExpression:
-		function := eval(node.Function, env)
-		if isError(function) {
-			return function
-		}
 		args := evalExpressions(node.Arguments, env)
 		if len(args) == 1 && isError(args[0]) {
 			return args[0]
+		}
+		if index, ok := node.Function.(*ast.Index); ok {
+			right := eval(index.Index, env)
+			if isError(right) {
+				return right
+			}
+			if method, ok := right.(*object.String); ok {
+				return evalArrayMethodEpression(index, method, args, env)
+			}
+		}
+		function := eval(node.Function, env)
+		if isError(function) {
+			return function
 		}
 		return applyFunction(function, args)
 	case *ast.ForStatement:
@@ -108,6 +117,22 @@ func eval(node ast.Node, env *object.Environment) object.Object {
 		return &object.ReturnValue{Value: val}
 	case *ast.String:
 		return &object.String{Value: node.Value}
+	case *ast.Array:
+		body := evalExpressions(node.Body, env)
+		if len(body) == 1 && isError(body[0]) {
+			return body[0]
+		}
+		return &object.Array{Body: body}
+	case *ast.Index:
+		ident := eval(node.Identifier, env)
+		if isError(ident) {
+			return ident
+		}
+		index := eval(node.Index, env)
+		if isError(index) {
+			return index
+		}
+		return evalIndexExpression(ident, index)
 	}
 	return nil
 }
@@ -363,6 +388,49 @@ func evalIdentifier(node *ast.Identifier, env *object.Environment) object.Object
 		return newError("identifier not found: " + node.Literal)
 	}
 	return val
+}
+
+func evalIndexExpression(left, index object.Object) object.Object {
+	switch left := left.(type) {
+	case *object.Array:
+		return evalArrayIndexExpression(left, index)
+	}
+	return newError("index operator not supported: %s", left.Type())
+}
+
+func evalArrayIndexExpression(arr *object.Array, index object.Object) object.Object {
+	size := int64(len(arr.Body))
+
+	switch right := index.(type) {
+	case *object.Number:
+		idx := right.Value
+		if idx < 0 || idx >= size {
+			return NULL
+		}
+		return arr.Body[idx]
+	case *object.String:
+		if right.Value == "length" {
+			return &object.Number{Value: size}
+		}
+		return newError("array index unsupported for " + right.Value)
+	}
+	return newError("array index unsupported for type: " + index.String())
+}
+
+func evalArrayMethodEpression(index *ast.Index, method *object.String, args []object.Object, env *object.Environment) object.Object {
+	ident := eval(index.Identifier, env)
+	if isError(ident) {
+		return ident
+	}
+	arr, ok := ident.(*object.Array)
+	if !ok {
+		return newError("unsupported array call")
+	}
+	switch method.Value {
+	case "push":
+		arr.Body = append(arr.Body, args...)
+	}
+	return arr
 }
 
 func newError(format string, a ...interface{}) *object.Error {

@@ -11,4 +11,6 @@ foo(4, add);
 
 var total = num * 90;
 
-"hello";
+"hello"
+
+[1, 3, 5];

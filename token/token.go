@@ -53,10 +53,12 @@ const (
 	DOT       // .
 	COLON     // :
 
-	LPAREN // (
-	RPAREN // )
-	LBRACE // {
-	RBRACE // }
+	LPAREN   // (
+	RPAREN   // )
+	LBRACE   // {
+	RBRACE   // }
+	LBRACKET // [
+	RBRACKET // ]
 
 	operatorEnd
 
@@ -114,6 +116,8 @@ var tokens = [...]string{
 	RPAREN:    ")",
 	LBRACE:    "{",
 	RBRACE:    "}",
+	LBRACKET:  "[",
+	RBRACKET:  "]",
 	FUNCTION:  "function",
 	VAR:       "var",
 	IF:        "if",
