@@ -129,6 +129,7 @@ func (p *parser) parse() ast.Statement {
 		if !p.peekExpect(token.ASSIGN) {
 			break
 		}
+		// p.peekExpect? a [ token.LBRACKET
 		return p.parseAssignmentStatement()
 	case token.FOR:
 		return p.parseForStatement()
