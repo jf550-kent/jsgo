@@ -293,6 +293,14 @@ type (
 		Token  token.Token
 		Object map[Expression]Expression
 	}
+
+	// Dictionary declarations
+	DictionaryDeclaration struct {
+		Token      token.Token
+		Identifier Expression
+		Key        Expression
+		Value      Expression
+	}
 )
 
 func (n *Number) expressionNode()  {}
@@ -522,3 +530,8 @@ func (n *Dictionary) String() string {
 
 	return out.String()
 }
+
+func (n *DictionaryDeclaration) expressionNode()  {}
+func (n *DictionaryDeclaration) Start() token.Pos { return n.Token.Start }
+func (n *DictionaryDeclaration) End() token.Pos   { return n.Token.End }
+func (n *DictionaryDeclaration) String() string   { return n.Token.Literal }

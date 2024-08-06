@@ -126,10 +126,10 @@ func (p *parser) parse() ast.Statement {
 	case token.RETURN:
 		return p.parseReturnStatement()
 	case token.IDENT:
-		if !p.peekExpect(token.ASSIGN) {
-			break
+		switch p.nextToken.TokenType {
+		case token.ASSIGN:
+			return p.parseAssignmentStatement()
 		}
-		return p.parseAssignmentStatement()
 	case token.FOR:
 		return p.parseForStatement()
 	}
@@ -288,16 +288,27 @@ func (p *parser) parseCallExpression(left ast.Expression) ast.Expression {
 }
 
 func (p *parser) parseIndexExpression(left ast.Expression) ast.Expression {
-	exp := &ast.Index{Token: p.currentToken, Identifier: left}
+	startTok := p.currentToken
+	exp := &ast.Index{Token: startTok, Identifier: left}
 
 	p.next()
-	exp.Index = p.parseExpression(LOWEST)
+	index := p.parseExpression(LOWEST)
+	exp.Index = index
 
 	if !p.peekExpect(token.RBRACKET) {
 		err := exp.String() + " : missing ] "
 		p.panicError(err, SYNTAX_ERROR, p.currentToken.End)
 	}
 	p.next()
+
+	if p.peekExpect(token.ASSIGN) {
+		p.next()
+		dicDecl := &ast.DictionaryDeclaration{Token: startTok, Identifier: left, Key: index}
+		p.next()
+		dicDecl.Value = p.parseExpression(LOWEST)
+
+		return dicDecl
+	}
 	return exp
 }
 
@@ -481,6 +492,7 @@ func (p *parser) parseForStatement() ast.Statement {
 }
 
 func (p *parser) parseIdent() ast.Expression {
+	p.check(token.IDENT)
 	return &ast.Identifier{Token: p.currentToken, Literal: p.currentToken.Literal}
 }
 

@@ -137,6 +137,8 @@ func eval(node ast.Node, env *object.Environment) object.Object {
 		return NULL
 	case *ast.Dictionary:
 		return evalDictionary(node, env)
+	case *ast.DictionaryDeclaration:
+		return evalDictionaryDeclaration(node, env)
 	}
 	return nil
 }
@@ -467,6 +469,37 @@ func evalDictionary(dic *ast.Dictionary, env *object.Environment) object.Object 
 		dicry.Value[keyHash] = object.KeyValue{Key: k, Value: v}
 	}
 	return dicry
+}
+
+func evalDictionaryDeclaration(decl *ast.DictionaryDeclaration, env *object.Environment) object.Object {
+	ident := eval(decl.Identifier, env)
+	if isError(ident) {
+		return ident
+	}
+
+	dic, ok := ident.(*object.Dictionary)
+	if !ok {
+		return newError("undefined object reference for" + ident.String())
+	}
+
+	key := eval(decl.Key, env)
+	if isError(key) {
+		return key
+	}
+
+	hasherKey, ok := key.(object.Hasher)
+	if !ok {
+		return newError("object key unable to hash" + key.String())
+	}
+
+	val := eval(decl.Value, env)
+	if isError(val) {
+		return val
+	}
+
+	hash := hasherKey.Hash()
+	dic.Value[hash] = object.KeyValue{Key: key, Value: val}
+	return dic
 }
 
 func evalDictionaryExpression(dic *object.Dictionary, right object.Object) object.Object {
