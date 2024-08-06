@@ -431,6 +431,20 @@ func TestDictionaryExpressions(t *testing.T) {
 	}
 }
 
+func TestDictionaryDeclaration(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected any
+	}{
+		{`var apple = {"color": "red"}; apple["taste"] = "red"; apple["taste"];`, "red"},
+	}
+
+	for _, tt := range tests {
+		evaluated := evalSetup(tt.input)
+		testValue(t, evaluated, tt.expected)
+	}
+}
+
 func testValue(t *testing.T, obj object.Object, expectedValue any) {
 	switch v := expectedValue.(type) {
 	case int:

@@ -672,6 +672,44 @@ func TestParsingDictionaryWithExpressions(t *testing.T) {
 	}
 }
 
+func TestParsingDictionaryDecl(t *testing.T) {
+	input := `var apple = {"color": "red"}; apple["taste"] = "red";`
+
+	main := Parse("", []byte([]byte(input)))
+
+	if len(main.Statements) != 2 {
+		t.Fatal("should have 2 statements")
+	}
+	expr := checkStatement[*ast.VarStatement](t, main.Statements[0])
+	m := checkExpression[*ast.Dictionary](t, expr.Expression)
+
+	if len(m.Object) != 1 {
+		t.Errorf("dictionary has wrong length. got=%d", len(m.Object))
+	}
+
+	tests := map[string]func(ast.Expression){
+		"color": func(e ast.Expression) { testString(t, e, "red") },
+	}
+
+	for key, value := range m.Object {
+		str := checkExpression[*ast.String](t, key)
+
+		testFunc, ok := tests[str.Value]
+		if !ok {
+			t.Errorf("No test function for key %q found", str.Value)
+			continue
+		}
+
+		testFunc(value)
+	}
+
+	dicExpr := checkStatement[*ast.ExpressionStatement](t, main.Statements[1])
+	dcl := checkExpression[*ast.DictionaryDeclaration](t, dicExpr.Expression)
+	testIdentifier(t, dcl.Identifier, "apple")
+	testString(t, dcl.Key, "taste")
+	testString(t, dcl.Value, "red")
+}
+
 func checkStatement[expected any](t *testing.T, stmt ast.Statement) expected {
 	if stmt == nil {
 		t.Fatal("statement is nil")
