@@ -135,6 +135,8 @@ func eval(node ast.Node, env *object.Environment) object.Object {
 		return evalIndexExpression(ident, index)
 	case *ast.Null:
 		return NULL
+	case *ast.Dictionary:
+		return evalDictionary(node, env)
 	}
 	return nil
 }
@@ -401,6 +403,8 @@ func evalIndexExpression(left, index object.Object) object.Object {
 	switch left := left.(type) {
 	case *object.Array:
 		return evalArrayIndexExpression(left, index)
+	case *object.Dictionary:
+		return evalDictionaryExpression(left, index)
 	}
 	return newError("index operator not supported: %s", left.Type())
 }
@@ -438,6 +442,45 @@ func evalArrayMethodEpression(index *ast.Index, method *object.String, args []ob
 		arr.Body = append(arr.Body, args...)
 	}
 	return arr
+}
+
+func evalDictionary(dic *ast.Dictionary, env *object.Environment) object.Object {
+
+	dicry := &object.Dictionary{Value: make(map[object.Hash]object.KeyValue)}
+
+	for key, val := range dic.Object {
+		k := eval(key, env)
+		if isError(k) {
+			return k
+		}
+
+		h, ok := k.(object.Hasher)
+		if !ok {
+			return newError("key unable to be hash" + k.String())
+		}
+		v := eval(val, env)
+		if isError(v) {
+			return v
+		}
+
+		keyHash := h.Hash()
+		dicry.Value[keyHash] = object.KeyValue{Key: k, Value: v}
+	}
+	return dicry
+}
+
+func evalDictionaryExpression(dic *object.Dictionary, right object.Object) object.Object {
+	key, ok := right.(object.Hasher)
+	if !ok {
+		return newError("cannot use " + right.String() + "as dictionary index")
+	}
+
+	hashKey := key.Hash()
+	keyValue, ok := dic.Value[hashKey]
+	if !ok {
+		return NULL
+	}
+	return keyValue.Value
 }
 
 func newError(format string, a ...interface{}) *object.Error {

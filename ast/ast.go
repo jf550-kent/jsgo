@@ -288,6 +288,11 @@ type (
 	Null struct {
 		Token token.Token
 	}
+
+	Dictionary struct {
+		Token  token.Token
+		Object map[Expression]Expression
+	}
 )
 
 func (n *Number) expressionNode()  {}
@@ -499,3 +504,21 @@ func (n *Null) expressionNode()  {}
 func (n *Null) Start() token.Pos { return n.Token.Start }
 func (n *Null) End() token.Pos   { return n.Token.End }
 func (n *Null) String() string   { return n.Token.Literal }
+
+func (n *Dictionary) expressionNode()  {}
+func (n *Dictionary) Start() token.Pos { return n.Token.Start }
+func (n *Dictionary) End() token.Pos   { return n.Token.End }
+func (n *Dictionary) String() string {
+	var out strings.Builder
+
+	keyVal := []string{}
+	for key, value := range n.Object {
+		keyVal = append(keyVal, key.String()+" : "+value.String())
+	}
+
+	out.WriteString("{")
+	out.WriteString(strings.Join(keyVal, ", "))
+	out.WriteString("}")
+
+	return out.String()
+}

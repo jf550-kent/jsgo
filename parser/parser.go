@@ -100,6 +100,7 @@ func new(filename string, l *lexer.Lexer) *parser {
 		token.STRING:   p.parseStringExpression,
 		token.LBRACKET: p.parseArrayExpression,
 		token.NULL:     p.parseNullExpression,
+		token.LBRACE:   p.parseDictionary,
 	}
 
 	p.binaryExpressionFunc = map[token.TokenType]binaryExpressionFunc{
@@ -523,6 +524,36 @@ func (p *parser) parseNullExpression() ast.Expression {
 	p.check(token.NULL)
 
 	return &ast.Null{Token: p.currentToken}
+}
+
+func (p *parser) parseDictionary() ast.Expression {
+	p.check(token.LBRACE)
+
+	dic := &ast.Dictionary{Token: p.currentToken, Object: make(map[ast.Expression]ast.Expression)}
+	if p.peekExpect(token.RBRACE) {
+		p.next()
+		return dic
+	}
+	for !p.expect(token.RBRACE) {
+		// { jk : ijk, KL }
+		p.next()
+		key := p.parseExpression(LOWEST)
+		p.next()
+		if !p.expect(token.COLON) {
+			p.panicError("missing : in object literal", SYNTAX_ERROR, p.currentToken.End)
+		}
+		p.next()
+		value := p.parseExpression(LOWEST)
+
+		dic.Object[key] = value
+		p.next()
+	}
+
+	if !p.expect(token.RBRACE) {
+		p.panicError("missing } to close object literal", SYNTAX_ERROR, p.currentToken.End)
+	}
+
+	return dic
 }
 
 func (p *parser) parseExpressionList(end token.TokenType) []ast.Expression {
