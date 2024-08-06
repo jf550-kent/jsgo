@@ -542,6 +542,136 @@ func TestParsingIndexString(t *testing.T) {
 	testValueExpression(t, index.Index, "length")
 }
 
+func TestParsingEmptyDictionary(t *testing.T) {
+	input := "{}"
+
+	main := Parse("", []byte([]byte(input)))
+
+	expr := checkStatement[*ast.ExpressionStatement](t, main.Statements[0])
+	m := checkExpression[*ast.Dictionary](t, expr.Expression)
+
+	if len(m.Object) != 0 {
+		t.Errorf("dictionary has wrong length. got=%d", len(m.Object))
+	}
+}
+
+func TestParsingDictionarysStringKeys(t *testing.T) {
+	input := `{"hello": 900, "world": 222, "bye": 998}`
+
+	main := Parse("", []byte([]byte(input)))
+
+	expr := checkStatement[*ast.ExpressionStatement](t, main.Statements[0])
+	m := checkExpression[*ast.Dictionary](t, expr.Expression)
+
+	expected := map[string]int64{
+		"one":   900,
+		"two":   222,
+		"three": 998,
+	}
+
+	if len(m.Object) != len(expected) {
+		t.Errorf("hash.Pairs has wrong length. got=%d", len(m.Object))
+	}
+
+	for key, value := range m.Object {
+		literal, ok := key.(*ast.String)
+		if !ok {
+			t.Errorf("key is not ast.StringLiteral. got=%T", key)
+			continue
+		}
+
+		expectedValue := expected[literal.String()]
+		testValueExpression(t, value, expectedValue)
+	}
+}
+
+func TestParsingDictionaryBooleanKeys(t *testing.T) {
+	input := `{true: 9099, false: 9099}`
+
+	main := Parse("", []byte([]byte(input)))
+
+	expr := checkStatement[*ast.ExpressionStatement](t, main.Statements[0])
+	m := checkExpression[*ast.Dictionary](t, expr.Expression)
+
+	expected := map[string]int64{
+		"true":  9099,
+		"false": 9099,
+	}
+
+	if len(m.Object) != len(expected) {
+		t.Errorf("dictionary has wrong length. got=%d", len(m.Object))
+	}
+
+	for key, value := range m.Object {
+		boolean, ok := key.(*ast.Boolean)
+		if !ok {
+			t.Errorf("key is not ast.BooleanLiteral. got=%T", key)
+			continue
+		}
+
+		expectedValue := expected[boolean.String()]
+		testValueExpression(t, value, expectedValue)
+	}
+}
+
+func TestParsingDictionaryIntegerKeys(t *testing.T) {
+	input := `{1: 1, 2: 2, 3: 3}`
+
+	main := Parse("", []byte([]byte(input)))
+
+	expr := checkStatement[*ast.ExpressionStatement](t, main.Statements[0])
+	m := checkExpression[*ast.Dictionary](t, expr.Expression)
+
+	if len(m.Object) != 3 {
+		t.Errorf("dictionary has wrong length. got=%d", len(m.Object))
+	}
+
+	expected := map[string]int64{
+		"1": 1,
+		"2": 2,
+		"3": 3,
+	}
+
+	for key, value := range m.Object {
+		num := checkExpression[*ast.Number](t, key)
+
+		expectedValue := expected[num.String()]
+
+		testNumberValue(t, value, expectedValue)
+	}
+}
+
+func TestParsingDictionaryWithExpressions(t *testing.T) {
+	input := `{"ninezero": 0 + 9, "8": 12 - 4, "ten": 100 / 10}`
+
+	main := Parse("", []byte([]byte(input)))
+
+	expr := checkStatement[*ast.ExpressionStatement](t, main.Statements[0])
+	m := checkExpression[*ast.Dictionary](t, expr.Expression)
+
+	if len(m.Object) != 3 {
+		t.Errorf("dictionary has wrong length. got=%d", len(m.Object))
+	}
+
+	tests := map[string]func(ast.Expression){
+		"ninezero": func(e ast.Expression) { testBinaryExpression(t, e, 0, "+", 9) },
+		"8":        func(e ast.Expression) { testBinaryExpression(t, e, 12, "-", 4) },
+		"ten":      func(e ast.Expression) { testBinaryExpression(t, e, 100, "/", 10) },
+	}
+
+	for key, value := range m.Object {
+		str := checkExpression[*ast.String](t, key)
+
+		testFunc, ok := tests[str.Value]
+		if !ok {
+			t.Errorf("No test function for key %q found", str.Value)
+			continue
+		}
+
+		testFunc(value)
+	}
+}
+
 func checkStatement[expected any](t *testing.T, stmt ast.Statement) expected {
 	if stmt == nil {
 		t.Fatal("statement is nil")

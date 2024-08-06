@@ -2,6 +2,7 @@ package object
 
 import (
 	"fmt"
+	"hash/fnv"
 	"strconv"
 	"strings"
 
@@ -9,6 +10,10 @@ import (
 )
 
 type ObjectType string
+type Hash struct {
+	Type ObjectType
+	Key  uint64
+}
 
 const (
 	NUMBER_OBJECT       ObjectType = "NUMBER"
@@ -21,6 +26,7 @@ const (
 	STRING_OBJECT       ObjectType = "STRING"
 	ARRAY_OBJECT        ObjectType = "ARRAY"
 	BUITL_IN_OBJECT     ObjectType = "BUILT_IN"
+	DICTIONARY_OBJECT   ObjectType = "DICTIONARY_OBJECT"
 )
 
 // Object is used in the evaluator to represent value in when evaluating the AST of JSGO.
@@ -36,6 +42,7 @@ type Number struct {
 
 func (n *Number) String() string   { return fmt.Sprintf("%d", n.Value) }
 func (n *Number) Type() ObjectType { return NUMBER_OBJECT }
+func (n *Number) Hash() Hash       { return Hash{Type: n.Type(), Key: uint64(n.Value)} }
 
 type Float struct {
 	Value float64
@@ -43,6 +50,7 @@ type Float struct {
 
 func (f *Float) String() string   { return strconv.FormatFloat(f.Value, 'f', -1, 64) }
 func (f *Float) Type() ObjectType { return FLOAT_OBJECT }
+func (f *Float) Hash() Hash       { return Hash{Type: f.Type(), Key: uint64(f.Value)} }
 
 // Boolean represent the boolean value in the language when evaluating the ast
 type Boolean struct {
@@ -51,6 +59,13 @@ type Boolean struct {
 
 func (b *Boolean) String() string   { return fmt.Sprintf("%t", b.Value) }
 func (b *Boolean) Type() ObjectType { return ObjectType(BOOLEAN_OBJECT) }
+func (b *Boolean) Hash() Hash {
+	val := 0
+	if b.Value {
+		val = 1
+	}
+	return Hash{Type: b.Type(), Key: uint64(val)}
+}
 
 // Null represent the NULL value in the language, it means that there is no value
 type Null struct{}
@@ -90,6 +105,11 @@ type String struct {
 
 func (s *String) String() string   { return s.Value }
 func (s *String) Type() ObjectType { return STRING_OBJECT }
+func (s *String) Hash() Hash {
+	h := fnv.New64()
+	h.Write([]byte(s.Value))
+	return Hash{Type: s.Type(), Key: h.Sum64()}
+}
 
 type Array struct {
 	Body []Object
@@ -127,6 +147,37 @@ type ReturnValue struct {
 
 func (rv *ReturnValue) String() string   { return rv.Value.String() }
 func (rv *ReturnValue) Type() ObjectType { return RETURN_VALUE_OBJECT }
+
+// Hasher verify that the Object can be used as a dictionary key.
+type Hasher interface {
+	Hash() Hash
+	String() string
+}
+
+type KeyValue struct {
+	Key   Object
+	Value Object
+}
+
+type Dictionary struct {
+	Value map[Hash]KeyValue
+}
+
+func (d *Dictionary) Type() ObjectType { return DICTIONARY_OBJECT }
+func (d *Dictionary) String() string {
+	var out strings.Builder
+
+	pairs := []string{}
+	for _, pair := range d.Value {
+		pairs = append(pairs, fmt.Sprintf("%s: %s", pair.Key.String(), pair.Value.String()))
+	}
+
+	out.WriteString("{")
+	out.WriteString(strings.Join(pairs, ", "))
+	out.WriteString("}")
+
+	return out.String()
+}
 
 // Error represent the error object in when evaluating the AST.
 type Error struct {

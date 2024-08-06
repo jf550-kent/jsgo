@@ -411,6 +411,26 @@ func TestArrayFunctionCall(t *testing.T) {
 	testValue(t, evaluated, 18)
 }
 
+func TestDictionaryExpressions(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected any
+	}{
+		{`{"foo": 5}["foo"]`, 5},
+		{`{"foo": 5}["bar"]`, nil},
+		{`var key = "foo"; {"foo": 5}[key]`, 5},
+		{`{}["foo"]`, nil},
+		{`{5: 5}[5]`, 5},
+		{`{true: 5}[true]`, 5},
+		{`{false: 5}[false]`, 5},
+	}
+
+	for _, tt := range tests {
+		evaluated := evalSetup(tt.input)
+		testValue(t, evaluated, tt.expected)
+	}
+}
+
 func testValue(t *testing.T, obj object.Object, expectedValue any) {
 	switch v := expectedValue.(type) {
 	case int:
