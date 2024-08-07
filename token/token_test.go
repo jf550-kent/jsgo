@@ -44,6 +44,12 @@ func TestTokenString(t *testing.T) {
 		{LBRACKET, "["},
 		{RBRACKET, "]"},
 		{NULL, "null"},
+		{AND,       "&"},
+		{OR,     "|"},
+		{XOR,       "^"},
+		{SHL,       "<<"},
+		{SHR,       ">>"},
+		{AND_NOT,   "&^"},
 	}
 
 	for _, tt := range tests {

@@ -1,68 +1,38 @@
-function createElement(v, next) {
-  return {
-    val: v,
-    next: next
-  };
+var createNode = function(v, n) {
+  return { "value": v, "next": n };
 }
 
-function getLength(element) {
-  if (element.next === null) {
+var length = function(node) {
+  if (node["next"] == null) {
     return 1;
   }
-  return 1 + getLength(element.next);
+  return 1 + length(node["next"]);
 }
 
-function createList() {
-  function makeList(length) {
-    if (length === 0) {
-      return null;
-    }
-    var e = createElement(length, makeList(length - 1));
-    return e;
-  }
-
-  function isShorterThan(x, y) {
-    var xTail = x;
-    var yTail = y;
-
-    while (yTail !== null) {
-      if (xTail === null) { return true; }
-      xTail = xTail.next;
-      yTail = yTail.next;
-    }
-    return false;
-  }
-
-  function tail(x, y, z) {
-    if (isShorterThan(y, x)) {
-      return tail(
-        tail(x.next, y, z),
-        tail(y.next, z, x),
-        tail(z.next, x, y)
-      );
-    }
-    return z;
-  }
-
-  function benchmark() {
-    var result = tail(
-      makeList(15),
-      makeList(10),
-      makeList(6)
-    );
-    return getLength(result);
-  }
-
-  function verifyResult(result) {
-    return result === 10;
-  }
-
-  return {
-    benchmark: benchmark,
-    verifyResult: verifyResult
-  };
+var createList = function(size) {
+  if (size == 0) { return null; }
+  return createNode(size, createList(size - 1));
 }
 
-var l = createList()
-var result = l.benchmark()
-console.log(l.verifyResult(result))
+var tail = function(x, y, z) {
+  if (isShorterThan(y, x)) {
+    return tail(tail(x["next"], y, z), tail(y["next"], z, x), tail(z["next"], x, y));
+  }
+  return z;
+}
+
+var isShorterThan = function(x, y) {
+  var xTail = x;
+  var yTail = y;
+
+  for (;yTail != null;) {
+    if (xTail == null) { return true; }
+    xTail = xTail["next"];
+    yTail = yTail["next"];
+  }
+  return false;
+}
+
+var result = length(tail(createList(15), createList(10), createList(6)))
+var correct = result == 10;
+correct;

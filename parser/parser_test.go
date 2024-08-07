@@ -17,7 +17,7 @@ func BenchmarkExample(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		main := Parse("", byt)
-		if len(main.Statements) != 5 {
+		if len(main.Statements) < 10 {
 			b.Fatal("parser failed")
 		}
 	}
@@ -126,6 +126,8 @@ func TestBinaryExpression(t *testing.T) {
 		{"true == true;", true, "==", true},
 		{"true != false;", true, "!=", false},
 		{"false == false;", false, "==", false},
+		{"5 << 5;", 5, "<<", 5},
+		{"5 ^ 5;", 5, "^", 5},
 	}
 
 	for _, tt := range tests {
@@ -704,7 +706,7 @@ func TestParsingDictionaryDecl(t *testing.T) {
 	}
 
 	dicExpr := checkStatement[*ast.ExpressionStatement](t, main.Statements[1])
-	dcl := checkExpression[*ast.DictionaryDeclaration](t, dicExpr.Expression)
+	dcl := checkExpression[*ast.BracketDeclaration](t, dicExpr.Expression)
 	testIdentifier(t, dcl.Identifier, "apple")
 	testString(t, dcl.Key, "taste")
 	testString(t, dcl.Value, "red")

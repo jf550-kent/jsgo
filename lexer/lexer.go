@@ -74,6 +74,11 @@ func (l *Lexer) Lex() (token.Token, error) {
 		tok = newToken(token.GTR, ">", pos, pos)
 	case '<':
 		pos := l.currentPos()
+		if l.peekByte() == '<' {
+			l.next()
+			tok = newToken(token.SHL, "<<", pos, l.currentPos())
+			break
+		}
 		tok = newToken(token.LSS, "<", pos, pos)
 	case '[':
 		pos := l.currentPos()
@@ -83,6 +88,9 @@ func (l *Lexer) Lex() (token.Token, error) {
 		tok = newToken(token.RBRACKET, "]", pos, pos)
 	case '"':
 		return l.readString()
+	case '^':
+		pos := l.currentPos()
+		tok = newToken(token.XOR, "^", pos, pos)
 	case '!':
 		start := l.currentPos()
 		if l.peekByte() == '=' {

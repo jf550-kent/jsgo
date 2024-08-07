@@ -60,6 +60,13 @@ const (
 	LBRACKET // [
 	RBRACKET // ]
 
+	AND     // &
+	OR      // |
+	XOR     // ^
+	SHL     // <<
+	SHR     // >>
+	AND_NOT // &^
+
 	operatorEnd
 
 	keywordBegin // keyword in the language of jsgo
@@ -120,6 +127,12 @@ var tokens = [...]string{
 	RBRACE:    "}",
 	LBRACKET:  "[",
 	RBRACKET:  "]",
+	AND:       "&",
+	OR:        "|",
+	XOR:       "^",
+	SHL:       "<<",
+	SHR:       ">>",
+	AND_NOT:   "&^",
 	FUNCTION:  "function",
 	VAR:       "var",
 	IF:        "if",

@@ -43,13 +43,13 @@ func eval(node ast.Node, env *object.Environment) object.Object {
 		if isError(val) {
 			return val
 		}
-		env.Set(node.Identifier.Literal, val)
 
-		v, ok := env.Get(node.Identifier.Literal)
+		_, env, ok := env.GetIdentifier(node.Identifier.Literal)
 		if !ok {
 			return newError("failed to set variable")
 		}
-		return v
+		env.Set(node.Identifier.Literal, val)
+		return val
 	case *ast.Number:
 		return &object.Number{Value: node.Value}
 	case *ast.Float:
@@ -137,7 +137,7 @@ func eval(node ast.Node, env *object.Environment) object.Object {
 		return NULL
 	case *ast.Dictionary:
 		return evalDictionary(node, env)
-	case *ast.DictionaryDeclaration:
+	case *ast.BracketDeclaration:
 		return evalDictionaryDeclaration(node, env)
 	}
 	return nil
@@ -233,11 +233,17 @@ func evalIfExpression(ie *ast.IFExpression, env *object.Environment) object.Obje
 }
 
 func evalBinaryExpression(left, right object.Object, op string) object.Object {
+	lType := left.Type()
+	rType := right.Type()
 	switch {
-	case left.Type() == object.NUMBER_OBJECT && right.Type() == object.NUMBER_OBJECT:
+	case lType == object.NUMBER_OBJECT && rType == object.NUMBER_OBJECT:
 		return evalNumberExpression(left, right, op)
-	case left.Type() == object.FLOAT_OBJECT && right.Type() == object.FLOAT_OBJECT:
+	case lType == object.FLOAT_OBJECT && rType == object.FLOAT_OBJECT:
 		return evalFloatExpression(left, right, op)
+	case (lType == object.FLOAT_OBJECT && rType == object.NUMBER_OBJECT) || (lType == object.NUMBER_OBJECT && rType == object.FLOAT_OBJECT):
+		l := convertFloat(left)
+		r := convertFloat(right)
+		return evalFloatExpression(l, r, op)
 	case op == "!=":
 		return nativeBoolean(left != right)
 	case op == "==":
@@ -312,7 +318,15 @@ func evalNumberExpression(left, right object.Object, op string) object.Object {
 	case "+":
 		return &object.Number{Value: leftValue.Value + rightValue.Value}
 	case "/":
+		reminder := leftValue.Value % rightValue.Value
+		if reminder != 0 {
+			return &object.Float{Value: float64(leftValue.Value) / float64(rightValue.Value)}
+		}
 		return &object.Number{Value: leftValue.Value / rightValue.Value}
+	case "<<":
+		return &object.Number{Value: leftValue.Value << rightValue.Value}
+	case "^":
+		return &object.Number{Value: leftValue.Value ^ rightValue.Value}
 	case "<":
 		return nativeBoolean(leftValue.Value < rightValue.Value)
 	case ">":
@@ -451,55 +465,71 @@ func evalDictionary(dic *ast.Dictionary, env *object.Environment) object.Object 
 	dicry := &object.Dictionary{Value: make(map[object.Hash]object.KeyValue)}
 
 	for key, val := range dic.Object {
-		k := eval(key, env)
-		if isError(k) {
-			return k
+		if _, err := assignDictionaryKey(dicry, key, val, env); err != nil {
+			return err
 		}
-
-		h, ok := k.(object.Hasher)
-		if !ok {
-			return newError("key unable to be hash" + k.String())
-		}
-		v := eval(val, env)
-		if isError(v) {
-			return v
-		}
-
-		keyHash := h.Hash()
-		dicry.Value[keyHash] = object.KeyValue{Key: k, Value: v}
 	}
 	return dicry
 }
 
-func evalDictionaryDeclaration(decl *ast.DictionaryDeclaration, env *object.Environment) object.Object {
+func assignDictionaryKey(dic *object.Dictionary, key, value ast.Node, env *object.Environment) (*object.Dictionary, *object.Error) {
+	k := eval(key, env)
+	if isError(k) {
+		return nil, k.(*object.Error) // dangerous man you should know better smh
+	}
+
+	h, ok := k.(object.Hasher)
+	if !ok {
+		return nil, newError("key unable to be hash" + k.String())
+	}
+	v := eval(value, env)
+	if isError(v) {
+		return nil, v.(*object.Error)
+	}
+
+	keyHash := h.Hash()
+	dic.Value[keyHash] = object.KeyValue{Key: k, Value: v}
+
+	return dic, nil
+}
+
+func evalDictionaryDeclaration(decl *ast.BracketDeclaration, env *object.Environment) object.Object {
 	ident := eval(decl.Identifier, env)
 	if isError(ident) {
 		return ident
 	}
 
-	dic, ok := ident.(*object.Dictionary)
-	if !ok {
-		return newError("undefined object reference for" + ident.String())
+	switch left := ident.(type) {
+	case *object.Dictionary:
+		if _, err := assignDictionaryKey(left, decl.Key, decl.Value, env); err != nil {
+			return err
+		}
+		return left
+	case *object.Array:
+		in := eval(decl.Key, env)
+		if isError(in) {
+			newError("unable to evaluate array index")
+		}
+		num, ok := in.(*object.Number)
+		if !ok {
+			return newError("wrong type for array index")
+		}
+		if int(num.Value) >= len(left.Body) {
+			// a more efficient assignment can be done here
+			newArr := make([]object.Object, int(num.Value) + 1)
+			copy(newArr, left.Body)
+			left.Body = newArr
+		}
+		v := eval(decl.Value, env)
+		if isError(v) {
+			return newError("unable to eval array assigment")
+		}
+		left.Body[int(num.Value)] = v
+		return left
 	}
 
-	key := eval(decl.Key, env)
-	if isError(key) {
-		return key
-	}
-
-	hasherKey, ok := key.(object.Hasher)
-	if !ok {
-		return newError("object key unable to hash" + key.String())
-	}
-
-	val := eval(decl.Value, env)
-	if isError(val) {
-		return val
-	}
-
-	hash := hasherKey.Hash()
-	dic.Value[hash] = object.KeyValue{Key: key, Value: val}
-	return dic
+	msg := fmt.Sprintf("undefined identifier <%s>[] reference for %v:%v", ident.String(),  decl.Start().Line ,decl.Start().Col)
+	return newError(msg)
 }
 
 func evalDictionaryExpression(dic *object.Dictionary, right object.Object) object.Object {
@@ -514,6 +544,16 @@ func evalDictionaryExpression(dic *object.Dictionary, right object.Object) objec
 		return NULL
 	}
 	return keyValue.Value
+}
+
+func convertFloat(node object.Object) *object.Float {
+	switch node := node.(type) {
+	case *object.Float:
+		return node
+	case *object.Number:
+		return &object.Float{Value: float64(node.Value)}
+	}
+	panic("unable to convert to float with" + node.String())
 }
 
 func newError(format string, a ...interface{}) *object.Error {
