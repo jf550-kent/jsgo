@@ -35,3 +35,14 @@ func (e *Environment) Set(name string, val Object) bool {
 	e.values[name] = val
 	return true
 }
+
+func (e *Environment) GetIdentifier(name string) (Object, *Environment, bool) {
+	e.mu.RLock()
+	defer e.mu.RUnlock()
+	obj, ok := e.values[name]
+	returnEnv := e
+	if !ok && e.outer != nil {
+		obj, returnEnv, ok = e.outer.GetIdentifier(name)
+	}
+	return obj, returnEnv, ok
+}

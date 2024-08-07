@@ -294,8 +294,8 @@ type (
 		Object map[Expression]Expression
 	}
 
-	// Dictionary declarations
-	DictionaryDeclaration struct {
+	// Bracket declarations apple[] = <expression>
+	BracketDeclaration struct {
 		Token      token.Token
 		Identifier Expression
 		Key        Expression
@@ -531,7 +531,7 @@ func (n *Dictionary) String() string {
 	return out.String()
 }
 
-func (n *DictionaryDeclaration) expressionNode()  {}
-func (n *DictionaryDeclaration) Start() token.Pos { return n.Token.Start }
-func (n *DictionaryDeclaration) End() token.Pos   { return n.Token.End }
-func (n *DictionaryDeclaration) String() string   { return n.Token.Literal }
+func (n *BracketDeclaration) expressionNode()  {}
+func (n *BracketDeclaration) Start() token.Pos { return n.Token.Start }
+func (n *BracketDeclaration) End() token.Pos   { return n.Token.End }
+func (n *BracketDeclaration) String() string   { return n.Token.Literal }

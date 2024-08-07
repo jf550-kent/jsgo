@@ -1,65 +1,54 @@
-var create = function () {
-  var piles = null;
-  var movesDone = 0;
+var this_movesDone = 0;
 
-  var pushDisk = function (disk, pile) {
-    var top = piles[pile];
-    if (top) {
-      if (disk.pile >= top.size) {
-        return 0;
-      }
-      disk.next = top;
-      piles[pile] = disk;
+var pushDisk = function(disk, pile) {
+  var top = this_piles[pile]
+  if (top) {
+    if (disk["size"] > top["size"] + 1) {
+      return "Cannot put a big disk on a smaller one";
     }
-  };
+  }
 
-  var popDiskFrom = (pile) => {
-    var top = piles[pile];
-    if (top === null) {
-      throw new Error("Attempting to remove a disk from an empty pile");
-    }
-    piles[pile] = top.next;
-    top.next = null;
-    return top;
-  };
+  disk["next"] = top
+  this_piles[pile] = disk
+}
 
-  var moveTopDisk = (fromPile, toPile) => {
-    pushDisk(popDiskFrom(fromPile), toPile);
-    movesDone += 1;
-  };
+var createTowerDisk = function (size) {
+  return { "size": size, "next": null };
+}
 
-  var buildTowerAt = (pile, disks) => {
-    for (let i = disks; i >= 0; i -= 1) {
-      pushDisk({ size: i, next: null }, pile);
-    }
-  };
+var buildTowerAt = function (pile, disks) {
+  for (var d = disks; d > -1; d = d -1) {
+    pushDisk(createTowerDisk(d), pile)
+  }
+}
 
-  var moveDisks = (disks, fromPile, toPile) => {
-    if (disks === 1) {
-      moveTopDisk(fromPile, toPile);
-    } else {
-      const otherPile = 3 - fromPile - toPile;
-      moveDisks(disks - 1, fromPile, otherPile);
-      moveTopDisk(fromPile, toPile);
-      moveDisks(disks - 1, otherPile, toPile);
-    }
-  };
+var popDiskFrom = function (pile) {
+  var top = this_piles[pile]
+  if (top == null) {
+    return "Trying to remove a empty pile";
+  }
+  this_piles[pile] = top["next"]
+  top["next"] = null
+  return top;
+}
 
-  return {
-    benchmark: () => {
-      piles = new Array(3);
-      buildTowerAt(0, 13);
-      movesDone = 0;
-      moveDisks(13, 0, 1);
-      return movesDone;
-    },
+var moveTopDisk = function (fromPile, toPile) {
+  pushDisk(popDiskFrom(fromPile), toPile)
+  this_movesDone = this_movesDone + 1
+}
 
-    verify: (result) => {
-      return 8191 === result;
-    },
-  };
-};
-
-var towers = createTowers();
-var result = towers.benchmark();
-towers.verify(result);
+var moveDisks = function (disks, fromPile, toPile) {
+  if (disks == 1) {
+    moveTopDisk(fromPile, toPile);
+  } else {
+    var otherPile = (3 - fromPile) - toPile;
+    moveDisks(disks - 1, fromPile, otherPile);
+    moveTopDisk(fromPile, toPile);
+    moveDisks(disks - 1, otherPile, toPile);
+  }
+}
+var this_piles = [null, null, null];
+buildTowerAt(0, 13)
+moveDisks(13, 0, 1)
+var correct = this_movesDone == 8191
+correct;

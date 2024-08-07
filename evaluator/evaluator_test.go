@@ -70,10 +70,10 @@ func TestUnaryOperation(t *testing.T) {
 	}
 }
 
-func TestEvalIntegerExpression(t *testing.T) {
+func TestEvalNumberExpression(t *testing.T) {
 	tests := []struct {
 		input    string
-		expected int
+		expected any
 	}{
 		{"5;", 5},
 		{"10;", 10},
@@ -90,6 +90,8 @@ func TestEvalIntegerExpression(t *testing.T) {
 		{"3 * 3 * 3 + 10;", 37},
 		{"3 * (3 * 3) + 10;", 37},
 		{"(5 + 10 * 2 + 15 / 3) * 2 + -10;", 50},
+		{"5 / 3;", 5.0 / 3.0},
+		{"5 + 1.0;", 6.0},
 	}
 
 	for _, tt := range tests {
@@ -443,6 +445,22 @@ func TestDictionaryDeclaration(t *testing.T) {
 		evaluated := evalSetup(tt.input)
 		testValue(t, evaluated, tt.expected)
 	}
+}
+
+func TestClosure(t *testing.T) {
+	input := `
+	var sum = 0;
+	var add = function () {
+  	sum = sum + 1
+	}
+	
+	add()
+	add()
+	sum;
+	`
+
+	evaluated := evalSetup(input)
+	print(evaluated)
 }
 
 func testValue(t *testing.T, obj object.Object, expectedValue any) {
