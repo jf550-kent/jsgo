@@ -90,7 +90,7 @@ func TestEvalNumberExpression(t *testing.T) {
 		{"3 * 3 * 3 + 10;", 37},
 		{"3 * (3 * 3) + 10;", 37},
 		{"(5 + 10 * 2 + 15 / 3) * 2 + -10;", 50},
-		{"5 / 3;", 5.0/3.0},
+		{"5 / 3;", 5.0 / 3.0},
 		{"5 + 1.0;", 6.0},
 	}
 
@@ -448,7 +448,7 @@ func TestDictionaryDeclaration(t *testing.T) {
 }
 
 func TestClosure(t *testing.T) {
-	input:= `
+	input := `
 	var sum = 0;
 	var add = function () {
   	sum = sum + 1

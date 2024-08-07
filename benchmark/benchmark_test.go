@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"github.com/jf550-kent/jsgo/evaluator"
-	"github.com/jf550-kent/jsgo/parser"
 	"github.com/jf550-kent/jsgo/object"
+	"github.com/jf550-kent/jsgo/parser"
 )
 
 func BenchmarkList(b *testing.B) {

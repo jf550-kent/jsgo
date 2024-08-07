@@ -516,7 +516,7 @@ func evalDictionaryDeclaration(decl *ast.BracketDeclaration, env *object.Environ
 		}
 		if int(num.Value) >= len(left.Body) {
 			// a more efficient assignment can be done here
-			newArr := make([]object.Object, int(num.Value) + 1)
+			newArr := make([]object.Object, int(num.Value)+1)
 			copy(newArr, left.Body)
 			left.Body = newArr
 		}
@@ -528,7 +528,7 @@ func evalDictionaryDeclaration(decl *ast.BracketDeclaration, env *object.Environ
 		return left
 	}
 
-	msg := fmt.Sprintf("undefined identifier <%s>[] reference for %v:%v", ident.String(),  decl.Start().Line ,decl.Start().Col)
+	msg := fmt.Sprintf("undefined identifier <%s>[] reference for %v:%v", ident.String(), decl.Start().Line, decl.Start().Col)
 	return newError(msg)
 }
 

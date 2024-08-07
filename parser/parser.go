@@ -46,8 +46,8 @@ var precedences = map[token.TokenType]int{
 	token.MUL:       PRODUCT,
 	token.LPAREN:    CALL,
 	token.LBRACKET:  INDEX,
-	token.SHL: LESSGREATER,
-	token.XOR: EQUALS,
+	token.SHL:       LESSGREATER,
+	token.XOR:       EQUALS,
 }
 
 func Parse(filename string, src []byte) *ast.Main {
@@ -116,8 +116,8 @@ func new(filename string, l *lexer.Lexer) *parser {
 		token.EQUAL:     p.parseBinaryExpression,
 		token.LPAREN:    p.parseCallExpression,
 		token.LBRACKET:  p.parseIndexExpression,
-		token.SHL: p.parseBinaryExpression,
-		token.XOR: p.parseBinaryExpression,
+		token.SHL:       p.parseBinaryExpression,
+		token.XOR:       p.parseBinaryExpression,
 	}
 
 	return p
