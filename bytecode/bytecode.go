@@ -30,7 +30,6 @@ func (ins Instructions) String() string {
 	return res.String()
 }
 
-
 func (ins Instructions) fmtInstruction(def *Definition, operands []int) string {
 	operandCount := def.OperandNum
 
@@ -55,15 +54,15 @@ const (
 )
 
 type Definition struct {
-	Name        string
+	Name         string
 	OperandWidth []int
-	ByteSize int
-	OperandNum int
+	ByteSize     int
+	OperandNum   int
 }
 
 var definitions = map[Opcode]*Definition{
 	OpConstant: {"OpConstant", []int{2}, 2, 1},
-	OpAdd: {"OpAdd", []int{}, 0, 0},
+	OpAdd:      {"OpAdd", []int{}, 0, 0},
 }
 
 func Lookup(op byte) (*Definition, error) {

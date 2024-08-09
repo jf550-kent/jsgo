@@ -54,7 +54,7 @@ func (c *Compiler) addConstant(obj object.Object) int {
 	return len(c.constants) - 1
 }
 
-func (c *Compiler) emit(op bytecode.Opcode, operands... int) int {
+func (c *Compiler) emit(op bytecode.Opcode, operands ...int) int {
 	instrct := bytecode.Make(op, operands...)
 	pos := c.addInstruction(instrct)
 	return pos

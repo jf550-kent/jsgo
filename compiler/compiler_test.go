@@ -20,7 +20,7 @@ func TestNumberAddition(t *testing.T) {
 	tests := []compilerTestCase{
 		{input: "1 + 2", expectedConstants: []any{1, 2},
 			expectedInstructions: []bytecode.Instructions{
-				bytecode.Make(bytecode.OpConstant, 0), 
+				bytecode.Make(bytecode.OpConstant, 0),
 				bytecode.Make(bytecode.OpConstant, 1),
 				bytecode.Make(bytecode.OpAdd),
 			},
@@ -86,7 +86,6 @@ func testNumberObject(t *testing.T, constant int64, act object.Object) {
 		t.Errorf("wrong number value: got=%d expected=%d", actual.Value, constant)
 	}
 }
-
 
 func mergeInstructions(s []bytecode.Instructions) bytecode.Instructions {
 	result := bytecode.Instructions{}

@@ -11,19 +11,19 @@ import (
 const STACK_SIZE = 2048
 
 type VM struct {
-	constants []object.Object
+	constants    []object.Object
 	instructions bytecode.Instructions
 
-	stack []object.Object
+	stack        []object.Object
 	stackPointer int // Must always points to the new value, the object at the top of the stack is stack[stackPointer -1]
 }
 
 func New(bytecode *compiler.Bytecode) *VM {
 	return &VM{
 		instructions: bytecode.Instructions,
-		constants: bytecode.Constants,
+		constants:    bytecode.Constants,
 
-		stack: make([]object.Object, STACK_SIZE),
+		stack:        make([]object.Object, STACK_SIZE),
 		stackPointer: 0,
 	}
 }
@@ -33,7 +33,7 @@ func (vm *VM) StackTop() object.Object {
 		return nil
 	}
 
-	return vm.stack[vm.stackPointer -1]
+	return vm.stack[vm.stackPointer-1]
 }
 
 func (vm *VM) Run() error {
@@ -51,7 +51,7 @@ func (vm *VM) Run() error {
 			}
 
 		case bytecode.OpAdd:
-			r, err := vm.pop() 
+			r, err := vm.pop()
 			if err != nil {
 				return err
 			}

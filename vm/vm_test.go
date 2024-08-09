@@ -9,9 +9,10 @@ import (
 )
 
 type vmTestCase struct {
-	input string
-	expected any 
+	input    string
+	expected any
 }
+
 func TestNumberAddition(t *testing.T) {
 	tests := []vmTestCase{
 		{"3", 3},
@@ -33,7 +34,7 @@ func testVmTests(t *testing.T, tests []vmTestCase) {
 			t.Fatalf("compiler error: %s", err)
 		}
 
-		vm := New(com.ByteCode()) 
+		vm := New(com.ByteCode())
 		if err := vm.Run(); err != nil {
 			t.Fatalf("vm error: %s", err)
 		}
