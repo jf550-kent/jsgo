@@ -51,6 +51,7 @@ func (ins Instructions) fmtInstruction(def *Definition, operands []int) string {
 
 const (
 	OpConstant Opcode = iota
+	OpAdd
 )
 
 type Definition struct {
@@ -62,6 +63,7 @@ type Definition struct {
 
 var definitions = map[Opcode]*Definition{
 	OpConstant: {"OpConstant", []int{2}, 2, 1},
+	OpAdd: {"OpAdd", []int{}, 0, 0},
 }
 
 func Lookup(op byte) (*Definition, error) {

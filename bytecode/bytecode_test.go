@@ -11,7 +11,6 @@ func TestMake(t *testing.T) {
 		{OpConstant, []int{65534}, []byte{byte(OpConstant), 255, 254}},
 	}
 
-	// OpConstant 255 254
 	for _, tt := range tests {
 		instruction := Make(tt.op, tt.operands...)
 
@@ -33,17 +32,15 @@ func TestInstructionsString(t *testing.T) {
 		Make(OpConstant, 1),
 		Make(OpConstant, 2),
 		Make(OpConstant, 65535),
+		Make(OpAdd),
 	}
 
-	expected := "0000 OpConstant 1\n0003 OpConstant 2\n0006 OpConstant 65535\n"
+	expected := "0000 OpConstant 1\n0003 OpConstant 2\n0006 OpConstant 65535\n0009 OpAdd\n"
 
 	merged := Instructions{}
 	for _, ins := range intrustions {
 		merged = append(merged, ins...)
 	}
-
-	s := merged.String()
-	print(s)
 
 	if merged.String() != expected {
 		t.Errorf("instructions wrongly formatted\ngot:\n%s \nexpected:\n%s", merged.String(), expected)

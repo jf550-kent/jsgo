@@ -22,6 +22,7 @@ func TestNumberAddition(t *testing.T) {
 			expectedInstructions: []bytecode.Instructions{
 				bytecode.Make(bytecode.OpConstant, 0), 
 				bytecode.Make(bytecode.OpConstant, 1),
+				bytecode.Make(bytecode.OpAdd),
 			},
 		},
 	}
