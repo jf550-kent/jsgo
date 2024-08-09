@@ -66,6 +66,8 @@ func (vm *VM) Run() error {
 
 			result := left + right
 			vm.push(&object.Number{Value: result})
+		case bytecode.OpPop:
+			vm.pop()
 		}
 	}
 	return nil
@@ -88,4 +90,12 @@ func (vm *VM) pop() (object.Object, error) {
 	}
 	vm.stackPointer--
 	return vm.stack[vm.stackPointer], nil
+}
+
+// TEST only function
+func (vm *VM) lastPopStack() object.Object {
+	if vm.stackPointer < 0 {
+		panic("vm stack pointer is non zero")
+	}
+	return vm.stack[vm.stackPointer]
 }
