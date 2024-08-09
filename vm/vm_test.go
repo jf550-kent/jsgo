@@ -13,11 +13,40 @@ type vmTestCase struct {
 	expected any
 }
 
-func TestNumberAddition(t *testing.T) {
+func TestNumberOperation(t *testing.T) {
 	tests := []vmTestCase{
 		{"3", 3},
 		{"9", 9},
 		{"8 + 1", 9},
+		{"1 - 2", -1},
+		{"1 * 2", 2},
+		{"4 / 2", 2},
+		{"50 / 2 * 2 + 10 - 5", 55},
+		{"5 + 5 + 5 + 5 - 10", 10},
+		{"2 * 2 * 2 * 2 * 2", 32},
+		{"5 * 2 + 10", 20},
+		{"5 + 2 * 10", 25},
+		{"5 * (2 + 10)", 60},
+		{"20 << 10", 20480},
+		{"99 ^ 8", 107},
+	}
+
+	testVmTests(t, tests)
+}
+
+func TestFloatOperation(t *testing.T) {
+	tests := []vmTestCase{
+		{"1.0", 1.0},
+		{"3.14", 3.14},
+		{"1.5 + 2.5", 4.0},
+		{"5.0 - 1.2", 3.8},
+		{"2.5 * 4.0", 10.0},
+		{"10.0 / 3.0", 3.3333333333333335},
+		{"(2.0 + 3.0) * 4.0", 20.0},
+		{"5.0 + 2.0 * 3.0", 11.0},
+		{"(5.0 + 2.0) / 3.0", 2.3333333333333335},
+		{"7.0 / (2.0 + 3.0)", 1.4},
+		{"9.0 - (2.0 + 1.0) * 2.0", 3.0},
 	}
 
 	testVmTests(t, tests)
@@ -38,6 +67,8 @@ func testVmTests(t *testing.T, tests []vmTestCase) {
 		if err := vm.Run(); err != nil {
 			t.Fatalf("vm error: %s", err)
 		}
+		i := com.ByteCode().Instructions.String()
+		print(i)
 
 		result := vm.lastPopStack()
 
@@ -49,6 +80,8 @@ func testObject(t *testing.T, expected any, actual object.Object) {
 	switch expected := expected.(type) {
 	case int:
 		testNumberObject(t, int64(expected), actual)
+	case float64:
+		testFloat(t, expected, actual)
 	}
 }
 
@@ -61,4 +94,24 @@ func testNumberObject(t *testing.T, constant int64, act object.Object) {
 	if constant != actual.Value {
 		t.Errorf("wrong number value: got=%d expected=%d", actual.Value, constant)
 	}
+}
+
+func testFloat(t *testing.T, constant float64, obj object.Object) {
+	fl := checkObject[*object.Float](t, obj)
+
+	if fl.Value != constant {
+		t.Errorf("wrong float value: got=%v expected=%v", fl.Value, constant)
+	}
+}
+
+func checkObject[expected any](t *testing.T, obj object.Object) expected {
+	if obj == nil {
+		t.Fatal("object is nil")
+	}
+
+	v, ok := obj.(expected)
+	if !ok {
+		t.Fatalf("object wrong type: got=%T expected=%T", obj, v)
+	}
+	return v
 }

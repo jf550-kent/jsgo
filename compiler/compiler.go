@@ -39,11 +39,24 @@ func (c *Compiler) Compile(node ast.Node) error {
 		switch node.Operator {
 		case "+":
 			c.emit(bytecode.OpAdd)
+		case "-":
+			c.emit(bytecode.OpSub)
+		case "*":
+			c.emit(bytecode.OpMul)
+		case "/":
+			c.emit(bytecode.OpDiv)
+		case "<<":
+			c.emit(bytecode.OpSHL)
+		case "^":
+			c.emit(bytecode.OpXOR)
 		default:
 			return fmt.Errorf("unknown operator %s", node.Operator)
 		}
 	case *ast.Number:
 		number := &object.Number{Value: node.Value}
+		c.emit(bytecode.OpConstant, c.addConstant(number))
+	case *ast.Float:
+		number := &object.Float{Value: node.Value}
 		c.emit(bytecode.OpConstant, c.addConstant(number))
 	}
 

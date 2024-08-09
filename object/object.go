@@ -187,3 +187,13 @@ type Error struct {
 func (e *Error) Type() ObjectType { return ERROR_OBJECT }
 func (e *Error) String() string   { return "error: " + e.Message }
 func (e *Error) Error() string    { return e.Message }
+
+func ConvertFloat(node Object) *Float {
+	switch node := node.(type) {
+	case *Float:
+		return node
+	case *Number:
+		return &Float{Value: float64(node.Value)}
+	}
+	panic("unable to convert to float with" + node.String())
+}
