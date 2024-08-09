@@ -28,6 +28,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 		if err := c.Compile(node.Expression); err != nil {
 			return err
 		}
+		c.emit(bytecode.OpPop)
 	case *ast.BinaryExpression:
 		if err := c.Compile(node.Left); err != nil {
 			return err
