@@ -17,7 +17,7 @@ type compilerTestCase struct {
 }
 
 // [CONSTANT 0 CONSTANT 1 ADD POP]
-func TestNumberAddition(t *testing.T) {
+func TestNumberOperation(t *testing.T) {
 	tests := []compilerTestCase{
 		{input: "1 + 2", expectedConstants: []any{1, 2},
 			expectedInstructions: []bytecode.Instructions{
@@ -32,6 +32,46 @@ func TestNumberAddition(t *testing.T) {
 				bytecode.Make(bytecode.OpConstant, 0),
 				bytecode.Make(bytecode.OpPop),
 				bytecode.Make(bytecode.OpConstant, 1),
+				bytecode.Make(bytecode.OpPop),
+			},
+		},
+		{input: "90 - 45;", expectedConstants: []any{90, 45},
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpConstant, 1),
+				bytecode.Make(bytecode.OpSub),
+				bytecode.Make(bytecode.OpPop),
+			},
+		},
+		{input: "90 / 45;", expectedConstants: []any{90, 45},
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpConstant, 1),
+				bytecode.Make(bytecode.OpDiv),
+				bytecode.Make(bytecode.OpPop),
+			},
+		},
+		{input: "90 * 45;", expectedConstants: []any{90, 45},
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpConstant, 1),
+				bytecode.Make(bytecode.OpMul),
+				bytecode.Make(bytecode.OpPop),
+			},
+		},
+		{input: "90 << 45;", expectedConstants: []any{90, 45},
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpConstant, 1),
+				bytecode.Make(bytecode.OpSHL),
+				bytecode.Make(bytecode.OpPop),
+			},
+		},
+		{input: "90 ^ 45;", expectedConstants: []any{90, 45},
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpConstant, 1),
+				bytecode.Make(bytecode.OpXOR),
 				bytecode.Make(bytecode.OpPop),
 			},
 		},

@@ -241,8 +241,8 @@ func evalBinaryExpression(left, right object.Object, op string) object.Object {
 	case lType == object.FLOAT_OBJECT && rType == object.FLOAT_OBJECT:
 		return evalFloatExpression(left, right, op)
 	case (lType == object.FLOAT_OBJECT && rType == object.NUMBER_OBJECT) || (lType == object.NUMBER_OBJECT && rType == object.FLOAT_OBJECT):
-		l := convertFloat(left)
-		r := convertFloat(right)
+		l := object.ConvertFloat(left)
+		r := object.ConvertFloat(right)
 		return evalFloatExpression(l, r, op)
 	case op == "!=":
 		return nativeBoolean(left != right)
@@ -544,16 +544,6 @@ func evalDictionaryExpression(dic *object.Dictionary, right object.Object) objec
 		return NULL
 	}
 	return keyValue.Value
-}
-
-func convertFloat(node object.Object) *object.Float {
-	switch node := node.(type) {
-	case *object.Float:
-		return node
-	case *object.Number:
-		return &object.Float{Value: float64(node.Value)}
-	}
-	panic("unable to convert to float with" + node.String())
 }
 
 func newError(format string, a ...interface{}) *object.Error {
