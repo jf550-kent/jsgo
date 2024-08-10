@@ -109,6 +109,17 @@ func TestConditionals(t *testing.T) {
 	testVmTests(t, tests)
 }
 
+func TestGlobalStatement(t *testing.T) {
+	tests := []vmTestCase{
+		{"var apple = 99; apple", 99},
+		{"var one = 80.9; var two = 2; one + two", 82.9},
+		{"var one = 1; var two = one + one; one + two", 3},
+		{"var one = 1; one = 29 one;", 29},
+	}
+
+	testVmTests(t, tests)
+}
+
 func testVmTests(t *testing.T, tests []vmTestCase) {
 	t.Helper()
 
