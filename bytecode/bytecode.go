@@ -67,6 +67,8 @@ const (
 	OpJumpNotTrue
 	OpJump
 	OpNull
+	OpGetGlobal
+	OpSetGlobal
 )
 
 type Definition struct {
@@ -95,6 +97,8 @@ var definitions = map[Opcode]*Definition{
 	OpJumpNotTrue: {"OpJumpNotTrue", []int{2}, 2, 1},
 	OpJump:        {"OpJump", []int{2}, 2, 1},
 	OpNull:        {"OpNull", []int{}, 0, 0},
+	OpGetGlobal:   {"OpGetGlobal", []int{2}, 2, 1},
+	OpSetGlobal:   {"OpSetGlobal", []int{2}, 2, 1},
 }
 
 func Lookup(op byte) (*Definition, error) {

@@ -20,6 +20,7 @@ type EmittedInstruction struct {
 type Compiler struct {
 	instructions bytecode.Instructions
 	constants    []object.Object
+	symbolTable  *SymbolTable
 
 	lastInstruction     EmittedInstruction
 	previousInstruction EmittedInstruction
@@ -31,6 +32,7 @@ func New() *Compiler {
 	return &Compiler{
 		instructions:        bytecode.Instructions{},
 		constants:           []object.Object{},
+		symbolTable:         NewSymbolTable(),
 		lastInstruction:     EmittedInstruction{},
 		previousInstruction: EmittedInstruction{},
 	}
@@ -95,6 +97,18 @@ func (c *Compiler) Compile(node ast.Node) error {
 		default:
 			return fmt.Errorf("unknown operator %s", node.Operator)
 		}
+	case *ast.VarStatement:
+		if err := c.Compile(node.Expression); err != nil {
+			return err
+		}
+		symbol := c.symbolTable.Define(node.Variable.Literal)
+		c.emit(bytecode.OpSetGlobal, symbol.Index)
+	case *ast.Identifier:
+		symbl, ok := c.symbolTable.Resolve(node.Literal)
+		if !ok {
+			return fmt.Errorf("variable is not defined: %s", node.Literal)
+		}
+		c.emit(bytecode.OpGetGlobal, symbl.Index)
 	case *ast.Number:
 		number := &object.Number{Value: node.Value}
 		c.emit(bytecode.OpConstant, c.addConstant(number))
