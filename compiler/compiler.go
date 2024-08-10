@@ -98,6 +98,8 @@ func (c *Compiler) Compile(node ast.Node) error {
 	case *ast.Number:
 		number := &object.Number{Value: node.Value}
 		c.emit(bytecode.OpConstant, c.addConstant(number))
+	case *ast.Null:
+		c.emit(bytecode.OpNull)
 	case *ast.Float:
 		number := &object.Float{Value: node.Value}
 		c.emit(bytecode.OpConstant, c.addConstant(number))
