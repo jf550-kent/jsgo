@@ -79,6 +79,20 @@ func (vm *VM) Run() error {
 			if err := vm.runMinus(); err != nil {
 				return err
 			}
+		case bytecode.OpJumpNotTrue:
+			pos := int(bytecode.ReadUint16(vm.instructions[ip+1:]))
+			ip += 2
+			result, err := vm.pop()
+			if err != nil {
+				return err
+			}
+			if !isTruthy(result) {
+				ip = pos - 1
+			}
+		case bytecode.OpJump:
+			// [OpJump 0, 3, OpConstant 0, 9]
+			pos := int(bytecode.ReadUint16(vm.instructions[ip+1:]))
+			ip = pos - 1
 		}
 	}
 	return nil
@@ -332,4 +346,15 @@ func nativeBool(input bool) *object.Boolean {
 		return TRUE
 	}
 	return FALSE
+}
+
+func isTruthy(obj object.Object) bool {
+	switch obj := obj.(type) {
+
+	case *object.Boolean:
+			return obj.Value
+
+	default:
+			return true
+	}
 }

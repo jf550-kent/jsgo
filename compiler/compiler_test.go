@@ -175,6 +175,44 @@ func TestBooleanExpression(t *testing.T) {
 	testCompilerTests(t, tests)
 }
 
+func TestConditionals(t *testing.T) {
+	tests := []compilerTestCase{
+			{
+					input: `
+					if (true) { 20 }; 88;
+					`, 
+					// [OpTrue, OpJumpNotTrue, operand1, operand1, OpConstant, operand1, operand1, OpPop, OpConstant, operand1, operand1, OpPop]
+					expectedConstants: []interface{}{20, 88},
+					expectedInstructions: []bytecode.Instructions{
+							bytecode.Make(bytecode.OpTrue), // 0
+							bytecode.Make(bytecode.OpJumpNotTrue, 7), // 1
+							bytecode.Make(bytecode.OpConstant, 0), // 4
+							bytecode.Make(bytecode.OpPop), // 7
+							bytecode.Make(bytecode.OpConstant, 1), // 8
+							bytecode.Make(bytecode.OpPop), // 11
+					},
+			},
+			{
+				input: `
+				if (true) { 10 } else { 20 }; 3333;
+				`,
+				expectedConstants: []any{10, 20, 3333},
+				expectedInstructions: []bytecode.Instructions{
+						bytecode.Make(bytecode.OpTrue),
+						bytecode.Make(bytecode.OpJumpNotTrue, 10),
+						bytecode.Make(bytecode.OpConstant, 0),
+						bytecode.Make(bytecode.OpJump, 13),
+						bytecode.Make(bytecode.OpConstant, 1),
+						bytecode.Make(bytecode.OpPop),
+						bytecode.Make(bytecode.OpConstant, 2),
+						bytecode.Make(bytecode.OpPop),
+				},
+		},
+	}
+
+	testCompilerTests(t, tests)
+}
+
 func testCompilerTests(t *testing.T, tests []compilerTestCase) {
 	t.Helper()
 
@@ -188,6 +226,7 @@ func testCompilerTests(t *testing.T, tests []compilerTestCase) {
 		}
 
 		bytecode := compiler.ByteCode()
+		aoksl := bytecode.Instructions.String(); print(aoksl) 
 
 		testInstructions(t, tt.expectedInstructions, bytecode.Instructions)
 		testConstants(t, tt.expectedConstants, bytecode.Constants)
