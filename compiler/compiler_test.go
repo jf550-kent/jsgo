@@ -259,6 +259,22 @@ func TestGlobalVarStatements(t *testing.T) {
 				bytecode.Make(bytecode.OpPop),
 			},
 		},
+		{
+			input: `
+            var one = 1;
+            one = 90;
+            one;
+            `,
+			expectedConstants: []interface{}{1, 90},
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpSetGlobal, 0),
+				bytecode.Make(bytecode.OpConstant, 1),
+				bytecode.Make(bytecode.OpSetGlobal, 0),
+				bytecode.Make(bytecode.OpGetGlobal, 0),
+				bytecode.Make(bytecode.OpPop),
+			},
+		},
 	}
 
 	testCompilerTests(t, tests)

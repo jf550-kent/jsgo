@@ -109,6 +109,15 @@ func (c *Compiler) Compile(node ast.Node) error {
 			return fmt.Errorf("variable is not defined: %s", node.Literal)
 		}
 		c.emit(bytecode.OpGetGlobal, symbl.Index)
+	case *ast.AssignmentStatement:
+		symbl, ok := c.symbolTable.Resolve(node.Identifier.Literal)
+		if !ok {
+			return fmt.Errorf("trying to assign an undefined variable: %s", node.Identifier.Literal)
+		}
+		if err := c.Compile(node.Expression); err != nil {
+			return err
+		}
+		c.emit(bytecode.OpSetGlobal, symbl.Index)
 	case *ast.Number:
 		number := &object.Number{Value: node.Value}
 		c.emit(bytecode.OpConstant, c.addConstant(number))

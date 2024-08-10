@@ -9,7 +9,10 @@ import (
 	"github.com/jf550-kent/jsgo/object"
 )
 
-const STACK_SIZE = 2048
+const (
+	STACK_SIZE           = 2048
+	MAX_GLOBAL_VARIABLES = 65536
+)
 
 var (
 	TRUE  = &object.Boolean{Value: true}
@@ -20,6 +23,7 @@ var (
 type VM struct {
 	constants    []object.Object
 	instructions bytecode.Instructions
+	globals      []object.Object
 
 	stack        []object.Object
 	stackPointer int // Must always points to the new value, the object at the top of the stack is stack[stackPointer -1]
@@ -29,6 +33,7 @@ func New(bytecode *compiler.Bytecode) *VM {
 	return &VM{
 		instructions: bytecode.Instructions,
 		constants:    bytecode.Constants,
+		globals:      make([]object.Object, MAX_GLOBAL_VARIABLES),
 
 		stack:        make([]object.Object, STACK_SIZE),
 		stackPointer: 0,
@@ -96,6 +101,25 @@ func (vm *VM) Run() error {
 			ip = pos - 1
 		case bytecode.OpNull:
 			if err := vm.push(NULL); err != nil {
+				return err
+			}
+		case bytecode.OpSetGlobal:
+			globalIndex := bytecode.ReadUint16(vm.instructions[ip+1:])
+			ip += 2
+			value, err := vm.pop()
+			if err != nil {
+				return err
+			}
+			vm.globals[globalIndex] = value
+		case bytecode.OpGetGlobal:
+			globalIndex := bytecode.ReadUint16(vm.instructions[ip+1:])
+			ip += 2
+			value := vm.globals[globalIndex]
+			if value == nil {
+				return fmt.Errorf("variable not defined")
+			}
+
+			if err := vm.push(value); err != nil {
 				return err
 			}
 		}
