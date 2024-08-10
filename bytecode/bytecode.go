@@ -77,8 +77,8 @@ var definitions = map[Opcode]*Definition{
 	OpDiv:      {"OpDiv", []int{}, 0, 0},
 	OpSHL:      {"OpSHL", []int{}, 0, 0},
 	OpXOR:      {"OpXOR", []int{}, 0, 0},
-	OpTrue: {"OpTrue", []int{}, 0, 0},
-	OpFalse: {"OpFalse", []int{}, 0, 0},
+	OpTrue:     {"OpTrue", []int{}, 0, 0},
+	OpFalse:    {"OpFalse", []int{}, 0, 0},
 }
 
 func Lookup(op byte) (*Definition, error) {

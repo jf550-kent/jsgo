@@ -10,8 +10,9 @@ import (
 )
 
 const STACK_SIZE = 2048
+
 var (
-	TRUE = &object.Boolean{Value: true}
+	TRUE  = &object.Boolean{Value: true}
 	FALSE = &object.Boolean{Value: false}
 )
 

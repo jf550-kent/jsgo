@@ -75,15 +75,15 @@ func TestCompileOperation(t *testing.T) {
 			},
 		},
 		{input: "true;", expectedConstants: []any{},
-		expectedInstructions: []bytecode.Instructions{
-			bytecode.Make(bytecode.OpTrue),
-			bytecode.Make(bytecode.OpPop),
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpTrue),
+				bytecode.Make(bytecode.OpPop),
 			},
 		},
 		{input: "false;", expectedConstants: []any{},
-		expectedInstructions: []bytecode.Instructions{
-			bytecode.Make(bytecode.OpFalse),
-			bytecode.Make(bytecode.OpPop),
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpFalse),
+				bytecode.Make(bytecode.OpPop),
 			},
 		},
 	}
