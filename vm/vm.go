@@ -11,6 +11,11 @@ import (
 
 const STACK_SIZE = 2048
 
+var (
+	TRUE  = &object.Boolean{Value: true}
+	FALSE = &object.Boolean{Value: false}
+)
+
 type VM struct {
 	constants    []object.Object
 	instructions bytecode.Instructions
@@ -58,6 +63,14 @@ func (vm *VM) Run() error {
 			}
 		case bytecode.OpPop:
 			vm.pop()
+		case bytecode.OpTrue:
+			if err := vm.push(TRUE); err != nil {
+				return err
+			}
+		case bytecode.OpFalse:
+			if err := vm.push(FALSE); err != nil {
+				return err
+			}
 		}
 	}
 	return nil
