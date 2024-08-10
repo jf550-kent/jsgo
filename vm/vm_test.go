@@ -52,6 +52,15 @@ func TestFloatOperation(t *testing.T) {
 	testVmTests(t, tests)
 }
 
+func TestBooleanExpression(t *testing.T) {
+	tests := []vmTestCase{
+		{"true;", true},
+		{"false;", false},
+	}
+
+	testVmTests(t, tests)
+}
+
 func testVmTests(t *testing.T, tests []vmTestCase) {
 	t.Helper()
 
@@ -82,6 +91,8 @@ func testObject(t *testing.T, expected any, actual object.Object) {
 		testNumberObject(t, int64(expected), actual)
 	case float64:
 		testFloat(t, expected, actual)
+	case bool:
+		testBoolean(t, expected, actual)
 	}
 }
 
@@ -101,6 +112,14 @@ func testFloat(t *testing.T, constant float64, obj object.Object) {
 
 	if fl.Value != constant {
 		t.Errorf("wrong float value: got=%v expected=%v", fl.Value, constant)
+	}
+}
+
+func testBoolean(t *testing.T, constant bool, obj object.Object) {
+	fl := checkObject[*object.Boolean](t, obj)
+
+	if fl.Value != constant {
+		t.Errorf("wrong number value: got=%v expected=%v", fl.Value, constant)
 	}
 }
 

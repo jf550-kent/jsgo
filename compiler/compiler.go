@@ -58,6 +58,12 @@ func (c *Compiler) Compile(node ast.Node) error {
 	case *ast.Float:
 		number := &object.Float{Value: node.Value}
 		c.emit(bytecode.OpConstant, c.addConstant(number))
+	case *ast.Boolean:
+		if node.Value {
+			c.emit(bytecode.OpTrue)
+		} else {
+			c.emit(bytecode.OpFalse)
+		}
 	}
 
 	return nil

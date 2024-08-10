@@ -16,8 +16,7 @@ type compilerTestCase struct {
 	expectedInstructions []bytecode.Instructions
 }
 
-// [CONSTANT 0 CONSTANT 1 ADD POP]
-func TestNumberOperation(t *testing.T) {
+func TestCompileOperation(t *testing.T) {
 	tests := []compilerTestCase{
 		{input: "1 + 2", expectedConstants: []any{1, 2},
 			expectedInstructions: []bytecode.Instructions{
@@ -73,6 +72,18 @@ func TestNumberOperation(t *testing.T) {
 				bytecode.Make(bytecode.OpConstant, 1),
 				bytecode.Make(bytecode.OpXOR),
 				bytecode.Make(bytecode.OpPop),
+			},
+		},
+		{input: "true;", expectedConstants: []any{},
+		expectedInstructions: []bytecode.Instructions{
+			bytecode.Make(bytecode.OpTrue),
+			bytecode.Make(bytecode.OpPop),
+			},
+		},
+		{input: "false;", expectedConstants: []any{},
+		expectedInstructions: []bytecode.Instructions{
+			bytecode.Make(bytecode.OpFalse),
+			bytecode.Make(bytecode.OpPop),
 			},
 		},
 	}
