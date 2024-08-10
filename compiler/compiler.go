@@ -61,6 +61,18 @@ func (c *Compiler) Compile(node ast.Node) error {
 		default:
 			return fmt.Errorf("unknown operator %s", node.Operator)
 		}
+	case *ast.UnaryExpression:
+		if err := c.Compile(node.Expression); err != nil {
+			return err
+		}
+		switch node.Operator {
+		case "!":
+			c.emit(bytecode.OpBang)
+		case "-":
+			c.emit(bytecode.OpMinus)
+		default:
+			return fmt.Errorf("unknown operator %s", node.Operator)
+		}
 	case *ast.Number:
 		number := &object.Number{Value: node.Value}
 		c.emit(bytecode.OpConstant, c.addConstant(number))
