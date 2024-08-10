@@ -175,6 +175,46 @@ func TestBooleanExpression(t *testing.T) {
 	testCompilerTests(t, tests)
 }
 
+func TestConditionals(t *testing.T) {
+	tests := []compilerTestCase{
+		{
+			input: `
+				if (true) { 10 } else { 20 }; 3333;
+				`,
+			expectedConstants: []any{10, 20, 3333},
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpTrue),
+				bytecode.Make(bytecode.OpJumpNotTrue, 10),
+				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpJump, 13),
+				bytecode.Make(bytecode.OpConstant, 1),
+				bytecode.Make(bytecode.OpPop),
+				bytecode.Make(bytecode.OpConstant, 2),
+				bytecode.Make(bytecode.OpPop),
+			},
+		},
+
+		{
+			input: `
+			if (true) { 10 }; 3333;
+			`,
+			expectedConstants: []any{10, 3333},
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpTrue),            // 0
+				bytecode.Make(bytecode.OpJumpNotTrue, 10), // 1
+				bytecode.Make(bytecode.OpConstant, 0),     // 4
+				bytecode.Make(bytecode.OpJump, 11),        // 7
+				bytecode.Make(bytecode.OpNull),            // 10
+				bytecode.Make(bytecode.OpPop),             // 11
+				bytecode.Make(bytecode.OpConstant, 1),     // 12
+				bytecode.Make(bytecode.OpPop),             // 15
+			},
+		},
+	}
+
+	testCompilerTests(t, tests)
+}
+
 func testCompilerTests(t *testing.T, tests []compilerTestCase) {
 	t.Helper()
 

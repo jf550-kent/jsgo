@@ -474,8 +474,6 @@ func TestForExpression(t *testing.T) {
 
 	main := Parse("", []byte([]byte(input)))
 
-	print(main)
-
 	forStmt := checkStatement[*ast.ForStatement](t, main.Statements[0])
 	initStmt := checkStatement[*ast.VarStatement](t, forStmt.Init)
 	testValueExpression(t, initStmt.Variable, "i")

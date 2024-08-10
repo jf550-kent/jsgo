@@ -27,8 +27,7 @@ func BenchmarkExample(b *testing.B) {
 func TestEval(t *testing.T) {
 	b, _ := os.ReadFile("./example.js")
 	main := parser.Parse("", b)
-	a := Eval(main)
-	print(a)
+	Eval(main)
 }
 
 func TestVarStatement(t *testing.T) {
