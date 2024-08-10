@@ -30,6 +30,9 @@ func (c *Compiler) Compile(node ast.Node) error {
 		}
 		c.emit(bytecode.OpPop)
 	case *ast.BinaryExpression:
+		if node.Operator == "<" {
+			return c.compileLessThan(node)
+		}
 		if err := c.Compile(node.Left); err != nil {
 			return err
 		}
@@ -49,6 +52,12 @@ func (c *Compiler) Compile(node ast.Node) error {
 			c.emit(bytecode.OpSHL)
 		case "^":
 			c.emit(bytecode.OpXOR)
+		case ">":
+			c.emit(bytecode.OpGreaterThan)
+		case "==":
+			c.emit(bytecode.OpEqual)
+		case "!=":
+			c.emit(bytecode.OpNotEqual)
 		default:
 			return fmt.Errorf("unknown operator %s", node.Operator)
 		}
@@ -93,6 +102,23 @@ func (c *Compiler) compileMain(node *ast.Main) error {
 			return err
 		}
 	}
+	return nil
+}
+
+func (c *Compiler) compileLessThan(node *ast.BinaryExpression) error {
+	if node.Operator != "<" {
+		panic("only use compileLSS for < operator")
+	}
+
+	if err := c.Compile(node.Right); err != nil {
+		return err
+	}
+
+	if err := c.Compile(node.Left); err != nil {
+		return err
+	}
+
+	c.emit(bytecode.OpGreaterThan)
 	return nil
 }
 

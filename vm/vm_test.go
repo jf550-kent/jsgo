@@ -56,6 +56,27 @@ func TestBooleanExpression(t *testing.T) {
 	tests := []vmTestCase{
 		{"true;", true},
 		{"false;", false},
+		{"3 < 4", true},
+		{"3 > 4", false},
+		{"3 < 3", false},
+		{"3 > 3", false},
+		{"3 == 3", true},
+		{"3 != 3", false},
+		{"3 == 4", false},
+		{"3 != 4", true},
+		{"true == true", true},
+		{"false == false", true},
+		{"true == false", false},
+		{"true != false", true},
+		{"false != true", true},
+		{"(3 < 4) == true", true},
+		{"(3 < 4) == false", false},
+		{"(3 > 4) == true", false},
+		{"(3 > 4) == false", true},
+		{"(3.10 > 4) == false", true},
+		{"(3.10 < 4) == true", true},
+		{"(3.10 == 4) == true", false},
+		{"(3.10 != 4) == false", false},
 	}
 
 	testVmTests(t, tests)
