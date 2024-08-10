@@ -94,13 +94,13 @@ func TestBooleanExpression(t *testing.T) {
 
 func TestConditionals(t *testing.T) {
 	tests := []vmTestCase{
-			{"if (true) { 100 }", 100},
-			{"if (true) { 190 } else { 20 }", 190},
-			{"if (false) { 10 } else { 33 } ", 33},
-			{"if (1) { 10 }", 10},
-			{"if (1 < 2) { 10 }", 10},
-			{"if (1 < 2) { 10 } else { 20 }", 10},
-			{"if (1 > 2) { 10 } else { 20 }", 20},
+		{"if (true) { 100 }", 100},
+		{"if (true) { 190 } else { 20 }", 190},
+		{"if (false) { 10 } else { 33 } ", 33},
+		{"if (1) { 10 }", 10},
+		{"if (1 < 2) { 10 }", 10},
+		{"if (1 < 2) { 10 } else { 20 }", 10},
+		{"if (1 > 2) { 10 } else { 20 }", 20},
 	}
 
 	testVmTests(t, tests)

@@ -13,7 +13,7 @@ const (
 )
 
 type EmittedInstruction struct {
-	Opcode bytecode.Opcode
+	Opcode   bytecode.Opcode
 	Position int
 }
 
@@ -21,7 +21,7 @@ type Compiler struct {
 	instructions bytecode.Instructions
 	constants    []object.Object
 
-	lastInstruction EmittedInstruction
+	lastInstruction     EmittedInstruction
 	previousInstruction EmittedInstruction
 }
 
@@ -29,9 +29,9 @@ type Compiler struct {
 
 func New() *Compiler {
 	return &Compiler{
-		instructions: bytecode.Instructions{},
-		constants:    []object.Object{},
-		lastInstruction: EmittedInstruction{},
+		instructions:        bytecode.Instructions{},
+		constants:           []object.Object{},
+		lastInstruction:     EmittedInstruction{},
 		previousInstruction: EmittedInstruction{},
 	}
 }
@@ -48,7 +48,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 	case *ast.BlockStatement:
 		for _, s := range node.Statements {
 			if err := c.Compile(s); err != nil {
-					return err
+				return err
 			}
 		}
 	case *ast.BinaryExpression:

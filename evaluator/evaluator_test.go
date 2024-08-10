@@ -475,7 +475,7 @@ func testValue(t *testing.T, obj object.Object, expectedValue any) {
 		if obj != v {
 			t.Errorf("expecting null got=%v", v)
 		}
-case string:
+	case string:
 		testString(t, obj, v)
 	case nil:
 		testNullObject(t, obj)

@@ -352,9 +352,9 @@ func isTruthy(obj object.Object) bool {
 	switch obj := obj.(type) {
 
 	case *object.Boolean:
-			return obj.Value
+		return obj.Value
 
 	default:
-			return true
+		return true
 	}
 }
