@@ -29,6 +29,10 @@ func TestNumberOperation(t *testing.T) {
 		{"5 * (2 + 10)", 60},
 		{"20 << 10", 20480},
 		{"99 ^ 8", 107},
+		{"-50", -50},
+		{"-90", -90},
+		{"-50 + 100 + -50", 0},
+		{"(5 + 10 * 2 + 15 / 3) * 2 + -10", 50},
 	}
 
 	testVmTests(t, tests)
@@ -77,6 +81,12 @@ func TestBooleanExpression(t *testing.T) {
 		{"(3.10 < 4) == true", true},
 		{"(3.10 == 4) == true", false},
 		{"(3.10 != 4) == false", false},
+		{"!true", false},
+		{"!false", true},
+		{"!5", false},
+		{"!!true", true},
+		{"!!false", false},
+		{"!!5", true},
 	}
 
 	testVmTests(t, tests)
@@ -140,7 +150,7 @@ func testBoolean(t *testing.T, constant bool, obj object.Object) {
 	fl := checkObject[*object.Boolean](t, obj)
 
 	if fl.Value != constant {
-		t.Errorf("wrong number value: got=%v expected=%v", fl.Value, constant)
+		t.Errorf("wrong boolean value: got=%v expected=%v", fl.Value, constant)
 	}
 }
 

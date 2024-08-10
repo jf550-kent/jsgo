@@ -71,6 +71,14 @@ func (vm *VM) Run() error {
 			if err := vm.runComparison(op); err != nil {
 				return err
 			}
+		case bytecode.OpBang:
+			if err := vm.runBang(); err != nil {
+				return err
+			}
+		case bytecode.OpMinus:
+			if err := vm.runMinus(); err != nil {
+				return err
+			}
 		}
 	}
 	return nil
@@ -246,6 +254,37 @@ func (vm *VM) compareFloat(op bytecode.Opcode, left, right object.Object) error 
 	default:
 		return fmt.Errorf("unknown operator: %d", op)
 	}
+}
+
+func (vm *VM) runBang() error {
+	operand, err := vm.pop()
+	if err != nil {
+		return err
+	}
+
+	switch operand {
+	case TRUE:
+		return vm.push(FALSE)
+	case FALSE:
+		return vm.push(TRUE)
+	}
+	return vm.push(FALSE)
+}
+
+func (vm *VM) runMinus() error {
+	operand, err := vm.pop()
+	if err != nil {
+		return err
+	}
+
+	switch r := operand.(type) {
+	case *object.Number:
+		return vm.push(&object.Number{Value: -r.Value})
+	case *object.Float:
+		return vm.push(&object.Float{Value: -r.Value})
+	}
+
+	return fmt.Errorf("unsupported type for negation: %s", operand.Type())
 }
 
 func (vm *VM) popLeftRight() (object.Object, object.Object, error) {

@@ -74,6 +74,15 @@ func TestCompileOperation(t *testing.T) {
 				bytecode.Make(bytecode.OpPop),
 			},
 		},
+		{
+			input:             "-1",
+			expectedConstants: []interface{}{1},
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpMinus),
+				bytecode.Make(bytecode.OpPop),
+			},
+		},
 	}
 
 	testCompilerTests(t, tests)
@@ -95,7 +104,7 @@ func TestBooleanExpression(t *testing.T) {
 		},
 		{
 			input:             "1 > 2",
-			expectedConstants: []interface{}{1, 2},
+			expectedConstants: []any{1, 2},
 			expectedInstructions: []bytecode.Instructions{
 				bytecode.Make(bytecode.OpConstant, 0),
 				bytecode.Make(bytecode.OpConstant, 1),
@@ -105,7 +114,7 @@ func TestBooleanExpression(t *testing.T) {
 		},
 		{
 			input:             "1 < 2",
-			expectedConstants: []interface{}{2, 1},
+			expectedConstants: []any{2, 1},
 			expectedInstructions: []bytecode.Instructions{
 				bytecode.Make(bytecode.OpConstant, 0),
 				bytecode.Make(bytecode.OpConstant, 1),
@@ -115,7 +124,7 @@ func TestBooleanExpression(t *testing.T) {
 		},
 		{
 			input:             "1 == 2",
-			expectedConstants: []interface{}{1, 2},
+			expectedConstants: []any{1, 2},
 			expectedInstructions: []bytecode.Instructions{
 				bytecode.Make(bytecode.OpConstant, 0),
 				bytecode.Make(bytecode.OpConstant, 1),
@@ -125,7 +134,7 @@ func TestBooleanExpression(t *testing.T) {
 		},
 		{
 			input:             "1 != 2",
-			expectedConstants: []interface{}{1, 2},
+			expectedConstants: []any{1, 2},
 			expectedInstructions: []bytecode.Instructions{
 				bytecode.Make(bytecode.OpConstant, 0),
 				bytecode.Make(bytecode.OpConstant, 1),
@@ -135,7 +144,7 @@ func TestBooleanExpression(t *testing.T) {
 		},
 		{
 			input:             "true == false",
-			expectedConstants: []interface{}{},
+			expectedConstants: []any{},
 			expectedInstructions: []bytecode.Instructions{
 				bytecode.Make(bytecode.OpTrue),
 				bytecode.Make(bytecode.OpFalse),
@@ -145,11 +154,20 @@ func TestBooleanExpression(t *testing.T) {
 		},
 		{
 			input:             "true != false",
-			expectedConstants: []interface{}{},
+			expectedConstants: []any{},
 			expectedInstructions: []bytecode.Instructions{
 				bytecode.Make(bytecode.OpTrue),
 				bytecode.Make(bytecode.OpFalse),
 				bytecode.Make(bytecode.OpNotEqual),
+				bytecode.Make(bytecode.OpPop),
+			},
+		},
+		{
+			input:             "!true",
+			expectedConstants: []any{},
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpTrue),
+				bytecode.Make(bytecode.OpBang),
 				bytecode.Make(bytecode.OpPop),
 			},
 		},
