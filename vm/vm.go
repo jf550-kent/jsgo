@@ -42,21 +42,17 @@ func (vm *VM) StackTop() object.Object {
 	return vm.stack[vm.stackPointer-1]
 }
 
-// [9 6 2]
 func (vm *VM) Run() error {
 	for ip := 0; ip < len(vm.instructions); ip++ {
 		op := bytecode.Opcode(vm.instructions[ip])
 
-		// PUSH 0000 0001 PUSH 0000 0001
 		switch op {
 		case bytecode.OpConstant:
 			constantIndex := bytecode.ReadUint16(vm.instructions[ip+1:])
 			ip += 2
-
 			if err := vm.push(vm.constants[constantIndex]); err != nil {
 				return err
 			}
-
 		case bytecode.OpAdd, bytecode.OpSub, bytecode.OpMul, bytecode.OpDiv, bytecode.OpSHL, bytecode.OpXOR:
 			if err := vm.runBinaryOperation(op); err != nil {
 				return err
@@ -71,38 +67,52 @@ func (vm *VM) Run() error {
 			if err := vm.push(FALSE); err != nil {
 				return err
 			}
+		case bytecode.OpEqual, bytecode.OpGreaterThan, bytecode.OpNotEqual:
+			if err := vm.runComparison(op); err != nil {
+				return err
+			}
 		}
 	}
 	return nil
 }
 
 func (vm *VM) runBinaryOperation(op bytecode.Opcode) error {
-	right, err := vm.pop()
-	if err != nil {
-		return err
-	}
-	left, err := vm.pop()
+	left, right, err := vm.popLeftRight()
 	if err != nil {
 		return err
 	}
 
+	switch {
+	case left.Type() == object.NUMBER_OBJECT || left.Type() == object.FLOAT_OBJECT:
+		left, right, isNumber, err := vm.checkNumberType(left, right)
+		if err != nil {
+			break
+		}
+		if isNumber {
+			return vm.runNumberOperation(op, left, right)
+		}
+		return vm.runFloatOperation(op, left, right)
+	}
+
+	return fmt.Errorf("unsupported binary operation: %s %s", left.Type(), right.Type())
+}
+
+func (vm *VM) checkNumberType(left, right object.Object) (object.Object, object.Object, bool, error) {
 	lType := left.Type()
 	rType := right.Type()
 
 	switch {
 	case lType == object.NUMBER_OBJECT && rType == object.NUMBER_OBJECT:
-		return vm.runNumberOperation(op, left, right)
+		return left, right, true, nil
 	case lType == object.FLOAT_OBJECT && rType == object.FLOAT_OBJECT:
-		return vm.runFloatOperation(op, left, right)
+		return left, right, false, nil
 	case (lType == object.FLOAT_OBJECT && rType == object.NUMBER_OBJECT) || (lType == object.NUMBER_OBJECT && rType == object.FLOAT_OBJECT):
 		l := object.ConvertFloat(left)
 		r := object.ConvertFloat(right)
-		return vm.runFloatOperation(op, l, r)
-	case lType != rType:
-		return fmt.Errorf("type mismatch: %s %s", left.Type(), right.Type())
+		return l, r, false, nil
 	}
 
-	return fmt.Errorf("unsupported binary operation: %s %s", left.Type(), right.Type())
+	return left, right, false, fmt.Errorf("left and right is not a number or float")
 }
 
 func (vm *VM) runNumberOperation(op bytecode.Opcode, left, right object.Object) error {
@@ -167,6 +177,90 @@ func (vm *VM) runFloatOperation(op bytecode.Opcode, left, right object.Object) e
 	return vm.push(&object.Float{Value: result})
 }
 
+func (vm *VM) runComparison(op bytecode.Opcode) error {
+	left, right, err := vm.popLeftRight()
+	if err != nil {
+		return err
+	}
+
+	if l, r, isNumber, err := vm.checkNumberType(left, right); err == nil {
+		if isNumber {
+			return vm.compareNumber(op, l, r)
+		}
+		return vm.compareFloat(op, l, r)
+	} else {
+		if err.Error() != "left and right is not a number or float" {
+			return err
+		}
+	}
+
+	switch op {
+	case bytecode.OpEqual:
+		return vm.push(nativeBool(right == left))
+	case bytecode.OpNotEqual:
+		return vm.push(nativeBool(right != left))
+	default:
+		return fmt.Errorf("unknown operator: %d (%s %s)", op, left.Type(), right.Type())
+	}
+}
+
+func (vm *VM) compareNumber(op bytecode.Opcode, left, right object.Object) error {
+	leftValue, ok := left.(*object.Number)
+	if !ok {
+		return fmt.Errorf("unable to assert number type for compare operation got=%T instead", left)
+	}
+	rightValue, ok := right.(*object.Number)
+	if !ok {
+		return fmt.Errorf("unable to assert number type for compare operation got=%T instead", right)
+	}
+
+	switch op {
+	case bytecode.OpEqual:
+		return vm.push(nativeBool(rightValue.Value == leftValue.Value))
+	case bytecode.OpNotEqual:
+		return vm.push(nativeBool(rightValue.Value != leftValue.Value))
+	case bytecode.OpGreaterThan:
+		return vm.push(nativeBool(leftValue.Value > rightValue.Value))
+	default:
+		return fmt.Errorf("unknown operator: %d", op)
+	}
+}
+
+func (vm *VM) compareFloat(op bytecode.Opcode, left, right object.Object) error {
+	leftValue, ok := left.(*object.Float)
+	if !ok {
+		return fmt.Errorf("unable to assert float type for binary operation got=%T instead", left)
+	}
+	rightValue, ok := right.(*object.Float)
+	if !ok {
+		return fmt.Errorf("unable to assert float type for binary operation got=%T instead", left)
+	}
+
+	switch op {
+	case bytecode.OpEqual:
+		return vm.push(nativeBool(rightValue.Value == leftValue.Value))
+	case bytecode.OpNotEqual:
+		return vm.push(nativeBool(rightValue.Value != leftValue.Value))
+	case bytecode.OpGreaterThan:
+		return vm.push(nativeBool(leftValue.Value > rightValue.Value))
+	default:
+		return fmt.Errorf("unknown operator: %d", op)
+	}
+}
+
+func (vm *VM) popLeftRight() (object.Object, object.Object, error) {
+	right, err := vm.pop()
+	if err != nil {
+		return nil, nil, err
+	}
+	left, err := vm.pop()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return left, right, nil
+}
+
 func (vm *VM) push(ob object.Object) error {
 	if vm.stackPointer >= STACK_SIZE {
 		return errors.New("stack overflow")
@@ -192,4 +286,11 @@ func (vm *VM) lastPopStack() object.Object {
 		panic("vm stack pointer is non zero")
 	}
 	return vm.stack[vm.stackPointer]
+}
+
+func nativeBool(input bool) *object.Boolean {
+	if input {
+		return TRUE
+	}
+	return FALSE
 }
