@@ -119,16 +119,17 @@ func (c *Compiler) Compile(node ast.Node) error {
 		if c.lastInstructionIsPop() {
 			c.removeLastPop()
 		}
-		if node.Else == nil {
-			return c.changeOpJumpNotTrueOperand(jumpNotTruePos)
-		}
 		jumpTo := c.emit(bytecode.OpJump, TEMP_POSITION)
-		c.changeOpJumpNotTrueOperand(jumpNotTruePos)
-		if err := c.Compile(node.Else); err != nil {
-			return err
-		}
-		if c.lastInstructionIsPop() {
-			c.removeLastPop()
+		c.changeOperand(jumpNotTruePos, len(c.instructions))
+		if node.Else == nil {
+			c.emit(bytecode.OpNull)
+		} else {
+			if err := c.Compile(node.Else); err != nil {
+				return err
+			}
+			if c.lastInstructionIsPop() {
+				c.removeLastPop()
+			}
 		}
 		c.changeOperand(jumpTo, len(c.instructions))
 	}
@@ -199,17 +200,6 @@ func (c *Compiler) swapInstruction(pos int, newInstruction []byte) {
 	for i := 0; i < len(newInstruction); i++ {
 		c.instructions[pos+i] = newInstruction[i]
 	}
-}
-
-func (c *Compiler) changeOpJumpNotTrueOperand(pos int) error {
-	last := len(c.instructions)
-	instrt := bytecode.Make(bytecode.OpJumpNotTrue, last)
-
-	for _, b := range instrt {
-		c.instructions[pos] = b
-		pos++
-	}
-	return nil
 }
 
 type Bytecode struct {

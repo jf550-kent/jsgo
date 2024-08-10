@@ -101,6 +101,9 @@ func TestConditionals(t *testing.T) {
 		{"if (1 < 2) { 10 }", 10},
 		{"if (1 < 2) { 10 } else { 20 }", 10},
 		{"if (1 > 2) { 10 } else { 20 }", 20},
+		{"if (1 > 2) { 10 }", NULL},
+		{"if (false) { 10 }", NULL},
+		{"!(if (false) { 5; })", true},
 	}
 
 	testVmTests(t, tests)
@@ -121,8 +124,6 @@ func testVmTests(t *testing.T, tests []vmTestCase) {
 		if err := vm.Run(); err != nil {
 			t.Fatalf("vm error: %s", err)
 		}
-		i := com.ByteCode().Instructions.String()
-		print(i)
 
 		result := vm.lastPopStack()
 
@@ -138,6 +139,10 @@ func testObject(t *testing.T, expected any, actual object.Object) {
 		testFloat(t, expected, actual)
 	case bool:
 		testBoolean(t, expected, actual)
+	case *object.Null:
+		if expected != NULL {
+			t.Errorf("expected null got=%v", expected)
+		}
 	}
 }
 
