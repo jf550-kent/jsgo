@@ -85,7 +85,9 @@ func (vm *VM) runBinaryOperation(op bytecode.Opcode) error {
 	switch {
 	case left.Type() == object.NUMBER_OBJECT || left.Type() == object.FLOAT_OBJECT:
 		left, right, isNumber, err := vm.checkNumberType(left, right)
-		if err != nil { break }
+		if err != nil {
+			break
+		}
 		if isNumber {
 			return vm.runNumberOperation(op, left, right)
 		}
@@ -95,7 +97,7 @@ func (vm *VM) runBinaryOperation(op bytecode.Opcode) error {
 	return fmt.Errorf("unsupported binary operation: %s %s", left.Type(), right.Type())
 }
 
-func (vm *VM) checkNumberType(left, right object.Object) (object.Object, object.Object, bool, error) { 
+func (vm *VM) checkNumberType(left, right object.Object) (object.Object, object.Object, bool, error) {
 	lType := left.Type()
 	rType := right.Type()
 
