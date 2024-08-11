@@ -51,6 +51,8 @@ func (vm *VM) StackTop() object.Object {
 func (vm *VM) Run() error {
 	for ip := 0; ip < len(vm.instructions); ip++ {
 		op := bytecode.Opcode(vm.instructions[ip])
+		aoksl := vm.instructions.String()
+		print(aoksl)
 
 		switch op {
 		case bytecode.OpConstant:
@@ -111,6 +113,42 @@ func (vm *VM) Run() error {
 				return err
 			}
 			vm.globals[globalIndex] = value
+		case bytecode.OpArray:
+			size := int(bytecode.ReadUint16(vm.instructions[ip+1:]))
+			ip += 2
+			start := vm.stackPointer - size
+			array := vm.makeArray(start, vm.stackPointer, size)
+			vm.stackPointer = start
+
+			if err := vm.push(array); err != nil {
+				return err
+			}
+		case bytecode.OpDic:
+			size := int(bytecode.ReadUint16(vm.instructions[ip+1:]))
+			ip += 2
+			start := vm.stackPointer - size
+			dictionary, err := vm.makeDictionary(start, vm.stackPointer)
+			if err != nil {
+				return err
+			}
+			vm.stackPointer = start
+			if err := vm.push(dictionary); err != nil {
+				return err
+			}
+		case bytecode.OpIndex:
+			index, err := vm.pop()
+			if err != nil {
+				return err
+			}
+			identifier, err := vm.pop()
+			if err != nil {
+				return err
+			}
+
+			if err := vm.runIndexExpression(identifier, index); err != nil {
+				return err
+			}
+
 		case bytecode.OpGetGlobal:
 			globalIndex := bytecode.ReadUint16(vm.instructions[ip+1:])
 			ip += 2
@@ -125,6 +163,82 @@ func (vm *VM) Run() error {
 		}
 	}
 	return nil
+}
+
+func (vm *VM) runIndexExpression(identifier, index object.Object) error {
+	identifierType := identifier.Type()
+	indexType := index.Type()
+	switch {
+	case identifierType == object.ARRAY_OBJECT && indexType == object.NUMBER_OBJECT:
+		return vm.runArrayIndex(identifier, index)
+	case identifierType == object.DICTIONARY_OBJECT && indexType == object.NUMBER_OBJECT:
+		return vm.runDictionaryIndex(identifier, index)
+	}
+
+	return fmt.Errorf("index operation not supported for %s[%s]", identifierType, indexType)
+}
+
+func (vm *VM) runArrayIndex(identifier, index object.Object) error {
+	arrayObj, ok := identifier.(*object.Array)
+	if !ok {
+		return fmt.Errorf("not array object passed to index array")
+	}
+	num, ok := index.(*object.Number)
+	if !ok {
+		return fmt.Errorf("non number is used to index array")
+	}
+	numIdex := num.Value
+	max := int64(len(arrayObj.Body) - 1)
+
+	if numIdex < 0 || numIdex > max {
+		return vm.push(NULL)
+	}
+	return vm.push(arrayObj.Body[numIdex])
+}
+
+func (vm *VM) runDictionaryIndex(identifier, index object.Object) error {
+	dic, ok := identifier.(*object.Dictionary)
+	if !ok {
+		return fmt.Errorf("identifier is not an dictionary for indexing")
+	}
+
+	key, ok := index.(object.Hasher)
+	if !ok {
+		return fmt.Errorf("unable to hash key for indexing dictionary")
+	}
+
+	keyValue, ok := dic.Value[key.Hash()]
+	if !ok {
+		return vm.push(NULL)
+	}
+	return vm.push(keyValue.Value)
+}
+
+func (vm *VM) makeDictionary(start, end int) (object.Object, error) {
+	dic := make(map[object.Hash]object.KeyValue)
+
+	for i := start; i < end; i += 2 {
+		key := vm.stack[i]
+		value := vm.stack[i+1]
+		hash, ok := key.(object.Hasher)
+
+		if !ok {
+			return nil, fmt.Errorf("dictionary key unhashbale: %s", key.String())
+		}
+
+		keyHash := hash.Hash()
+		dic[keyHash] = object.KeyValue{Key: key, Value: value}
+	}
+	return &object.Dictionary{Value: dic}, nil
+}
+
+func (vm *VM) makeArray(start, end, size int) object.Object {
+	arr := make([]object.Object, size)
+
+	for i := start; i < end; i++ {
+		arr[i-start] = vm.stack[i]
+	}
+	return &object.Array{Body: arr}
 }
 
 func (vm *VM) runBinaryOperation(op bytecode.Opcode) error {
