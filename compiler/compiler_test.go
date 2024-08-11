@@ -418,6 +418,143 @@ func TestIndexing(t *testing.T) {
 	testCompilerTests(t, tests)
 }
 
+func TestFunction(t *testing.T) {
+	tests := []compilerTestCase{
+		{
+			input: "function() { return 19 + 20; }",
+			expectedConstants: []any{
+				19, 20,
+				[]bytecode.Instructions{
+					bytecode.Make(bytecode.OpConstant, 0),
+					bytecode.Make(bytecode.OpConstant, 1),
+					bytecode.Make(bytecode.OpAdd),
+					bytecode.Make(bytecode.OpReturnValue),
+				},
+			},
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpConstant, 2),
+				bytecode.Make(bytecode.OpPop),
+			},
+		},
+		{
+			input: "function() { 10 }",
+			expectedConstants: []any{
+				10,
+				[]bytecode.Instructions{
+					bytecode.Make(bytecode.OpConstant, 0),
+					bytecode.Make(bytecode.OpReturnValue), 
+				},
+			},
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpConstant, 1),
+				bytecode.Make(bytecode.OpPop),
+			},
+		},
+		{
+			input: "function() {89; 99;};",
+			expectedConstants: []any{
+				89,
+				99,
+				[]bytecode.Instructions{
+					bytecode.Make(bytecode.OpConstant, 0),
+					bytecode.Make(bytecode.OpPop),
+					bytecode.Make(bytecode.OpConstant, 1),
+					bytecode.Make(bytecode.OpReturnValue),
+				},
+			},
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpConstant, 2),
+				bytecode.Make(bytecode.OpPop),
+			},
+		},
+		{
+			input: "function() {};",
+			expectedConstants: []any{
+				bytecode.Make(bytecode.OpReturn),
+			},
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpPop),
+			},
+		},
+		{
+			input: "function() {90}();",
+			expectedConstants: []any{
+				90,
+				[]bytecode.Instructions{
+					bytecode.Make(bytecode.OpConstant, 0),
+					bytecode.Make(bytecode.OpReturnValue),
+				},
+			},
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpConstant, 1),
+				bytecode.Make(bytecode.OpCall),
+				bytecode.Make(bytecode.OpPop),
+			},
+		},
+		{
+			input: "var foo = function() {90}; foo();",
+			expectedConstants: []any{
+				90,
+				[]bytecode.Instructions{
+					bytecode.Make(bytecode.OpConstant, 0),
+					bytecode.Make(bytecode.OpReturnValue),
+				},
+			},
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpConstant, 1),
+				bytecode.Make(bytecode.OpSetGlobal, 0),
+				bytecode.Make(bytecode.OpGetGlobal, 0),
+				bytecode.Make(bytecode.OpCall),
+				bytecode.Make(bytecode.OpPop),
+			},
+		},
+	}
+
+	testCompilerTests(t, tests)
+}
+
+func TestCompilerScopes(t *testing.T) {
+	compiler := New()
+	if compiler.scopeIndex != 0 {
+		t.Errorf("scopeIndex should be 0. got=%d", compiler.scopeIndex)
+	}
+	compiler.emit(bytecode.OpMinus)
+	compiler.enterScope()
+	if compiler.scopeIndex != 1 {
+		t.Errorf("scopeIndex should be1. got=%d", compiler.scopeIndex)
+	}
+
+	compiler.emit(bytecode.OpMul)
+	if len(compiler.scopesStack[compiler.scopeIndex].instructions) != 1 {
+		t.Errorf("instructions length wrong got=%d", len(compiler.scopesStack[compiler.scopeIndex].instructions))
+	}
+
+	last := compiler.scopesStack[compiler.scopeIndex].lastInstruction
+	if last.Opcode != bytecode.OpMul {
+		t.Errorf("last instructions.Opcode wrong: got=%d expected=%d", last.Opcode, bytecode.OpMul)
+	}
+
+	compiler.leaveScope()
+	if compiler.scopeIndex != 0 {
+		t.Errorf("scope index should be 1 : got=%d", compiler.scopeIndex)
+	}
+
+	compiler.emit(bytecode.OpAdd)
+	if len(compiler.scopesStack[compiler.scopeIndex].instructions) != 2 {
+		t.Errorf("should have 2 instructions: got =%d", len(compiler.scopesStack[compiler.scopeIndex].instructions))
+	}
+
+	last = compiler.scopesStack[compiler.scopeIndex].lastInstruction
+	if last.Opcode != bytecode.OpAdd {
+		t.Errorf("last instructions.Opcode wrong: got=%d expected=%d", last.Opcode, bytecode.OpAdd)
+	}
+	previous := compiler.scopesStack[compiler.scopeIndex].previousInstruction
+	if previous.Opcode != bytecode.OpMinus {
+		t.Errorf("last instructions.Opcode wrong: got=%d expected=%d", last.Opcode, bytecode.OpMinus)
+	}
+}
+
 func testCompilerTests(t *testing.T, tests []compilerTestCase) {
 	t.Helper()
 
@@ -462,6 +599,12 @@ func testConstants(t *testing.T, expected []any, actual []object.Object) {
 			testNumberObject(t, int64(constant), actual[i])
 		case string:
 			testStringObject(t, constant, actual[i])
+		case []bytecode.Instructions:
+			function, ok := actual[i].(*object.BytecodeFunction)
+			if !ok {
+				t.Errorf("constant not a function")
+			}
+			testInstructions(t, constant, function.Instructions)
 		}
 	}
 }

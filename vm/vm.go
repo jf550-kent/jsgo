@@ -27,6 +27,9 @@ type VM struct {
 
 	stack        []object.Object
 	stackPointer int // Must always points to the new value, the object at the top of the stack is stack[stackPointer -1]
+
+	frames []*Frame
+	framesIndex int
 }
 
 func New(bytecode *compiler.Bytecode) *VM {
@@ -213,6 +216,16 @@ func (vm *VM) runDictionaryIndex(identifier, index object.Object) error {
 	}
 	return vm.push(keyValue.Value)
 }
+
+func (vm *VM) currentFrame() *Frame {
+	return vm.frames[vm.framesIndex-1]
+}
+
+func (vm *VM) pushFrame(f *Frame) {
+    vm.frames[vm.framesIndex] = f
+    vm.framesIndex++
+}
+
 
 func (vm *VM) makeDictionary(start, end int) (object.Object, error) {
 	dic := make(map[object.Hash]object.KeyValue)
