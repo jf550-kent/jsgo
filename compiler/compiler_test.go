@@ -280,6 +280,144 @@ func TestGlobalVarStatements(t *testing.T) {
 	testCompilerTests(t, tests)
 }
 
+func TestStringExpression(t *testing.T) {
+	tests := []compilerTestCase{
+		{
+			input:             `"Hello world!"`,
+			expectedConstants: []any{"Hello world!"},
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpPop),
+			},
+		},
+	}
+
+	testCompilerTests(t, tests)
+}
+
+func TestArrayLiterals(t *testing.T) {
+	tests := []compilerTestCase{
+		{
+			input:             "[]",
+			expectedConstants: []interface{}{},
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpArray, 0),
+				bytecode.Make(bytecode.OpPop),
+			},
+		},
+		{
+			input:             "[10, 8, 9]",
+			expectedConstants: []interface{}{10, 8, 9},
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpConstant, 1),
+				bytecode.Make(bytecode.OpConstant, 2),
+				bytecode.Make(bytecode.OpArray, 3),
+				bytecode.Make(bytecode.OpPop),
+			},
+		},
+		{
+			input:             "[1 + 2, 3 - 4, 5 * 6]",
+			expectedConstants: []interface{}{1, 2, 3, 4, 5, 6},
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpConstant, 1),
+				bytecode.Make(bytecode.OpAdd),
+				bytecode.Make(bytecode.OpConstant, 2),
+				bytecode.Make(bytecode.OpConstant, 3),
+				bytecode.Make(bytecode.OpSub),
+				bytecode.Make(bytecode.OpConstant, 4),
+				bytecode.Make(bytecode.OpConstant, 5),
+				bytecode.Make(bytecode.OpMul),
+				bytecode.Make(bytecode.OpArray, 3),
+				bytecode.Make(bytecode.OpPop),
+			},
+		},
+	}
+
+	testCompilerTests(t, tests)
+}
+
+func TestDictionary(t *testing.T) {
+	tests := []compilerTestCase{
+		{
+			input:             "{}",
+			expectedConstants: []any{},
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpDic, 0),
+				bytecode.Make(bytecode.OpPop),
+			},
+		},
+		{
+			input:             "{1: 2, 3: 4, 5: 6}",
+			expectedConstants: []any{1, 2, 3, 4, 5, 6},
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpConstant, 1),
+				bytecode.Make(bytecode.OpConstant, 2),
+				bytecode.Make(bytecode.OpConstant, 3),
+				bytecode.Make(bytecode.OpConstant, 4),
+				bytecode.Make(bytecode.OpConstant, 5),
+				bytecode.Make(bytecode.OpDic, 6),
+				bytecode.Make(bytecode.OpPop),
+			},
+		},
+		{
+			input:             "{1: 2 + 3, 4: 5 * 6}",
+			expectedConstants: []any{1, 2, 3, 4, 5, 6},
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpConstant, 1),
+				bytecode.Make(bytecode.OpConstant, 2),
+				bytecode.Make(bytecode.OpAdd),
+				bytecode.Make(bytecode.OpConstant, 3),
+				bytecode.Make(bytecode.OpConstant, 4),
+				bytecode.Make(bytecode.OpConstant, 5),
+				bytecode.Make(bytecode.OpMul),
+				bytecode.Make(bytecode.OpDic, 4),
+				bytecode.Make(bytecode.OpPop),
+			},
+		},
+	}
+
+	testCompilerTests(t, tests)
+}
+
+func TestIndexing(t *testing.T) {
+	tests := []compilerTestCase{
+		{
+			input:             "[1, 2, 3][1 + 1]",
+			expectedConstants: []any{1, 2, 3, 1, 1},
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpConstant, 1),
+				bytecode.Make(bytecode.OpConstant, 2),
+				bytecode.Make(bytecode.OpArray, 3),
+				bytecode.Make(bytecode.OpConstant, 3),
+				bytecode.Make(bytecode.OpConstant, 4),
+				bytecode.Make(bytecode.OpAdd),
+				bytecode.Make(bytecode.OpIndex),
+				bytecode.Make(bytecode.OpPop),
+			},
+		},
+		{
+			input:             "{1: 2}[2 - 1]",
+			expectedConstants: []any{1, 2, 2, 1},
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpConstant, 1),
+				bytecode.Make(bytecode.OpDic, 2),
+				bytecode.Make(bytecode.OpConstant, 2),
+				bytecode.Make(bytecode.OpConstant, 3),
+				bytecode.Make(bytecode.OpSub),
+				bytecode.Make(bytecode.OpIndex),
+				bytecode.Make(bytecode.OpPop),
+			},
+		},
+	}
+	testCompilerTests(t, tests)
+}
+
 func testCompilerTests(t *testing.T, tests []compilerTestCase) {
 	t.Helper()
 
@@ -322,7 +460,19 @@ func testConstants(t *testing.T, expected []any, actual []object.Object) {
 		switch constant := constant.(type) {
 		case int:
 			testNumberObject(t, int64(constant), actual[i])
+		case string:
+			testStringObject(t, constant, actual[i])
 		}
+	}
+}
+
+func testStringObject(t *testing.T, constant string, act object.Object) {
+	actual, ok := act.(*object.String)
+	if !ok {
+		t.Errorf("expecting number got=%T", act)
+	}
+	if constant != actual.Value {
+		t.Errorf("wrong string literal got=%s expected=%s", actual.Value, constant)
 	}
 }
 

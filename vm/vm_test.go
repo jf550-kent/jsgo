@@ -120,6 +120,63 @@ func TestGlobalStatement(t *testing.T) {
 	testVmTests(t, tests)
 }
 
+func TestStringExpression(t *testing.T) {
+	tests := []vmTestCase{
+		{`"Hello world"`, "Hello world"},
+	}
+	testVmTests(t, tests)
+}
+
+func TestArray(t *testing.T) {
+	tests := []vmTestCase{
+		{"[]", []int{}},
+		{"[8, 9, 10]", []int{8, 9, 10}},
+		{"[1 + 3, 5 * 6, 9 + 1]", []int{4, 30, 10}},
+	}
+
+	testVmTests(t, tests)
+}
+
+func TestDictionary(t *testing.T) {
+	tests := []vmTestCase{
+		{
+			"{}", map[object.Hash]int64{},
+		},
+		{
+			"{1: 2, 2: 3}",
+			map[object.Hash]int64{
+				(&object.Number{Value: 1}).Hash(): 2,
+				(&object.Number{Value: 2}).Hash(): 3,
+			},
+		},
+		{
+			"{1 + 1: 2 * 2, 3 + 3: 4 * 4}",
+			map[object.Hash]int64{
+				(&object.Number{Value: 2}).Hash(): 4,
+				(&object.Number{Value: 6}).Hash(): 16,
+			},
+		},
+	}
+
+	testVmTests(t, tests)
+}
+
+func TestIndexing(t *testing.T) {
+	tests := []vmTestCase{
+		{"[1, 2, 3][1]", 2},
+		{"[1, 2, 3][0 + 2]", 3},
+		{"[[1, 1, 1]][0][0]", 1},
+		{"[][0]", NULL},
+		{"[1, 2, 3][99]", NULL},
+		{"[1][-1]", NULL},
+		{"{1: 1, 2: 2}[1]", 1},
+		{"{1: 1, 2: 2}[2]", 2},
+		{"{1: 1}[0]", NULL},
+		{"{}[0]", NULL},
+	}
+
+	testVmTests(t, tests)
+}
 func testVmTests(t *testing.T, tests []vmTestCase) {
 	t.Helper()
 
@@ -150,6 +207,36 @@ func testObject(t *testing.T, expected any, actual object.Object) {
 		testFloat(t, expected, actual)
 	case bool:
 		testBoolean(t, expected, actual)
+	case string:
+		testString(t, expected, actual)
+	case []int:
+		array, ok := actual.(*object.Array)
+		if !ok {
+			t.Errorf("object not Array: %T (%+v)", actual, actual)
+		}
+		if len(array.Body) != len(expected) {
+			t.Errorf("wrong num of elements. want=%d, got=%d", len(expected), len(array.Body))
+		}
+		for i, expectedElem := range expected {
+			testNumberObject(t, int64(expectedElem), array.Body[i])
+		}
+	case map[object.Hash]int64:
+		dic, ok := actual.(*object.Dictionary)
+		if !ok {
+			t.Errorf("object is not Dictinary. got=%T (%+v)", actual, actual)
+		}
+
+		if len(dic.Value) != len(expected) {
+			t.Errorf("dictionary has wrong number of key-value pair. want=%d, got=%d", len(expected), len(dic.Value))
+		}
+
+		for expectedKey, expectedValue := range expected {
+			pair, ok := dic.Value[expectedKey]
+			if !ok {
+				t.Errorf("no pair for given key in Pairs")
+			}
+			testNumberObject(t, expectedValue, pair.Value)
+		}
 	case *object.Null:
 		if expected != NULL {
 			t.Errorf("expected null got=%v", expected)
@@ -181,6 +268,14 @@ func testBoolean(t *testing.T, constant bool, obj object.Object) {
 
 	if fl.Value != constant {
 		t.Errorf("wrong boolean value: got=%v expected=%v", fl.Value, constant)
+	}
+}
+
+func testString(t *testing.T, v string, obj object.Object) {
+	s := checkObject[*object.String](t, obj)
+
+	if s.Value != v {
+		t.Errorf("wrong string value: got=%v expected=%v", s.Value, v)
 	}
 }
 

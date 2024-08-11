@@ -2,6 +2,7 @@ package compiler
 
 import (
 	"fmt"
+	"sort"
 
 	"github.com/jf550-kent/jsgo/ast"
 	"github.com/jf550-kent/jsgo/bytecode"
@@ -132,6 +133,43 @@ func (c *Compiler) Compile(node ast.Node) error {
 		} else {
 			c.emit(bytecode.OpFalse)
 		}
+	case *ast.String:
+		str := &object.String{Value: node.Value}
+		c.emit(bytecode.OpConstant, c.addConstant(str))
+	case *ast.Array:
+		for _, a := range node.Body {
+			if err := c.Compile(a); err != nil {
+				return err
+			}
+		}
+		c.emit(bytecode.OpArray, len(node.Body))
+	case *ast.Dictionary:
+		keys := []ast.Expression{}
+		for k := range node.Object {
+			keys = append(keys, k)
+		}
+		sort.Slice(keys, func(i, j int) bool {
+			return keys[i].String() < keys[j].String()
+		})
+
+		for _, k := range keys {
+			if err := c.Compile(k); err != nil {
+				return err
+			}
+			if err := c.Compile(node.Object[k]); err != nil {
+				return err
+			}
+		}
+		size := len(keys) * 2
+		c.emit(bytecode.OpDic, size)
+	case *ast.Index:
+		if err := c.Compile(node.Identifier); err != nil {
+			return err
+		}
+		if err := c.Compile(node.Index); err != nil {
+			return err
+		}
+		c.emit(bytecode.OpIndex)
 	case *ast.IFExpression:
 		if err := c.Compile(node.Condition); err != nil {
 			return err
