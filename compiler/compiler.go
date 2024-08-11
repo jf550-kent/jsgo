@@ -19,8 +19,8 @@ type EmittedInstruction struct {
 }
 
 type CompilationScope struct {
-	instructions bytecode.Instructions
-	lastInstruction EmittedInstruction
+	instructions        bytecode.Instructions
+	lastInstruction     EmittedInstruction
 	previousInstruction EmittedInstruction
 }
 
@@ -30,26 +30,26 @@ type Bytecode struct {
 }
 
 type Compiler struct {
-	constants    []object.Object
-	symbolTable  *SymbolTable
+	constants   []object.Object
+	symbolTable *SymbolTable
 
 	scopesStack []CompilationScope
-	scopeIndex int
+	scopeIndex  int
 }
 
 // Instructions Example: [OpPop, OpConstant, 0, 3] posNewInstruction = 1
 
 func New() *Compiler {
 	globalScope := CompilationScope{
-		instructions: bytecode.Instructions{},
-		lastInstruction: EmittedInstruction{},
+		instructions:        bytecode.Instructions{},
+		lastInstruction:     EmittedInstruction{},
 		previousInstruction: EmittedInstruction{},
 	}
 	return &Compiler{
-		constants:           []object.Object{},
-		symbolTable:         NewSymbolTable(),
+		constants:   []object.Object{},
+		symbolTable: NewSymbolTable(),
 		scopesStack: []CompilationScope{globalScope},
-		scopeIndex: 0,
+		scopeIndex:  0,
 	}
 }
 
@@ -70,7 +70,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 				return err
 			}
 		}
-	
+
 	case *ast.FunctionDeclaration:
 		c.enterScope()
 
@@ -89,7 +89,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 
 		compiledFunc := &object.BytecodeFunction{Instructions: instructions}
 		c.emit(bytecode.OpConstant, c.addConstant(compiledFunc))
-	
+
 	case *ast.CallExpression:
 		if err := c.Compile(node.Function); err != nil {
 			return err
@@ -224,7 +224,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 			return err
 		}
 		c.emit(bytecode.OpIndex)
-	
+
 	case *ast.ReturnStatement:
 		if err := c.Compile(node.ReturnExpression); err != nil {
 			return err
@@ -321,7 +321,7 @@ func (c *Compiler) changeOperand(opPos int, operand int) {
 }
 
 func (c *Compiler) swapInstruction(pos int, newInstruction []byte) {
-	cur :=c.currentInstructions()
+	cur := c.currentInstructions()
 	for i := 0; i < len(newInstruction); i++ {
 		cur[pos+i] = newInstruction[i]
 	}
@@ -359,18 +359,18 @@ func (c *Compiler) removeLastPop() {
 
 func (c *Compiler) enterScope() {
 	scope := CompilationScope{
-		instructions: bytecode.Instructions{},
-		lastInstruction: EmittedInstruction{},
+		instructions:        bytecode.Instructions{},
+		lastInstruction:     EmittedInstruction{},
 		previousInstruction: EmittedInstruction{},
 	}
 	c.scopesStack = append(c.scopesStack, scope)
-	c.scopeIndex++ 
+	c.scopeIndex++
 }
 
 func (c *Compiler) leaveScope() bytecode.Instructions {
 	instructions := c.currentInstructions()
 
-	c.scopesStack = c.scopesStack[:len(c.scopesStack) - 1]
+	c.scopesStack = c.scopesStack[:len(c.scopesStack)-1]
 	c.scopeIndex--
 	return instructions
 }

@@ -12,6 +12,7 @@ import (
 const (
 	STACK_SIZE           = 2048
 	MAX_GLOBAL_VARIABLES = 65536
+	MAX_FRAMES           = 1024
 )
 
 var (
@@ -21,25 +22,32 @@ var (
 )
 
 type VM struct {
-	constants    []object.Object
-	instructions bytecode.Instructions
-	globals      []object.Object
+	constants []object.Object
+	globals   []object.Object
 
 	stack        []object.Object
 	stackPointer int // Must always points to the new value, the object at the top of the stack is stack[stackPointer -1]
 
-	frames []*Frame
+	frames      []*Frame
 	framesIndex int
 }
 
 func New(bytecode *compiler.Bytecode) *VM {
+	mainFn := &object.BytecodeFunction{Instructions: bytecode.Instructions}
+	mainFrame := NewFrame(mainFn)
+
+	frames := make([]*Frame, MAX_FRAMES)
+	frames[0] = mainFrame
+
 	return &VM{
-		instructions: bytecode.Instructions,
-		constants:    bytecode.Constants,
-		globals:      make([]object.Object, MAX_GLOBAL_VARIABLES),
+		constants: bytecode.Constants,
+		globals:   make([]object.Object, MAX_GLOBAL_VARIABLES),
 
 		stack:        make([]object.Object, STACK_SIZE),
 		stackPointer: 0,
+
+		frames:      frames,
+		framesIndex: 1,
 	}
 }
 
@@ -52,15 +60,21 @@ func (vm *VM) StackTop() object.Object {
 }
 
 func (vm *VM) Run() error {
-	for ip := 0; ip < len(vm.instructions); ip++ {
-		op := bytecode.Opcode(vm.instructions[ip])
-		aoksl := vm.instructions.String()
-		print(aoksl)
+	var ip int
+	var ins bytecode.Instructions
+	var op bytecode.Opcode
+
+	for vm.currentFrame().ip < len(vm.currentFrame().Instructions())-1 {
+		vm.currentFrame().ip++
+
+		ip = vm.currentFrame().ip
+		ins = vm.currentFrame().Instructions()
+		op = bytecode.Opcode(ins[ip])
 
 		switch op {
 		case bytecode.OpConstant:
-			constantIndex := bytecode.ReadUint16(vm.instructions[ip+1:])
-			ip += 2
+			constantIndex := bytecode.ReadUint16(ins[ip+1:])
+			vm.currentFrame().ip += 2
 			if err := vm.push(vm.constants[constantIndex]); err != nil {
 				return err
 			}
@@ -91,34 +105,34 @@ func (vm *VM) Run() error {
 				return err
 			}
 		case bytecode.OpJumpNotTrue:
-			pos := int(bytecode.ReadUint16(vm.instructions[ip+1:]))
-			ip += 2
+			pos := int(bytecode.ReadUint16(ins[ip+1:]))
+			vm.currentFrame().ip += 2
 			result, err := vm.pop()
 			if err != nil {
 				return err
 			}
 			if !isTruthy(result) {
-				ip = pos - 1
+				vm.currentFrame().ip = pos - 1
 			}
 		case bytecode.OpJump:
 			// [OpJump 0, 3, OpConstant 0, 9]
-			pos := int(bytecode.ReadUint16(vm.instructions[ip+1:]))
-			ip = pos - 1
+			pos := int(bytecode.ReadUint16(ins[ip+1:]))
+			vm.currentFrame().ip = pos - 1
 		case bytecode.OpNull:
 			if err := vm.push(NULL); err != nil {
 				return err
 			}
 		case bytecode.OpSetGlobal:
-			globalIndex := bytecode.ReadUint16(vm.instructions[ip+1:])
-			ip += 2
+			globalIndex := bytecode.ReadUint16(ins[ip+1:])
+			vm.currentFrame().ip += 2
 			value, err := vm.pop()
 			if err != nil {
 				return err
 			}
 			vm.globals[globalIndex] = value
 		case bytecode.OpArray:
-			size := int(bytecode.ReadUint16(vm.instructions[ip+1:]))
-			ip += 2
+			size := int(bytecode.ReadUint16(ins[ip+1:]))
+			vm.currentFrame().ip += 2
 			start := vm.stackPointer - size
 			array := vm.makeArray(start, vm.stackPointer, size)
 			vm.stackPointer = start
@@ -127,8 +141,8 @@ func (vm *VM) Run() error {
 				return err
 			}
 		case bytecode.OpDic:
-			size := int(bytecode.ReadUint16(vm.instructions[ip+1:]))
-			ip += 2
+			size := int(bytecode.ReadUint16(ins[ip+1:]))
+			vm.currentFrame().ip += 2
 			start := vm.stackPointer - size
 			dictionary, err := vm.makeDictionary(start, vm.stackPointer)
 			if err != nil {
@@ -153,8 +167,8 @@ func (vm *VM) Run() error {
 			}
 
 		case bytecode.OpGetGlobal:
-			globalIndex := bytecode.ReadUint16(vm.instructions[ip+1:])
-			ip += 2
+			globalIndex := bytecode.ReadUint16(ins[ip+1:])
+			vm.currentFrame().ip += 2
 			value := vm.globals[globalIndex]
 			if value == nil {
 				return fmt.Errorf("variable not defined")
@@ -163,9 +177,52 @@ func (vm *VM) Run() error {
 			if err := vm.push(value); err != nil {
 				return err
 			}
+		case bytecode.OpCall:
+			fnc, ok := vm.stack[vm.stackPointer-1].(*object.BytecodeFunction)
+			if !ok {
+				return fmt.Errorf("unable to call non-function")
+			}
+
+			frame := NewFrame(fnc)
+			vm.pushFrame(frame)
+		case bytecode.OpReturnValue:
+			returnValue, err := vm.pop()
+			if err != nil {
+				return err
+			}
+			vm.popFrame()
+			vm.pop()
+
+			if err := vm.push(returnValue); err != nil {
+				return err
+			}
+		case bytecode.OpReturn:
+			vm.popFrame()
+			vm.pop()
+
+			if err := vm.push(NULL); err != nil {
+				return err
+			}
 		}
 	}
 	return nil
+}
+
+func (vm *VM) currentFrame() *Frame {
+	return vm.frames[vm.framesIndex-1]
+}
+
+func (vm *VM) pushFrame(f *Frame) {
+	if vm.framesIndex > MAX_FRAMES {
+		panic("maximum frame reached")
+	}
+	vm.frames[vm.framesIndex] = f
+	vm.framesIndex++
+}
+
+func (vm *VM) popFrame() *Frame {
+	vm.framesIndex--
+	return vm.frames[vm.framesIndex]
 }
 
 func (vm *VM) runIndexExpression(identifier, index object.Object) error {
@@ -216,16 +273,6 @@ func (vm *VM) runDictionaryIndex(identifier, index object.Object) error {
 	}
 	return vm.push(keyValue.Value)
 }
-
-func (vm *VM) currentFrame() *Frame {
-	return vm.frames[vm.framesIndex-1]
-}
-
-func (vm *VM) pushFrame(f *Frame) {
-    vm.frames[vm.framesIndex] = f
-    vm.framesIndex++
-}
-
 
 func (vm *VM) makeDictionary(start, end int) (object.Object, error) {
 	dic := make(map[object.Hash]object.KeyValue)

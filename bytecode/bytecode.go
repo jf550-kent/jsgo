@@ -108,9 +108,9 @@ var definitions = map[Opcode]*Definition{
 	OpArray:       {"OpArray", []int{2}, 2, 1},
 	OpDic:         {"OpDic", []int{2}, 2, 1},
 	OpIndex:       {"OpIndex", []int{}, 0, 0},
-	OpCall:       {"OpCall", []int{}, 0, 0},
+	OpCall:        {"OpCall", []int{}, 0, 0},
 	OpReturnValue: {"OpReturnValue", []int{}, 0, 0},
-	OpReturn: {"OpReturn", []int{}, 0, 0},
+	OpReturn:      {"OpReturn", []int{}, 0, 0},
 }
 
 func Lookup(op byte) (*Definition, error) {

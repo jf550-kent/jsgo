@@ -442,7 +442,7 @@ func TestFunction(t *testing.T) {
 				10,
 				[]bytecode.Instructions{
 					bytecode.Make(bytecode.OpConstant, 0),
-					bytecode.Make(bytecode.OpReturnValue), 
+					bytecode.Make(bytecode.OpReturnValue),
 				},
 			},
 			expectedInstructions: []bytecode.Instructions{
