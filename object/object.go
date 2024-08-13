@@ -183,6 +183,7 @@ func (d *Dictionary) String() string {
 
 type BytecodeFunction struct {
 	Instructions bytecode.Instructions
+	NumLocals    int
 }
 
 func (b *BytecodeFunction) Type() ObjectType { return BYTECODE_FUNCTION_OBJECT }

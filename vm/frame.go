@@ -11,10 +11,11 @@ type Frame struct {
 	basePointer int
 }
 
-func NewFrame(fn *object.BytecodeFunction) *Frame {
+func NewFrame(fn *object.BytecodeFunction, basePointer int) *Frame {
 	return &Frame{
-		function: fn,
-		ip:       -1,
+		function:    fn,
+		ip:          -1,
+		basePointer: basePointer,
 	}
 }
 

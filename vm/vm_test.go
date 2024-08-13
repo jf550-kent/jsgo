@@ -185,8 +185,23 @@ func TestCallingFunction(t *testing.T) {
 		{input: "var a = function() { 1 }; var b = function() { a() + 1 }; var c = function() { b() + 1 }; c();", expected: 3},
 		{input: "var a = function() { return 1; 3; 2; }; a();", expected: 1},
 		{input: "var a = function() {  1; return 3; return 2; }; a();", expected: 3},
-		{input: "var a = function() {  var a = 90; }; a();", expected: NULL},
+		{input: "var a = function() { }; a();", expected: NULL},
 	}
+	testVmTests(t, tests)
+}
+
+func TestCallingFunctionsWithLocalScope(t *testing.T) {
+	tests := []vmTestCase{
+		{input: "var foo = function() { var apple = 98; apple; }; foo();", expected: 98},
+		{input: "var sum = function() { var first = 9; var second = 9; return first + second; }; sum()", expected: 18},
+		{input: "var sum = function() { var first = 9; var second = 9; return first + second; }; var ten = function() { var five = 5; return five + five;}; ten() + sum()", expected: 28},
+		{input: "var globalNumber = 90; var minus = function() { var num = 1 return globalNumber - num; } var add = function() { var num = 8 return globalNumber + num; } minus() + add()", expected: 187},
+		{input: "var sum = function(a, b) { return a + b; }; sum(2,2)", expected: 4},
+		{input: "var sum = function(a, b) { var c = a + b; return c; }; sum(1, 2);", expected: 3},
+		{input: "var sum = function(a, b) { var c = a + b; return c; }; sum(1, 2) + sum(3, 4);", expected: 10},
+		{input: "var sum = function(a, b) { var c = a + b; return c; }; var outer = function() { return sum(1, 2) + sum(3, 4); }; outer();", expected: 10},
+	}
+
 	testVmTests(t, tests)
 }
 

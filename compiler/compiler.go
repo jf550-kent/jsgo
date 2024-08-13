@@ -74,6 +74,10 @@ func (c *Compiler) Compile(node ast.Node) error {
 	case *ast.FunctionDeclaration:
 		c.enterScope()
 
+		for _, p := range node.Parameters {
+			c.symbolTable.Define(p.Literal)
+		}
+
 		if err := c.Compile(node.Body); err != nil {
 			return err
 		}
@@ -85,16 +89,22 @@ func (c *Compiler) Compile(node ast.Node) error {
 			c.emit(bytecode.OpReturn)
 		}
 
+		numLocals := c.symbolTable.numberDefinitions
 		instructions := c.leaveScope()
 
-		compiledFunc := &object.BytecodeFunction{Instructions: instructions}
+		compiledFunc := &object.BytecodeFunction{Instructions: instructions, NumLocals: numLocals}
 		c.emit(bytecode.OpConstant, c.addConstant(compiledFunc))
 
 	case *ast.CallExpression:
 		if err := c.Compile(node.Function); err != nil {
 			return err
 		}
-		c.emit(bytecode.OpCall)
+		for _, arg := range node.Arguments {
+			if err := c.Compile(arg); err != nil {
+				return err
+			}
+		}
+		c.emit(bytecode.OpCall, len(node.Arguments))
 
 	case *ast.BinaryExpression:
 		if node.Operator == "<" {
@@ -147,15 +157,22 @@ func (c *Compiler) Compile(node ast.Node) error {
 			return err
 		}
 		symbol := c.symbolTable.Define(node.Variable.Literal)
-		c.emit(bytecode.OpSetGlobal, symbol.Index)
+		if symbol.Scope == GlobalScope {
+			c.emit(bytecode.OpSetGlobal, symbol.Index)
+		} else {
+			c.emit(bytecode.OpSetLocal, symbol.Index)
+		}
 
 	case *ast.Identifier:
 		symbl, ok := c.symbolTable.Resolve(node.Literal)
 		if !ok {
 			return fmt.Errorf("variable is not defined: %s", node.Literal)
 		}
-		c.emit(bytecode.OpGetGlobal, symbl.Index)
-
+		if symbl.Scope == GlobalScope {
+			c.emit(bytecode.OpGetGlobal, symbl.Index)
+		} else {
+			c.emit(bytecode.OpGetLocal, symbl.Index)
+		}
 	case *ast.AssignmentStatement:
 		symbl, ok := c.symbolTable.Resolve(node.Identifier.Literal)
 		if !ok {
@@ -365,6 +382,7 @@ func (c *Compiler) enterScope() {
 	}
 	c.scopesStack = append(c.scopesStack, scope)
 	c.scopeIndex++
+	c.symbolTable = NewEnclosedSymbolTable(c.symbolTable)
 }
 
 func (c *Compiler) leaveScope() bytecode.Instructions {
@@ -372,6 +390,7 @@ func (c *Compiler) leaveScope() bytecode.Instructions {
 
 	c.scopesStack = c.scopesStack[:len(c.scopesStack)-1]
 	c.scopeIndex--
+	c.symbolTable = c.symbolTable.Outer
 	return instructions
 }
 
