@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/jf550-kent/jsgo/ast"
+	"github.com/jf550-kent/jsgo/bytecode"
 )
 
 type ObjectType string
@@ -16,17 +17,18 @@ type Hash struct {
 }
 
 const (
-	NUMBER_OBJECT       ObjectType = "NUMBER"
-	FLOAT_OBJECT        ObjectType = "FLOAT"
-	BOOLEAN_OBJECT      ObjectType = "BOOLEAN"
-	NULL_OBJECT         ObjectType = "NULL"
-	RETURN_VALUE_OBJECT ObjectType = "RETURN_VALUE"
-	ERROR_OBJECT        ObjectType = "ERROR"
-	FUNCTION_OBJECT     ObjectType = "FUNCTION"
-	STRING_OBJECT       ObjectType = "STRING"
-	ARRAY_OBJECT        ObjectType = "ARRAY"
-	BUITL_IN_OBJECT     ObjectType = "BUILT_IN"
-	DICTIONARY_OBJECT   ObjectType = "DICTIONARY_OBJECT"
+	NUMBER_OBJECT            ObjectType = "NUMBER"
+	FLOAT_OBJECT             ObjectType = "FLOAT"
+	BOOLEAN_OBJECT           ObjectType = "BOOLEAN"
+	NULL_OBJECT              ObjectType = "NULL"
+	RETURN_VALUE_OBJECT      ObjectType = "RETURN_VALUE"
+	ERROR_OBJECT             ObjectType = "ERROR"
+	FUNCTION_OBJECT          ObjectType = "FUNCTION"
+	STRING_OBJECT            ObjectType = "STRING"
+	ARRAY_OBJECT             ObjectType = "ARRAY"
+	BUITL_IN_OBJECT          ObjectType = "BUILT_IN"
+	DICTIONARY_OBJECT        ObjectType = "DICTIONARY_OBJECT"
+	BYTECODE_FUNCTION_OBJECT ObjectType = "BYTECODE_FUNCTION_OBJECT"
 )
 
 // Object is used in the evaluator to represent value in when evaluating the AST of JSGO.
@@ -178,6 +180,14 @@ func (d *Dictionary) String() string {
 
 	return out.String()
 }
+
+type BytecodeFunction struct {
+	Instructions bytecode.Instructions
+	NumLocals    int
+}
+
+func (b *BytecodeFunction) Type() ObjectType { return BYTECODE_FUNCTION_OBJECT }
+func (b *BytecodeFunction) String() string   { return fmt.Sprintf("BytecodeFunction[%p]", b) }
 
 // Error represent the error object in when evaluating the AST.
 type Error struct {
