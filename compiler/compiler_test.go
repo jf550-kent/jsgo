@@ -679,6 +679,24 @@ func TestCompilerScopes(t *testing.T) {
 	}
 }
 
+func TestBuiltIn(t *testing.T) {
+	tests := []compilerTestCase{
+		{
+			input: "console.log(89);",
+			expectedConstants: []any{
+				89,
+			},
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpGetBuiltIn, 0),
+				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpCall, 1),
+				bytecode.Make(bytecode.OpPop),
+			},
+		},
+	}
+	testCompilerTests(t, tests)
+}
+
 func testCompilerTests(t *testing.T, tests []compilerTestCase) {
 	t.Helper()
 

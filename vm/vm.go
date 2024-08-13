@@ -180,14 +180,10 @@ func (vm *VM) Run() error {
 		case bytecode.OpCall:
 			args := int(bytecode.ReadUnit8(ins[ip+1:]))
 			vm.currentFrame().ip += 1
-			fnc, ok := vm.stack[vm.stackPointer-1-args].(*object.BytecodeFunction)
-			if !ok {
-				return fmt.Errorf("unable to call non-function")
-			}
 
-			frame := NewFrame(fnc, vm.stackPointer-args)
-			vm.pushFrame(frame)
-			vm.stackPointer = frame.basePointer + fnc.NumLocals
+			if err := vm.runCall(args); err != nil {
+				return err
+			}
 		case bytecode.OpSetLocal:
 			localIndex := bytecode.ReadUnit8(ins[ip+1:])
 			vm.currentFrame().ip += 1
@@ -224,6 +220,15 @@ func (vm *VM) Run() error {
 			vm.pop()
 
 			if err := vm.push(NULL); err != nil {
+				return err
+			}
+		case bytecode.OpGetBuiltIn:
+			index := bytecode.ReadUnit8(ins[ip+1:])
+			vm.currentFrame().ip += 1
+
+			def := object.Builtins[index]
+			err := vm.push(def)
+			if err != nil {
 				return err
 			}
 		}
@@ -277,6 +282,42 @@ func (vm *VM) runArrayIndex(identifier, index object.Object) error {
 		return vm.push(NULL)
 	}
 	return vm.push(arrayObj.Body[numIdex])
+}
+
+func (vm *VM) runCall(numArgs int) error {
+	caller := vm.stack[vm.stackPointer-1-numArgs]
+	switch caller := caller.(type) {
+	case *object.BytecodeFunction:
+		return vm.callFunction(caller, numArgs)
+	case *object.BuiltIn:
+		return vm.callBuiltin(caller, numArgs)
+	}
+	return fmt.Errorf("calling non-function and non-built-in")
+}
+
+func (vm *VM) callFunction(fn *object.BytecodeFunction, numArgs int) error {
+
+	frame := NewFrame(fn, vm.stackPointer-numArgs)
+	vm.pushFrame(frame)
+
+	vm.stackPointer = frame.basePointer + fn.NumLocals
+
+	return nil
+}
+
+func (vm *VM) callBuiltin(builtin *object.BuiltIn, numArgs int) error {
+	args := vm.stack[vm.stackPointer-numArgs : vm.stackPointer]
+
+	result := builtin.Function(args...)
+	vm.stackPointer = vm.stackPointer - numArgs - 1
+
+	if result != nil {
+		vm.push(result)
+	} else {
+		vm.push(NULL)
+	}
+
+	return nil
 }
 
 func (vm *VM) runDictionaryIndex(identifier, index object.Object) error {
