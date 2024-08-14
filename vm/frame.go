@@ -6,12 +6,12 @@ import (
 )
 
 type Frame struct {
-	function    *object.BytecodeFunction
+	function    *object.Closure
 	ip          int
 	basePointer int
 }
 
-func NewFrame(fn *object.BytecodeFunction, basePointer int) *Frame {
+func NewFrame(fn *object.Closure, basePointer int) *Frame {
 	return &Frame{
 		function:    fn,
 		ip:          -1,
@@ -20,5 +20,5 @@ func NewFrame(fn *object.BytecodeFunction, basePointer int) *Frame {
 }
 
 func (f *Frame) Instructions() bytecode.Instructions {
-	return f.function.Instructions
+	return f.function.Fn.Instructions
 }

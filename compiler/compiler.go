@@ -45,9 +45,13 @@ func New() *Compiler {
 		lastInstruction:     EmittedInstruction{},
 		previousInstruction: EmittedInstruction{},
 	}
+	symbolTable := NewSymbolTable()
+	for i, v := range object.Builtins {
+		symbolTable.DefineBuiltIn(i, v.Name)
+	}
 	return &Compiler{
 		constants:   []object.Object{},
-		symbolTable: NewSymbolTable(),
+		symbolTable: symbolTable,
 		scopesStack: []CompilationScope{globalScope},
 		scopeIndex:  0,
 	}
@@ -74,6 +78,10 @@ func (c *Compiler) Compile(node ast.Node) error {
 	case *ast.FunctionDeclaration:
 		c.enterScope()
 
+		if node.Name != "" {
+			c.symbolTable.DefineFunctionName(node.Name)
+		}
+
 		for _, p := range node.Parameters {
 			c.symbolTable.Define(p.Literal)
 		}
@@ -89,11 +97,16 @@ func (c *Compiler) Compile(node ast.Node) error {
 			c.emit(bytecode.OpReturn)
 		}
 
+		freeSym := c.symbolTable.FreeSymbols
 		numLocals := c.symbolTable.numberDefinitions
 		instructions := c.leaveScope()
 
+		for _, s := range freeSym {
+			c.loadSymbol(s)
+		}
+
 		compiledFunc := &object.BytecodeFunction{Instructions: instructions, NumLocals: numLocals}
-		c.emit(bytecode.OpConstant, c.addConstant(compiledFunc))
+		c.emit(bytecode.OpClosure, c.addConstant(compiledFunc), len(freeSym))
 
 	case *ast.CallExpression:
 		if err := c.Compile(node.Function); err != nil {
@@ -153,10 +166,10 @@ func (c *Compiler) Compile(node ast.Node) error {
 		}
 
 	case *ast.VarStatement:
+		symbol := c.symbolTable.Define(node.Variable.Literal)
 		if err := c.Compile(node.Expression); err != nil {
 			return err
 		}
-		symbol := c.symbolTable.Define(node.Variable.Literal)
 		if symbol.Scope == GlobalScope {
 			c.emit(bytecode.OpSetGlobal, symbol.Index)
 		} else {
@@ -168,11 +181,8 @@ func (c *Compiler) Compile(node ast.Node) error {
 		if !ok {
 			return fmt.Errorf("variable is not defined: %s", node.Literal)
 		}
-		if symbl.Scope == GlobalScope {
-			c.emit(bytecode.OpGetGlobal, symbl.Index)
-		} else {
-			c.emit(bytecode.OpGetLocal, symbl.Index)
-		}
+		c.loadSymbol(symbl)
+
 	case *ast.AssignmentStatement:
 		symbl, ok := c.symbolTable.Resolve(node.Identifier.Literal)
 		if !ok {
@@ -399,4 +409,19 @@ func (c *Compiler) replaceLastPopWithReturn() {
 	c.swapInstruction(lastPos, bytecode.Make(bytecode.OpReturnValue))
 
 	c.scopesStack[c.scopeIndex].lastInstruction.Opcode = bytecode.OpReturnValue
+}
+
+func (c *Compiler) loadSymbol(s Symbol) {
+	switch s.Scope {
+	case GlobalScope:
+		c.emit(bytecode.OpGetGlobal, s.Index)
+	case LocalScope:
+		c.emit(bytecode.OpGetLocal, s.Index)
+	case BuiltInScope:
+		c.emit(bytecode.OpGetBuiltIn, s.Index)
+	case FreeScope:
+		c.emit(bytecode.OpGetFree, s.Index)
+	case FunctionScope:
+		c.emit(bytecode.OpCurrentClosure)
+	}
 }

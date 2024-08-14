@@ -205,6 +205,37 @@ func TestCallingFunctionsWithLocalScope(t *testing.T) {
 	testVmTests(t, tests)
 }
 
+func TestClosure(t *testing.T) {
+	tests := []vmTestCase{
+		{input: "var close = function(a) { function() {a;}}; var closure = close(100); closure()", expected: 100},
+	}
+	testVmTests(t, tests)
+}
+
+func TestRecursiveFibonacci(t *testing.T) {
+	tests := []vmTestCase{
+		{
+			input: `
+			var fibonacci = function(x) {
+					if (x == 0) {
+							return 0;
+					} else {
+							if (x == 1) {
+									return 1;
+							} else {
+									fibonacci(x - 1) + fibonacci(x - 2);
+							}
+					}
+			};
+			fibonacci(15);
+			`,
+			expected: 610,
+		},
+	}
+
+	testVmTests(t, tests)
+}
+
 func testVmTests(t *testing.T, tests []vmTestCase) {
 	t.Helper()
 

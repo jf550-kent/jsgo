@@ -167,6 +167,10 @@ func (p *parser) parseVarStatement() ast.Statement {
 
 	varStmt.Expression = p.parseExpression(1)
 
+	if f, ok := varStmt.Expression.(*ast.FunctionDeclaration); ok {
+		f.Name = varStmt.Variable.Literal
+	}
+
 	if p.peekExpect(token.SEMICOLON) {
 		p.next()
 	}

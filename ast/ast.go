@@ -261,6 +261,7 @@ type (
 		Token      token.Token
 		Parameters []*Identifier
 		Body       *BlockStatement
+		Name       string
 	}
 
 	CallExpression struct {
