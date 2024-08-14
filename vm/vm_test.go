@@ -236,6 +236,17 @@ func TestRecursiveFibonacci(t *testing.T) {
 	testVmTests(t, tests)
 }
 
+func TestBracket(t *testing.T) {
+	tests := []vmTestCase{
+		{
+			input:    "var arr = [10]; arr[1] = 90; arr;",
+			expected: []int{10, 90},
+		},
+	}
+	
+	testVmTests(t, tests)
+}
+
 func testVmTests(t *testing.T, tests []vmTestCase) {
 	t.Helper()
 

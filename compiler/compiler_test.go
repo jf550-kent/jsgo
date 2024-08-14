@@ -347,6 +347,29 @@ func TestVarStatements(t *testing.T) {
 	testCompilerTests(t, tests)
 }
 
+func TestBracket(t *testing.T) {
+	tests := []compilerTestCase{
+		{
+			input:    "var arr = [10]; arr[0] = 90",
+			expectedConstants: []any{10, 0, 90},
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpArray, 1),
+				bytecode.Make(bytecode.OpSetGlobal, 0),
+				bytecode.Make(bytecode.OpGetGlobal, 0),
+				bytecode.Make(bytecode.OpConstant, 1),
+				bytecode.Make(bytecode.OpConstant, 2),
+				bytecode.Make(bytecode.OpIndexAssign),
+				bytecode.Make(bytecode.OpPop),
+			},
+		},
+		{
+			input: `var dic = { "next": 10};
+		}
+	}
+
+	testCompilerTests(t, tests)
+}
 func TestStringExpression(t *testing.T) {
 	tests := []compilerTestCase{
 		{

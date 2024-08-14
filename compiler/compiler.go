@@ -222,7 +222,20 @@ func (c *Compiler) Compile(node ast.Node) error {
 			}
 		}
 		c.emit(bytecode.OpArray, len(node.Body))
-
+	
+	case *ast.BracketDeclaration:
+		if err := c.Compile(node.Identifier); err != nil {
+			return err
+		}
+		if err := c.Compile(node.Key); err != nil {
+			return err
+		}
+		if err := c.Compile(node.Value); err != nil {
+			return err
+		}
+		c.emit(bytecode.OpIndexAssign)
+		aoksl := c.scopesStack[c.scopeIndex].instructions.String(); 
+		print(aoksl) 
 	case *ast.Dictionary:
 		keys := []ast.Expression{}
 		for k := range node.Object {

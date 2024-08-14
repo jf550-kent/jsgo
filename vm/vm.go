@@ -141,6 +141,25 @@ func (vm *VM) Run() error {
 			if err := vm.push(array); err != nil {
 				return err
 			}
+		case bytecode.OpIndexAssign:
+			ident := vm.stack[vm.stackPointer-3]
+			index, ok := vm.stack[vm.stackPointer-2].(*object.Number)
+			if !ok {
+				return fmt.Errorf("wrong type for array index")
+			}
+			expr := vm.stack[vm.stackPointer-1]
+
+			switch val := ident.(type) {
+			case *object.Array:
+				if int(index.Value) >= len(val.Body) {
+					newArr := make([]object.Object, int(index.Value)+1)
+					copy(newArr, val.Body)
+					val.Body = newArr
+				}
+				val.Body[index.Value] = expr
+			default:
+				return fmt.Errorf("cannot index with type=%v", ident)
+			}
 		case bytecode.OpDic:
 			size := int(bytecode.ReadUint16(ins[ip+1:]))
 			vm.currentFrame().ip += 2
