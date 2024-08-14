@@ -290,7 +290,7 @@ func TestVarStatements(t *testing.T) {
 			expectedInstructions: []bytecode.Instructions{
 				bytecode.Make(bytecode.OpConstant, 0),
 				bytecode.Make(bytecode.OpSetGlobal, 0),
-				bytecode.Make(bytecode.OpConstant, 1),
+				bytecode.Make(bytecode.OpClosure, 1, 0),
 				bytecode.Make(bytecode.OpPop),
 			},
 		},
@@ -311,7 +311,7 @@ func TestVarStatements(t *testing.T) {
 				},
 			},
 			expectedInstructions: []bytecode.Instructions{
-				bytecode.Make(bytecode.OpConstant, 1),
+				bytecode.Make(bytecode.OpClosure, 1, 0),
 				bytecode.Make(bytecode.OpPop),
 			},
 		},
@@ -338,7 +338,7 @@ func TestVarStatements(t *testing.T) {
 				},
 			},
 			expectedInstructions: []bytecode.Instructions{
-				bytecode.Make(bytecode.OpConstant, 2),
+				bytecode.Make(bytecode.OpClosure, 2, 0),
 				bytecode.Make(bytecode.OpPop),
 			},
 		},
@@ -499,7 +499,7 @@ func TestFunction(t *testing.T) {
 				},
 			},
 			expectedInstructions: []bytecode.Instructions{
-				bytecode.Make(bytecode.OpConstant, 2),
+				bytecode.Make(bytecode.OpClosure, 2, 0),
 				bytecode.Make(bytecode.OpPop),
 			},
 		},
@@ -513,7 +513,7 @@ func TestFunction(t *testing.T) {
 				},
 			},
 			expectedInstructions: []bytecode.Instructions{
-				bytecode.Make(bytecode.OpConstant, 1),
+				bytecode.Make(bytecode.OpClosure, 1, 0),
 				bytecode.Make(bytecode.OpPop),
 			},
 		},
@@ -530,7 +530,7 @@ func TestFunction(t *testing.T) {
 				},
 			},
 			expectedInstructions: []bytecode.Instructions{
-				bytecode.Make(bytecode.OpConstant, 2),
+				bytecode.Make(bytecode.OpClosure, 2, 0),
 				bytecode.Make(bytecode.OpPop),
 			},
 		},
@@ -540,7 +540,7 @@ func TestFunction(t *testing.T) {
 				bytecode.Make(bytecode.OpReturn),
 			},
 			expectedInstructions: []bytecode.Instructions{
-				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpClosure, 0, 0),
 				bytecode.Make(bytecode.OpPop),
 			},
 		},
@@ -554,7 +554,7 @@ func TestFunction(t *testing.T) {
 				},
 			},
 			expectedInstructions: []bytecode.Instructions{
-				bytecode.Make(bytecode.OpConstant, 1),
+				bytecode.Make(bytecode.OpClosure, 1, 0),
 				bytecode.Make(bytecode.OpCall, 0),
 				bytecode.Make(bytecode.OpPop),
 			},
@@ -569,7 +569,7 @@ func TestFunction(t *testing.T) {
 				},
 			},
 			expectedInstructions: []bytecode.Instructions{
-				bytecode.Make(bytecode.OpConstant, 1),
+				bytecode.Make(bytecode.OpClosure, 1, 0),
 				bytecode.Make(bytecode.OpSetGlobal, 0),
 				bytecode.Make(bytecode.OpGetGlobal, 0),
 				bytecode.Make(bytecode.OpCall, 0),
@@ -586,7 +586,7 @@ func TestFunction(t *testing.T) {
 				39,
 			},
 			expectedInstructions: []bytecode.Instructions{
-				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpClosure, 0, 0),
 				bytecode.Make(bytecode.OpSetGlobal, 0),
 				bytecode.Make(bytecode.OpGetGlobal, 0),
 				bytecode.Make(bytecode.OpConstant, 1),
@@ -610,13 +610,174 @@ func TestFunction(t *testing.T) {
 				30,
 			},
 			expectedInstructions: []bytecode.Instructions{
-				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpClosure, 0, 0),
 				bytecode.Make(bytecode.OpSetGlobal, 0),
 				bytecode.Make(bytecode.OpGetGlobal, 0),
 				bytecode.Make(bytecode.OpConstant, 1),
 				bytecode.Make(bytecode.OpConstant, 2),
 				bytecode.Make(bytecode.OpConstant, 3),
 				bytecode.Make(bytecode.OpCall, 3),
+				bytecode.Make(bytecode.OpPop),
+			},
+		},
+	}
+
+	testCompilerTests(t, tests)
+}
+
+func TestClosures(t *testing.T) {
+	tests := []compilerTestCase{
+		{
+			input: "function(apple) { function(b) {apple + b;}}",
+			expectedConstants: []any{
+				[]bytecode.Instructions{
+					bytecode.Make(bytecode.OpGetFree, 0),
+					bytecode.Make(bytecode.OpGetLocal, 0),
+					bytecode.Make(bytecode.OpAdd),
+					bytecode.Make(bytecode.OpReturnValue),
+				},
+				[]bytecode.Instructions{
+					bytecode.Make(bytecode.OpGetLocal, 0),
+					bytecode.Make(bytecode.OpClosure, 0, 1),
+					bytecode.Make(bytecode.OpReturnValue),
+				},
+			},
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpClosure, 1, 0),
+				bytecode.Make(bytecode.OpPop),
+			},
+		},
+		{
+			input: "function(a) { function(b) { function(c) { a + b + c; } } }",
+			expectedConstants: []any{
+				[]bytecode.Instructions{
+					bytecode.Make(bytecode.OpGetFree, 0),
+					bytecode.Make(bytecode.OpGetFree, 1),
+					bytecode.Make(bytecode.OpAdd),
+					bytecode.Make(bytecode.OpGetLocal, 0),
+					bytecode.Make(bytecode.OpAdd),
+					bytecode.Make(bytecode.OpReturnValue),
+				},
+				[]bytecode.Instructions{
+					bytecode.Make(bytecode.OpGetFree, 0),
+					bytecode.Make(bytecode.OpGetLocal, 0),
+					bytecode.Make(bytecode.OpClosure, 0, 2),
+					bytecode.Make(bytecode.OpReturnValue),
+				},
+				[]bytecode.Instructions{
+					bytecode.Make(bytecode.OpGetLocal, 0),
+					bytecode.Make(bytecode.OpClosure, 1, 1),
+					bytecode.Make(bytecode.OpReturnValue),
+				},
+			},
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpClosure, 2, 0),
+				bytecode.Make(bytecode.OpPop),
+			},
+		},
+		{
+			input: `var sum = 10; function() { var car = 9; function() { var mon = 11 function() { var in = 8 sum + car + mon + in; } } }`,
+			expectedConstants: []any{
+				10,
+				9,
+				11,
+				8,
+				[]bytecode.Instructions{
+					bytecode.Make(bytecode.OpConstant, 3),
+					bytecode.Make(bytecode.OpSetLocal, 0),
+					bytecode.Make(bytecode.OpGetGlobal, 0),
+					bytecode.Make(bytecode.OpGetFree, 0),
+					bytecode.Make(bytecode.OpAdd),
+					bytecode.Make(bytecode.OpGetFree, 1),
+					bytecode.Make(bytecode.OpAdd),
+					bytecode.Make(bytecode.OpGetLocal, 0),
+					bytecode.Make(bytecode.OpAdd),
+					bytecode.Make(bytecode.OpReturnValue),
+				},
+				[]bytecode.Instructions{
+					bytecode.Make(bytecode.OpConstant, 2),
+					bytecode.Make(bytecode.OpSetLocal, 0),
+					bytecode.Make(bytecode.OpGetFree, 0),
+					bytecode.Make(bytecode.OpGetLocal, 0),
+					bytecode.Make(bytecode.OpClosure, 4, 2),
+					bytecode.Make(bytecode.OpReturnValue),
+				},
+				[]bytecode.Instructions{
+					bytecode.Make(bytecode.OpConstant, 1),
+					bytecode.Make(bytecode.OpSetLocal, 0),
+					bytecode.Make(bytecode.OpGetLocal, 0),
+					bytecode.Make(bytecode.OpClosure, 5, 1),
+					bytecode.Make(bytecode.OpReturnValue),
+				},
+			},
+
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpSetGlobal, 0),
+				bytecode.Make(bytecode.OpClosure, 6, 0),
+				bytecode.Make(bytecode.OpPop),
+			},
+		},
+	}
+
+	testCompilerTests(t, tests)
+}
+
+func TestRecursiveFunctions(t *testing.T) {
+	tests := []compilerTestCase{
+		{
+			input: `
+					var make = function(x) { make(x - 1); };
+					make(1);
+					`,
+			expectedConstants: []interface{}{
+				1,
+				[]bytecode.Instructions{
+					bytecode.Make(bytecode.OpCurrentClosure),
+					bytecode.Make(bytecode.OpGetLocal, 0),
+					bytecode.Make(bytecode.OpConstant, 0),
+					bytecode.Make(bytecode.OpSub),
+					bytecode.Make(bytecode.OpCall, 1),
+					bytecode.Make(bytecode.OpReturnValue),
+				},
+				1,
+			},
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpClosure, 1, 0),
+				bytecode.Make(bytecode.OpSetGlobal, 0),
+				bytecode.Make(bytecode.OpGetGlobal, 0),
+				bytecode.Make(bytecode.OpConstant, 2),
+				bytecode.Make(bytecode.OpCall, 1),
+				bytecode.Make(bytecode.OpPop),
+			},
+		},
+		{
+			input: "var outer = function() { var work = function(x) { work(x - 1); }; work(1); }; outer();",
+			expectedConstants: []interface{}{
+				1,
+				[]bytecode.Instructions{
+					bytecode.Make(bytecode.OpCurrentClosure),
+					bytecode.Make(bytecode.OpGetLocal, 0),
+					bytecode.Make(bytecode.OpConstant, 0),
+					bytecode.Make(bytecode.OpSub),
+					bytecode.Make(bytecode.OpCall, 1),
+					bytecode.Make(bytecode.OpReturnValue),
+				},
+				1,
+				[]bytecode.Instructions{
+					bytecode.Make(bytecode.OpClosure, 1, 0),
+					bytecode.Make(bytecode.OpSetLocal, 0),
+					bytecode.Make(bytecode.OpGetLocal, 0),
+					bytecode.Make(bytecode.OpConstant, 2),
+					bytecode.Make(bytecode.OpCall, 1),
+					bytecode.Make(bytecode.OpReturnValue),
+				},
+			},
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpClosure, 3, 0),
+				bytecode.Make(bytecode.OpSetGlobal, 0),
+				bytecode.Make(bytecode.OpGetGlobal, 0),
+				bytecode.Make(bytecode.OpCall, 0),
 				bytecode.Make(bytecode.OpPop),
 			},
 		},

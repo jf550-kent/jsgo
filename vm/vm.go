@@ -34,7 +34,8 @@ type VM struct {
 
 func New(bytecode *compiler.Bytecode) *VM {
 	mainFn := &object.BytecodeFunction{Instructions: bytecode.Instructions}
-	mainFrame := NewFrame(mainFn, 0)
+	mainClosure := &object.Closure{Fn: mainFn}
+	mainFrame := NewFrame(mainClosure, 0)
 
 	frames := make([]*Frame, MAX_FRAMES)
 	frames[0] = mainFrame
@@ -231,6 +232,27 @@ func (vm *VM) Run() error {
 			if err != nil {
 				return err
 			}
+		case bytecode.OpClosure:
+			index := int(bytecode.ReadUint16(ins[ip+1:]))
+			free := int(bytecode.ReadUnit8(ins[ip+3:]))
+
+			vm.currentFrame().ip += 3
+			if err := vm.pushClosure(index, free); err != nil {
+				return err
+			}
+		case bytecode.OpGetFree:
+			freeIndex := bytecode.ReadUnit8(ins[ip+1:])
+			vm.currentFrame().ip += 1
+
+			currentClosure := vm.currentFrame().function
+			if err := vm.push(currentClosure.Free[freeIndex]); err != nil {
+				return err
+			}
+		case bytecode.OpCurrentClosure:
+			currClosure := vm.currentFrame().function
+			if err := vm.push(currClosure); err != nil {
+				return err
+			}
 		}
 	}
 	return nil
@@ -238,6 +260,23 @@ func (vm *VM) Run() error {
 
 func (vm *VM) currentFrame() *Frame {
 	return vm.frames[vm.framesIndex-1]
+}
+
+func (vm *VM) pushClosure(index, free int) error {
+	constant := vm.constants[index]
+	function, ok := constant.(*object.BytecodeFunction)
+	if !ok {
+		return fmt.Errorf("not a function: %+v", constant)
+	}
+
+	freeVar := make([]object.Object, free)
+	for i := 0; i < free; i++ {
+		freeVar[i] = vm.stack[vm.stackPointer-free+i]
+	}
+	vm.stackPointer = vm.stackPointer - free
+
+	closure := &object.Closure{Fn: function, Free: freeVar}
+	return vm.push(closure)
 }
 
 func (vm *VM) pushFrame(f *Frame) {
@@ -287,20 +326,20 @@ func (vm *VM) runArrayIndex(identifier, index object.Object) error {
 func (vm *VM) runCall(numArgs int) error {
 	caller := vm.stack[vm.stackPointer-1-numArgs]
 	switch caller := caller.(type) {
-	case *object.BytecodeFunction:
-		return vm.callFunction(caller, numArgs)
+	case *object.Closure:
+		return vm.callClosure(caller, numArgs)
 	case *object.BuiltIn:
 		return vm.callBuiltin(caller, numArgs)
 	}
 	return fmt.Errorf("calling non-function and non-built-in")
 }
 
-func (vm *VM) callFunction(fn *object.BytecodeFunction, numArgs int) error {
+func (vm *VM) callClosure(fn *object.Closure, numArgs int) error {
 
 	frame := NewFrame(fn, vm.stackPointer-numArgs)
 	vm.pushFrame(frame)
 
-	vm.stackPointer = frame.basePointer + fn.NumLocals
+	vm.stackPointer = frame.basePointer + fn.Fn.NumLocals
 
 	return nil
 }

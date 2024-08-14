@@ -78,6 +78,10 @@ func (c *Compiler) Compile(node ast.Node) error {
 	case *ast.FunctionDeclaration:
 		c.enterScope()
 
+		if node.Name != "" {
+			c.symbolTable.DefineFunctionName(node.Name)
+		}
+
 		for _, p := range node.Parameters {
 			c.symbolTable.Define(p.Literal)
 		}
@@ -93,11 +97,16 @@ func (c *Compiler) Compile(node ast.Node) error {
 			c.emit(bytecode.OpReturn)
 		}
 
+		freeSym := c.symbolTable.FreeSymbols
 		numLocals := c.symbolTable.numberDefinitions
 		instructions := c.leaveScope()
 
+		for _, s := range freeSym {
+			c.loadSymbol(s)
+		}
+
 		compiledFunc := &object.BytecodeFunction{Instructions: instructions, NumLocals: numLocals}
-		c.emit(bytecode.OpConstant, c.addConstant(compiledFunc))
+		c.emit(bytecode.OpClosure, c.addConstant(compiledFunc), len(freeSym))
 
 	case *ast.CallExpression:
 		if err := c.Compile(node.Function); err != nil {
@@ -157,10 +166,10 @@ func (c *Compiler) Compile(node ast.Node) error {
 		}
 
 	case *ast.VarStatement:
+		symbol := c.symbolTable.Define(node.Variable.Literal)
 		if err := c.Compile(node.Expression); err != nil {
 			return err
 		}
-		symbol := c.symbolTable.Define(node.Variable.Literal)
 		if symbol.Scope == GlobalScope {
 			c.emit(bytecode.OpSetGlobal, symbol.Index)
 		} else {
@@ -410,5 +419,9 @@ func (c *Compiler) loadSymbol(s Symbol) {
 		c.emit(bytecode.OpGetLocal, s.Index)
 	case BuiltInScope:
 		c.emit(bytecode.OpGetBuiltIn, s.Index)
+	case FreeScope:
+		c.emit(bytecode.OpGetFree, s.Index)
+	case FunctionScope:
+		c.emit(bytecode.OpCurrentClosure)
 	}
 }

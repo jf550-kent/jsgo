@@ -29,6 +29,7 @@ const (
 	BUITL_IN_OBJECT          ObjectType = "BUILT_IN"
 	DICTIONARY_OBJECT        ObjectType = "DICTIONARY_OBJECT"
 	BYTECODE_FUNCTION_OBJECT ObjectType = "BYTECODE_FUNCTION_OBJECT"
+	CLOSURE_OBJ              ObjectType = "CLOSURE"
 )
 
 // Object is used in the evaluator to represent value in when evaluating the AST of JSGO.
@@ -206,4 +207,14 @@ func ConvertFloat(node Object) *Float {
 		return &Float{Value: float64(node.Value)}
 	}
 	panic("unable to convert to float with" + node.String())
+}
+
+type Closure struct {
+	Fn   *BytecodeFunction
+	Free []Object
+}
+
+func (c *Closure) Type() ObjectType { return CLOSURE_OBJ }
+func (c *Closure) String() string {
+	return fmt.Sprintf("Closure[%p]", c)
 }
