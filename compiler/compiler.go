@@ -298,6 +298,31 @@ func (c *Compiler) Compile(node ast.Node) error {
 			}
 		}
 		c.changeOperand(jumpTo, len(c.currentInstructions()))
+	case *ast.ForStatement:
+		// for (nil; not; nil)
+		 
+		if node.Init == nil {
+			c.emit(bytecode.OpNull)
+		} else {
+			if err := c.Compile(node.Init); err != nil {
+				return err
+			}
+		}
+		if err := c.Compile(node.Condition); err != nil {
+			return err
+		}
+		if node.Post == nil {
+			c.emit(bytecode.OpNull)
+		} else {
+			if err := c.Compile(node.Post); err != nil {
+				return err
+			}
+		}
+		if err := c.Compile(node.Body); err != nil {
+			return err
+		}
+		i := c.currentInstructions().String()
+		print(i)
 	}
 
 	return nil

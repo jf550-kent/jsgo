@@ -84,6 +84,7 @@ const (
 	OpGetFree
 	OpCurrentClosure
 	OpIndexAssign
+	OpFor
 )
 
 type Definition struct {
@@ -127,6 +128,7 @@ var definitions = map[Opcode]*Definition{
 	OpGetFree:        {"OpGetFree", []int{1}, 1, 1},
 	OpCurrentClosure: {"OpCurrentClosure", []int{}, 0, 0},
 	OpIndexAssign:    {"OpIndexAssign", []int{}, 0, 0},
+	OpFor: {"OpFor", []int{1, 1, 1}, 3, 3},
 }
 
 func Lookup(op byte) (*Definition, error) {

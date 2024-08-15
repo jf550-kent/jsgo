@@ -891,6 +891,27 @@ func TestBuiltIn(t *testing.T) {
 	testCompilerTests(t, tests)
 }
 
+func TestForLoop(t *testing.T) {
+	tests := []compilerTestCase{
+		{
+			input: "for (var i = 0; i < 10; i = i + 1) { 10; };",
+			expectedConstants: []any{
+				0,
+				10,
+				1,
+				10,
+			},
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpGetBuiltIn, 0),
+				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpCall, 1),
+				bytecode.Make(bytecode.OpPop),
+			},
+		},
+	}
+	testCompilerTests(t, tests)
+}
+
 func testCompilerTests(t *testing.T, tests []compilerTestCase) {
 	t.Helper()
 
