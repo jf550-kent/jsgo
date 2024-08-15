@@ -194,7 +194,13 @@ func (c *Compiler) Compile(node ast.Node) error {
 		if err := c.Compile(node.Expression); err != nil {
 			return err
 		}
-		c.emit(bytecode.OpSetGlobal, symbl.Index)
+
+		switch symbl.Scope {
+		case GlobalScope:
+			c.emit(bytecode.OpSetGlobal, symbl.Index)
+		case LocalScope:
+			c.emit(bytecode.OpSetLocal, symbl.Index)
+		} 
 
 	case *ast.Number:
 		number := &object.Number{Value: node.Value}

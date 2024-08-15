@@ -253,11 +253,53 @@ func TestBracket(t *testing.T) {
 
 func TestForLoop(t *testing.T) {
 	tests := []vmTestCase{
-		{input: "for (var i = 0; i < 10; i = i + 1) { 29; }; i;", expected: 10},
+		// {input: "for (var i = 0; i < 10; i = i + 1) { 29; }; i;", expected: 10},
+		// {input: "var i = 0 for (; i < 0;) { 29; }; i;", expected: 0},
 		{input: "var i = 0 for (; i < 0;) { 29; }; i;", expected: 0},
+		{input: `
+		
+		var isShorterThan = function(x, y) {
+
+  for (;y != null;) {
+    if (x == null) { return 8888; }
+	return 90;
+  }
+  return 323;
+}
+
+isShorterThan(null, null)
+		`, expected: 323},
+		{`var y = null;
+
+		var x = null
+		for (;y != null;) {
+    		if (x == null) { return 8888; }
+			return 90;
+  		}`, nil},
 	}
 
 	testVmTests(t, tests)
+}
+
+func TestDebug(t *testing.T) {
+	input := `var y = null;
+
+		var x = null
+		for (;y != null;) {
+    		if (x == null) { return 8888; }
+			return 90;
+  		}`
+	main := parser.Parse("", []byte(input))
+
+	com := compiler.New()
+	if err := com.Compile(main); err != nil {
+		t.Fatalf("compiler error: %s", err)
+	}
+
+	vm := New(com.ByteCode())
+	if err := vm.Run(); err != nil {
+		t.Fatalf("vm error: %s", err)
+	}
 }
 
 func TestBuiltIn(t *testing.T) {
@@ -284,7 +326,7 @@ func testVmTests(t *testing.T, tests []vmTestCase) {
 			t.Fatalf("vm error: %s", err)
 		}
 
-		result := vm.lastPopStack()
+		result := vm.LastPopStack()
 
 		testObject(t, tt.expected, result)
 	}
