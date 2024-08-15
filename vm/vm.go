@@ -142,24 +142,42 @@ func (vm *VM) Run() error {
 				return err
 			}
 		case bytecode.OpIndexAssign:
-			ident := vm.stack[vm.stackPointer-3]
-			index, ok := vm.stack[vm.stackPointer-2].(*object.Number)
-			if !ok {
-				return fmt.Errorf("wrong type for array index")
+			expr, err := vm.pop()
+			if err != nil {
+				return err
 			}
-			expr := vm.stack[vm.stackPointer-1]
+			index, err := vm.pop()
+			if err != nil {
+				return err
+			}
+			ident, err := vm.pop()
+			if err != nil {
+				return err
+			}
 
 			switch val := ident.(type) {
 			case *object.Array:
+				index, ok := index.(*object.Number)
+				if !ok {
+					return fmt.Errorf("wrong type for array indexing")
+				}
 				if int(index.Value) >= len(val.Body) {
 					newArr := make([]object.Object, int(index.Value)+1)
 					copy(newArr, val.Body)
 					val.Body = newArr
 				}
 				val.Body[index.Value] = expr
+			case *object.Dictionary:
+				hash, ok := index.(object.Hasher)
+				if !ok {
+					return fmt.Errorf("dictionary key unhashbale: %s", index.String())
+				}
+				keyHash := hash.Hash()
+				val.Value[keyHash] = object.KeyValue{Key: index, Value: expr}
 			default:
 				return fmt.Errorf("cannot index with type=%v", ident)
 			}
+			
 		case bytecode.OpDic:
 			size := int(bytecode.ReadUint16(ins[ip+1:]))
 			vm.currentFrame().ip += 2

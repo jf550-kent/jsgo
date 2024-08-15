@@ -238,12 +238,16 @@ func TestRecursiveFibonacci(t *testing.T) {
 
 func TestBracket(t *testing.T) {
 	tests := []vmTestCase{
+		{input: "var arr = [10]; arr[1] = 90; arr;", expected: []int{10, 90}},
 		{
-			input:    "var arr = [10]; arr[1] = 90; arr;",
-			expected: []int{10, 90},
+			input: `var dic = { "next": 10}; dic["current"] = 20 dic;`,
+			expected: map[object.Hash]int64{
+				(&object.String{Value: "next"}).Hash():    10,
+				(&object.String{Value: "current"}).Hash(): 20,
+			},
 		},
 	}
-	
+
 	testVmTests(t, tests)
 }
 

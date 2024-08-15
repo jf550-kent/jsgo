@@ -66,6 +66,9 @@ func (c *Compiler) Compile(node ast.Node) error {
 		if err := c.Compile(node.Expression); err != nil {
 			return err
 		}
+		if _, ok := node.Expression.(*ast.BracketDeclaration); ok {
+			break
+		}
 		c.emit(bytecode.OpPop)
 
 	case *ast.BlockStatement:
@@ -234,8 +237,8 @@ func (c *Compiler) Compile(node ast.Node) error {
 			return err
 		}
 		c.emit(bytecode.OpIndexAssign)
-		aoksl := c.scopesStack[c.scopeIndex].instructions.String(); 
-		print(aoksl) 
+
+
 	case *ast.Dictionary:
 		keys := []ast.Expression{}
 		for k := range node.Object {
