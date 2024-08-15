@@ -84,6 +84,7 @@ func eval(node ast.Node, env *object.Environment) object.Object {
 		params := node.Parameters
 		body := node.Body
 		return &object.Function{Parameters: params, Body: body, Env: env}
+
 	case *ast.CallExpression:
 		args := evalExpressions(node.Arguments, env)
 		if len(args) == 1 && isError(args[0]) {
