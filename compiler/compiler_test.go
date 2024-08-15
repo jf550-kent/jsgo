@@ -894,18 +894,27 @@ func TestBuiltIn(t *testing.T) {
 func TestForLoop(t *testing.T) {
 	tests := []compilerTestCase{
 		{
-			input: "for (var i = 0; i < 10; i = i + 1) { 10; };",
+			input: "for (var i = 0; i < 10; i = i + 1) { 29; };",
 			expectedConstants: []any{
 				0,
 				10,
+				29,
 				1,
-				10,
 			},
 			expectedInstructions: []bytecode.Instructions{
-				bytecode.Make(bytecode.OpGetBuiltIn, 0),
-				bytecode.Make(bytecode.OpConstant, 0),
-				bytecode.Make(bytecode.OpCall, 1),
-				bytecode.Make(bytecode.OpPop),
+				bytecode.Make(bytecode.OpConstant, 0),     // 3
+				bytecode.Make(bytecode.OpSetGlobal, 0),    // 3
+				bytecode.Make(bytecode.OpConstant, 1),     // 3
+				bytecode.Make(bytecode.OpGetGlobal, 0),    // 3
+				bytecode.Make(bytecode.OpGreaterThan),     // 1
+				bytecode.Make(bytecode.OpJumpNotTrue, 33), // 3
+				bytecode.Make(bytecode.OpConstant, 2),     // 3
+				bytecode.Make(bytecode.OpPop),             // 1
+				bytecode.Make(bytecode.OpGetGlobal, 0),    // 3
+				bytecode.Make(bytecode.OpConstant, 3),     // 3
+				bytecode.Make(bytecode.OpAdd),             // 1
+				bytecode.Make(bytecode.OpSetGlobal, 0),
+				bytecode.Make(bytecode.OpJump, 6), // 3
 			},
 		},
 	}

@@ -299,30 +299,26 @@ func (c *Compiler) Compile(node ast.Node) error {
 		}
 		c.changeOperand(jumpTo, len(c.currentInstructions()))
 	case *ast.ForStatement:
-		// for (nil; not; nil)
-		 
-		if node.Init == nil {
-			c.emit(bytecode.OpNull)
-		} else {
+		if node.Init != nil {
 			if err := c.Compile(node.Init); err != nil {
 				return err
 			}
 		}
+		start := len(c.currentInstructions())
 		if err := c.Compile(node.Condition); err != nil {
 			return err
 		}
-		if node.Post == nil {
-			c.emit(bytecode.OpNull)
-		} else {
+		jumpNotTruePos := c.emit(bytecode.OpJumpNotTrue, TEMP_POSITION)
+		if err := c.Compile(node.Body); err != nil {
+			return err
+		}
+		if node.Post != nil {
 			if err := c.Compile(node.Post); err != nil {
 				return err
 			}
 		}
-		if err := c.Compile(node.Body); err != nil {
-			return err
-		}
-		i := c.currentInstructions().String()
-		print(i)
+		c.emit(bytecode.OpJump, start)
+		c.changeOperand(jumpNotTruePos, len(c.currentInstructions()))
 	}
 
 	return nil

@@ -251,6 +251,15 @@ func TestBracket(t *testing.T) {
 	testVmTests(t, tests)
 }
 
+func TestForLoop(t *testing.T) {
+	tests := []vmTestCase{
+		{input: "for (var i = 0; i < 10; i = i + 1) { 29; }; i;", expected: 10},
+		{input: "var i = 0 for (; i < 0;) { 29; }; i;", expected: 0},
+	}
+
+	testVmTests(t, tests)
+}
+
 func testVmTests(t *testing.T, tests []vmTestCase) {
 	t.Helper()
 
