@@ -177,7 +177,7 @@ func (vm *VM) Run() error {
 			default:
 				return fmt.Errorf("cannot index with type=%v", ident)
 			}
-			
+
 		case bytecode.OpDic:
 			size := int(bytecode.ReadUint16(ins[ip+1:]))
 			vm.currentFrame().ip += 2

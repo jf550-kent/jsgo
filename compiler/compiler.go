@@ -225,7 +225,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 			}
 		}
 		c.emit(bytecode.OpArray, len(node.Body))
-	
+
 	case *ast.BracketDeclaration:
 		if err := c.Compile(node.Identifier); err != nil {
 			return err
@@ -237,7 +237,6 @@ func (c *Compiler) Compile(node ast.Node) error {
 			return err
 		}
 		c.emit(bytecode.OpIndexAssign)
-
 
 	case *ast.Dictionary:
 		keys := []ast.Expression{}

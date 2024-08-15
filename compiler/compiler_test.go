@@ -363,7 +363,7 @@ func TestBracket(t *testing.T) {
 		// 	},
 		// },
 		{
-			input: `var dic = { "next": 10}; dic["current"] = 20`,
+			input:             `var dic = { "next": 10}; dic["current"] = 20`,
 			expectedConstants: []any{"next", 10, "current", 20},
 			expectedInstructions: []bytecode.Instructions{
 				bytecode.Make(bytecode.OpConstant, 0),
