@@ -1,9 +1,3 @@
-var flags = [];
-var size = 5000;
-for (var ar = 0; ar < size; ar = ar + 1) {
-  flags["push"](true)
-}
-
 var sieve = function (flags, size) {
   var primeCount = 0;
 
@@ -18,5 +12,11 @@ var sieve = function (flags, size) {
   return primeCount;
 };
 
-var correct = sieve(flags, size)
+var flags = [];
+var size = 5000;
+for (var ar = 0; ar < size; ar = ar + 1) {
+  flags["push"](true)
+}
+
+var correct = sieve(flags, size) == 669;
 correct;
