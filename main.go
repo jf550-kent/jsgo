@@ -42,7 +42,7 @@ func main() {
 		log.Fatalf("flag: interpreter can only be 'tree' or 'bytecode', not: '%s'", interpreter)
 	}
 
-	printOut("Selected interpreter:" + interpreter, RESULT)
+	printOut("Selected interpreter:"+interpreter, RESULT)
 	defer func() {
 		if r := recover(); r != nil {
 			panicMsg := fmt.Sprintf("%v\n in file : %s", r, fileName)
@@ -67,7 +67,7 @@ func main() {
 		if err, ok := result.(*object.Error); ok {
 			printError(err.Error())
 		}
-	
+
 		if result == nil {
 			printError("unable to evalulate file : " + fileName)
 		}
