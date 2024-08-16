@@ -337,7 +337,7 @@ func (vm *VM) runIndexExpression(identifier, index object.Object) error {
 		return vm.runArrayIndex(identifier, index)
 	case identifierType == object.ARRAY_OBJECT && indexType == object.STRING_OBJECT:
 		return vm.runArrayMethod(identifier, index)
-	case identifierType == object.DICTIONARY_OBJECT && indexType == object.NUMBER_OBJECT:
+	case identifierType == object.DICTIONARY_OBJECT:
 		return vm.runDictionaryIndex(identifier, index)
 	}
 
@@ -720,7 +720,7 @@ func (vm *VM) pop() (object.Object, error) {
 }
 
 // TEST only function
-func (vm *VM) lastPopStack() object.Object {
+func (vm *VM) LastPopStack() object.Object {
 	if vm.stackPointer < 0 {
 		panic("vm stack pointer is non zero")
 	}
