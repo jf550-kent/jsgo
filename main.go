@@ -21,7 +21,7 @@ const (
 	WARNING = Yellow
 	ERROR   = Red
 	RESULT  = Green
-	VERSION = "v2.0.0"
+	VERSION = "v2.1.0"
 )
 
 func main() {
