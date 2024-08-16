@@ -67,6 +67,14 @@ func main() {
 		printError("unable to parse file : " + fileName)
 	}
 
+	if debug {
+		isJSGO := "is not"
+		if Is(main) {
+			isJSGO = "is"
+		}
+		fmt.Printf("Program: %s %s a JSGO program\n", fileName, isJSGO)
+	}
+
 	switch interpreter {
 	case "tree":
 		result := evaluator.Eval(main, debug)
@@ -91,6 +99,7 @@ func main() {
 		virtualMachine := vm.New(com.ByteCode())
 		if err := virtualMachine.Run(); err != nil {
 			printError("vm error: " + err.Error())
+			break
 		}
 
 		result := virtualMachine.LastPopStack()

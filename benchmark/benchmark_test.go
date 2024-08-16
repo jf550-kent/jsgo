@@ -166,6 +166,7 @@ func setUpFile(b *testing.B, file string) []byte {
 
 func testEval(b *testing.B, name string, src []byte) {
 	main := parser.Parse(name, src)
+	
 	obj := evaluator.Eval(main, false)
 	result, ok := obj.(*object.Boolean)
 	if !ok {
