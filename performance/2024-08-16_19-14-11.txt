@@ -1,0 +1,55 @@
+?   	github.com/jf550-kent/jsgo	[no test files]
+PASS
+ok  	github.com/jf550-kent/jsgo/ast	0.003s
+goos: linux
+goarch: amd64
+pkg: github.com/jf550-kent/jsgo/benchmark
+cpu: AMD EPYC 7763 64-Core Processor                
+BenchmarkListTree-4              	      90	  12913317 ns/op	 3377419 B/op	   75797 allocs/op
+BenchmarkListTreeDebug-4         	      88	  12845876 ns/op	 3377543 B/op	   75799 allocs/op
+BenchmarkListBytecode-4          	     120	  10003660 ns/op	 3837188 B/op	   86385 allocs/op
+BenchmarkTowerTree-4             	      37	  29744379 ns/op	15799401 B/op	  282906 allocs/op
+BenchmarkTowerTreeDebug-4        	      40	  29670342 ns/op	15799634 B/op	  282908 allocs/op
+BenchmarkTowerBytecode-4         	     100	  10235018 ns/op	 2703373 B/op	   82652 allocs/op
+BenchmarkMandelbrotTree-4        	       1	33590254259 ns/op	3261055400 B/op	407626898 allocs/op
+BenchmarkMandelbrotTreeDebug-4   	       1	33608170126 ns/op	3261053784 B/op	407626890 allocs/op
+BenchmarkPermuteTree-4           	      72	  16297088 ns/op	 8315227 B/op	  145896 allocs/op
+BenchmarkPermuteTreeDebug-4      	      72	  16946215 ns/op	 8315378 B/op	  145898 allocs/op
+BenchmarkPermuteBytecode-4       	     237	   5027949 ns/op	 1763794 B/op	   45090 allocs/op
+BenchmarkSieveTree-4             	     142	   8340710 ns/op	 1201701 B/op	  108937 allocs/op
+BenchmarkSieveTreeDebug-4        	     142	   8308989 ns/op	 1201846 B/op	  108939 allocs/op
+BenchmarkQueensTree-4            	      98	  12118677 ns/op	 5929930 B/op	  123239 allocs/op
+BenchmarkQueensTreeDebug-4       	      96	  12060390 ns/op	 5930034 B/op	  123169 allocs/op
+BenchmarkQueensBytecode-4        	     304	   3959979 ns/op	 1620175 B/op	   37608 allocs/op
+PASS
+ok  	github.com/jf550-kent/jsgo/benchmark	86.863s
+PASS
+ok  	github.com/jf550-kent/jsgo/bytecode	0.002s
+PASS
+ok  	github.com/jf550-kent/jsgo/compiler	0.002s
+goos: linux
+goarch: amd64
+pkg: github.com/jf550-kent/jsgo/evaluator
+cpu: AMD EPYC 7763 64-Core Processor                
+BenchmarkExample-4   	       1	33722548561 ns/op	3295576456 B/op	408361488 allocs/op
+PASS
+ok  	github.com/jf550-kent/jsgo/evaluator	33.726s
+goos: linux
+goarch: amd64
+pkg: github.com/jf550-kent/jsgo/lexer
+cpu: AMD EPYC 7763 64-Core Processor                
+BenchmarkLex-4   	18456039	        64.66 ns/op	       8 B/op	       1 allocs/op
+PASS
+ok  	github.com/jf550-kent/jsgo/lexer	1.264s
+?   	github.com/jf550-kent/jsgo/object	[no test files]
+goos: linux
+goarch: amd64
+pkg: github.com/jf550-kent/jsgo/parser
+cpu: AMD EPYC 7763 64-Core Processor                
+BenchmarkExample-4   	    6601	    180793 ns/op	  107110 B/op	    2119 allocs/op
+PASS
+ok  	github.com/jf550-kent/jsgo/parser	1.216s
+PASS
+ok  	github.com/jf550-kent/jsgo/token	0.002s
+PASS
+ok  	github.com/jf550-kent/jsgo/vm	0.002s
