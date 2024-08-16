@@ -47,4 +47,13 @@ This project uses the issues tracker: https://github.com/jf550-kent/jsgo/issues 
 To contribute to the project, you need to submit PR: https://github.com/jf550-kent/jsgo/pulls. This is also how the project handle development.
 
 ## **Project walk through**
--
+- This `performance/` directory stores the result of the benchmark
+- `token/` & `lexer/` & `ast/` & `parser/` this four directory is the code for the frontend of the interpreter.
+- `evaluator/` is the tree walking interpreter that evalualate the result after the parser builts a ast.
+- `vm/` similar to the `evaluator/` vm is the directory that execute the stack-based bytecode intructions.
+- `compiler/` compiles a AST into bytecode intructions for the `vm/` to run.
+- `benchmark/` stores the benchmarking files and script to run for benchmarking
+- `.github/` is used for Continuous integration 
+- `.goreleaser.yaml` is config used for  Continuous deployment
+- `main.go` is the entry file for this project
+- `specification.md` is the specifiction of the JSGO language
