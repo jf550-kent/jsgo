@@ -335,11 +335,41 @@ func (vm *VM) runIndexExpression(identifier, index object.Object) error {
 	switch {
 	case identifierType == object.ARRAY_OBJECT && indexType == object.NUMBER_OBJECT:
 		return vm.runArrayIndex(identifier, index)
+	case identifierType == object.ARRAY_OBJECT && indexType == object.STRING_OBJECT:
+		return vm.runArrayMethod(identifier, index)
 	case identifierType == object.DICTIONARY_OBJECT && indexType == object.NUMBER_OBJECT:
 		return vm.runDictionaryIndex(identifier, index)
 	}
 
 	return fmt.Errorf("index operation not supported for %s[%s]", identifierType, indexType)
+}
+
+func (vm *VM) runArrayMethod(identifier, index object.Object) error {
+	arrayObj, ok := identifier.(*object.Array)
+	if !ok {
+		return fmt.Errorf("not array object passed to index array")
+	}
+	methdName, ok := index.(*object.String)
+	if !ok {
+		return fmt.Errorf("non string is used for method access array")
+	}
+
+	switch methdName.Value {
+	case "push":
+		if err := vm.push(arrayObj); err != nil {
+			return nil
+		}
+		if err := vm.push(object.ArrayPush); err != nil {
+			return nil
+		}
+	case "size":
+		if err := vm.push(&object.Number{Value: int64(len(arrayObj.Body))}); err != nil {
+			return err
+		}
+	default:
+		return fmt.Errorf("undefined array method: %s", methdName.Value)
+	}
+	return nil
 }
 
 func (vm *VM) runArrayIndex(identifier, index object.Object) error {
@@ -366,6 +396,17 @@ func (vm *VM) runCall(numArgs int) error {
 	case *object.Closure:
 		return vm.callClosure(caller, numArgs)
 	case *object.BuiltIn:
+		if caller == object.ArrayPush {
+			arr := vm.stack[vm.stackPointer-2-numArgs]
+			arr, ok := arr.(*object.Array)
+			if !ok {
+				return fmt.Errorf("not an array?")
+			}
+			arg := vm.stack[vm.stackPointer-numArgs]
+			object.ArrayPush.Function(arr, arg)
+			vm.stackPointer = vm.stackPointer - numArgs - 1
+			return nil
+		}
 		return vm.callBuiltin(caller, numArgs)
 	}
 	return fmt.Errorf("calling non-function and non-built-in")

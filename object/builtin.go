@@ -15,3 +15,18 @@ var Builtins = []*BuiltIn{
 		},
 	},
 }
+
+var ArrayPush = &BuiltIn{
+	Name: "push",
+	Function: func(args ...Object) Object {
+		if len(args) != 2 {
+			panic("built in array push function only accept 2 arguments")
+		}
+		arr, ok := args[0].(*Array)
+		if !ok {
+			panic("not an array for push function")
+		}
+		arr.Body = append(arr.Body, args[1])
+		return nil
+	},
+}

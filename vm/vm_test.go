@@ -260,6 +260,14 @@ func TestForLoop(t *testing.T) {
 	testVmTests(t, tests)
 }
 
+func TestBuiltIn(t *testing.T) {
+	tests := []vmTestCase{
+		{`var arr = []; arr["push"](10); arr["push"](19); arr;`, []int{10, 19}},
+		{`var arr = [1, 2, 3]; arr["size"];`, 3},
+	}
+	testVmTests(t, tests)
+}
+
 func testVmTests(t *testing.T, tests []vmTestCase) {
 	t.Helper()
 
