@@ -1,4 +1,5 @@
 var this_movesDone = 0;
+var this_piles = [null, null, null];
 
 var pushDisk = function(disk, pile) {
   var top = this_piles[pile]
@@ -47,7 +48,6 @@ var moveDisks = function (disks, fromPile, toPile) {
     moveDisks(disks - 1, otherPile, toPile);
   }
 }
-var this_piles = [null, null, null];
 buildTowerAt(0, 13)
 moveDisks(13, 0, 1)
 var correct = this_movesDone == 8191

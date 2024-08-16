@@ -14,13 +14,6 @@ var createList = function(size) {
   return createNode(size, createList(size - 1));
 }
 
-var tail = function(x, y, z) {
-  if (isShorterThan(y, x)) {
-    return tail(tail(x["next"], y, z), tail(y["next"], z, x), tail(z["next"], x, y));
-  }
-  return z;
-}
-
 var isShorterThan = function(x, y) {
   var xTail = x;
   var yTail = y;
@@ -31,6 +24,13 @@ var isShorterThan = function(x, y) {
     yTail = yTail["next"];
   }
   return false;
+}
+
+var tail = function(x, y, z) {
+  if (isShorterThan(y, x)) {
+    return tail(tail(x["next"], y, z), tail(y["next"], z, x), tail(z["next"], x, y));
+  }
+  return z;
 }
 
 var result = length(tail(createList(15), createList(10), createList(6)))

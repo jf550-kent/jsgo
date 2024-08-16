@@ -1,6 +1,12 @@
 var count = 0;
 var v = [0, 0, 0, 0, 0, 0];
 
+var swap = function(i, j) {
+  var tmp = v[i];
+  v[i] = v[j];
+  v[j] = tmp;
+}
+
 var permute = function(n) {
   count = count + 1;
   if (n != 0) {
@@ -12,12 +18,6 @@ var permute = function(n) {
       swap(nOne, i);
     }
   }
-}
-
-var swap = function(i, j) {
-  var tmp = v[i];
-  v[i] = v[j];
-  v[j] = tmp;
 }
 
 permute(6)
