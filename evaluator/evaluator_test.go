@@ -17,7 +17,7 @@ func BenchmarkExample(b *testing.B) {
 	main := parser.Parse("", byt)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		result := Eval(main)
+		result := Eval(main, false)
 		if result.Type() == object.ERROR_OBJECT {
 			b.Error("failed to evalulate main")
 		}
@@ -27,7 +27,7 @@ func BenchmarkExample(b *testing.B) {
 func TestEval(t *testing.T) {
 	b, _ := os.ReadFile("./example.js")
 	main := parser.Parse("", b)
-	Eval(main)
+	Eval(main, false)
 }
 
 func TestVarStatement(t *testing.T) {
@@ -64,7 +64,7 @@ func TestUnaryOperation(t *testing.T) {
 
 	for _, tt := range tests {
 		main := parser.Parse("", []byte(tt.input))
-		result := Eval(main)
+		result := Eval(main, false)
 		testValue(t, result, tt.expected)
 	}
 }

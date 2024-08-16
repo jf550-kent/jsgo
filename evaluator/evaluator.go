@@ -13,7 +13,10 @@ var (
 	FALSE = &object.Boolean{Value: false}
 )
 
-func Eval(main *ast.Main) object.Object {
+func Eval(main *ast.Main, debug bool) object.Object {
+	if debug {
+		main = Partial(main)
+	}
 	obj := eval(main, object.NewEnvironment())
 	err, ok := obj.(*object.Error)
 	if ok {

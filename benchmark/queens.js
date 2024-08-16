@@ -5,6 +5,24 @@ var queenRows = null;
 
 var result = true;
 
+var getRowColumn = function(r, c) {
+  if (freeRows[r]) {
+    if (freeMaxs[c + r]) {
+      if (freeMins[c - r + 7]) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+var setRowColumn = function(r, c, v) {
+  freeRows[r] = v;
+  freeMaxs[c + r] = v;
+  freeMins[c - r + 7] = v;
+}
+
 var placeQueen = function(c) {
   for (var r = 0; r < 8; r = r + 1) {
     if (getRowColumn(r, c)) {
@@ -31,24 +49,6 @@ var queens = function() {
   queenRows = [-1, -1, -1, -1, -1, -1, -1, -1]
 
   return placeQueen(0);
-}
-
-var getRowColumn = function(r, c) {
-  if (freeRows[r]) {
-    if (freeMaxs[c + r]) {
-      if (freeMins[c - r + 7]) {
-        return true;
-      }
-    }
-  }
-
-  return false;
-}
-
-var setRowColumn = function(r, c, v) {
-  freeRows[r] = v;
-  freeMaxs[c + r] = v;
-  freeMins[c - r + 7] = v;
 }
 
 for (var i = 0; i < 10; i = i + 1) {
