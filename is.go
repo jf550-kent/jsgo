@@ -29,7 +29,9 @@ func check(node ast.Node) bool {
 	case *ast.IFExpression:
 		correct := checkBlockStatements(node.Body)
 		correct = check(node.Condition) && correct
-		if node.Else != nil { correct = correct && checkBlockStatements(node.Else)}
+		if node.Else != nil {
+			correct = correct && checkBlockStatements(node.Else)
+		}
 		return correct
 	case *ast.UnaryExpression:
 		if node.Operator != "!" && node.Operator != "-" {
@@ -82,7 +84,7 @@ func checkBlockStatements(stmts *ast.BlockStatement) bool {
 }
 
 // Binary operation allows:
-// number [+|-|*|/|<<|^|<|>|==|!=] number 
+// number [+|-|*|/|<<|^|<|>|==|!=] number
 // float [+|-|*|/|<|>|==|!=] float
 // float [+|-|*|/|<|>|==|!=] number = float [+|-|*|/|<|>|==|!=] float
 // <expression> [!= | == ] <expression>
