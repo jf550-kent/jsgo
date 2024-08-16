@@ -11,11 +11,19 @@ import (
 	"github.com/jf550-kent/jsgo/vm"
 )
 
-func BenchmarkList(b *testing.B) {
+func BenchmarkListTree(b *testing.B) {
 	byt := setUpFile(b, "./list.js")
 
 	for i := 0; i < b.N; i++ {
 		testEval(b, "list", byt)
+	}
+}
+
+func BenchmarkListTreeDebug(b *testing.B) {
+	byt := setUpFile(b, "./list.js")
+
+	for i := 0; i < b.N; i++ {
+		testEvalDebug(b, "list", byt)
 	}
 }
 
@@ -27,11 +35,19 @@ func BenchmarkListBytecode(b *testing.B) {
 	}
 }
 
-func BenchmarkTower(b *testing.B) {
+func BenchmarkTowerTree(b *testing.B) {
 	byt := setUpFile(b, "./tower.js")
 
 	for i := 0; i < b.N; i++ {
 		testEval(b, "tower", byt)
+	}
+}
+
+func BenchmarkTowerTreeDebug(b *testing.B) {
+	byt := setUpFile(b, "./tower.js")
+
+	for i := 0; i < b.N; i++ {
+		testEvalDebug(b, "tower", byt)
 	}
 }
 
@@ -43,11 +59,19 @@ func BenchmarkTowerBytecode(b *testing.B) {
 	}
 }
 
-func BenchmarkMandelbrot(b *testing.B) {
+func BenchmarkMandelbrotTree(b *testing.B) {
 	src := setUpFile(b, "./mandelbrot.js")
 
 	for i := 0; i < b.N; i++ {
 		testEval(b, "mandelbrot", src)
+	}
+}
+
+func BenchmarkMandelbrotTreeDebug(b *testing.B) {
+	src := setUpFile(b, "./mandelbrot.js")
+
+	for i := 0; i < b.N; i++ {
+		testEvalDebug(b, "mandelbrot", src)
 	}
 }
 
@@ -59,11 +83,19 @@ func BenchmarkMandelbrot(b *testing.B) {
 // 	}
 // }
 
-func BenchmarkPermute(b *testing.B) {
+func BenchmarkPermuteTree(b *testing.B) {
 	src := setUpFile(b, "./permute.js")
 
 	for i := 0; i < b.N; i++ {
 		testEval(b, "permute", src)
+	}
+}
+
+func BenchmarkPermuteTreeDebug(b *testing.B) {
+	src := setUpFile(b, "./permute.js")
+
+	for i := 0; i < b.N; i++ {
+		testEvalDebug(b, "permute", src)
 	}
 }
 
@@ -83,7 +115,7 @@ func BenchmarkPermuteBytecode(b *testing.B) {
 // 	}
 // }
 
-func BenchmarkSieve(b *testing.B) {
+func BenchmarkSieveTree(b *testing.B) {
 	src := setUpFile(b, "./sieve.js")
 
 	for i := 0; i < b.N; i++ {
@@ -91,11 +123,27 @@ func BenchmarkSieve(b *testing.B) {
 	}
 }
 
-func BenchmarkQueens(b *testing.B) {
+func BenchmarkSieveTreeDebug(b *testing.B) {
+	src := setUpFile(b, "./sieve.js")
+
+	for i := 0; i < b.N; i++ {
+		testEvalDebug(b, "sieve", src)
+	}
+}
+
+func BenchmarkQueensTree(b *testing.B) {
 	src := setUpFile(b, "./queens.js")
 
 	for i := 0; i < b.N; i++ {
-		testBytecode(b, "queens", src)
+		testEval(b, "queens", src)
+	}
+}
+
+func BenchmarkQueensTreeDebug(b *testing.B) {
+	src := setUpFile(b, "./queens.js")
+
+	for i := 0; i < b.N; i++ {
+		testEvalDebug(b, "queens", src)
 	}
 }
 
@@ -103,7 +151,7 @@ func BenchmarkQueensBytecode(b *testing.B) {
 	src := setUpFile(b, "./queens.js")
 
 	for i := 0; i < b.N; i++ {
-		testEval(b, "queens", src)
+		testBytecode(b, "queens", src)
 	}
 }
 
@@ -118,7 +166,19 @@ func setUpFile(b *testing.B, file string) []byte {
 
 func testEval(b *testing.B, name string, src []byte) {
 	main := parser.Parse(name, src)
-	obj := evaluator.Eval(main)
+	obj := evaluator.Eval(main, false)
+	result, ok := obj.(*object.Boolean)
+	if !ok {
+		b.Fatal("result is not type bool")
+	}
+	if !result.Value {
+		b.Error("result incorrect for list")
+	}
+}
+
+func testEvalDebug(b *testing.B, name string, src []byte) {
+	main := parser.Parse(name, src)
+	obj := evaluator.Eval(main, true)
 	result, ok := obj.(*object.Boolean)
 	if !ok {
 		b.Fatal("result is not type bool")

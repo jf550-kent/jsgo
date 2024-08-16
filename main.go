@@ -27,7 +27,7 @@ const (
 func main() {
 	if len(os.Args) < 3 {
 		printError("Please provide file name as the first argument to be run by jsgo\n")
-		printOut("usage ./jsgo <filename> <tree|bytecode> [-version]", WARNING)
+		printOut("usage ./jsgo <filename> <tree|bytecode> [debug] [-version]", WARNING)
 		os.Exit(1)
 	}
 	version := flag.Bool("version", false, "current version of JSGO")
@@ -40,6 +40,12 @@ func main() {
 	interpreter := os.Args[2]
 	if interpreter != "bytecode" && interpreter != "tree" {
 		log.Fatalf("flag: interpreter can only be 'tree' or 'bytecode', not: '%s'", interpreter)
+	}
+	debug := false
+	if len(os.Args) > 3 {
+		if os.Args[3] == "debug" {
+			debug = true
+		}
 	}
 
 	printOut("Selected interpreter:"+interpreter, RESULT)
@@ -63,7 +69,7 @@ func main() {
 
 	switch interpreter {
 	case "tree":
-		result := evaluator.Eval(main)
+		result := evaluator.Eval(main, debug)
 		if err, ok := result.(*object.Error); ok {
 			printError(err.Error())
 		}
@@ -75,6 +81,9 @@ func main() {
 		printOut(out, RESULT)
 	case "bytecode":
 		com := compiler.New()
+		if debug {
+			main = evaluator.Partial(main)
+		}
 		if err := com.Compile(main); err != nil {
 			printError("compiler error: " + err.Error())
 		}
