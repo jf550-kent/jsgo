@@ -1,14 +1,15 @@
-# jsgo
+# JSGO 🔥🔥🔥
 JavaScript compiler built in go
 
-**Installation**
+## **Installation**
+
 In this directory, you will find the zip `jsgo_<machine spec>.tar.gz` that you can download based on your machine specification. Download the correct one and unzip the file, it will contain the binary that you can use to run the interpreter.
 
 If you have the go compiler, you can clone the repo: https://github.com/jf550-kent/jsgo.git and build from source. 
 
 Alternatively, you can visit the release page to download the latest version of this project: https://github.com/jf550-kent/jsgo/releases
 
-**Usage**
+## **Usage**
 ```
 ./jsgo <filename> <tree|bytecode> [debug] [-version]
 ```
@@ -41,9 +42,9 @@ Here is the example command correct command that works:
 ./jsgo ./benchmark/tower.js bytecode debug
 ```
 
-**Software enginering pratice**
+## **Software enginering pratice**
 This project uses the issues tracker: https://github.com/jf550-kent/jsgo/issues for feature development and fixing errors.
 To contribute to the project, you need to submit PR: https://github.com/jf550-kent/jsgo/pulls. This is also how the project handle development.
 
-**Project walk through**
+## **Project walk through**
 -
