@@ -25,16 +25,16 @@ const (
 )
 
 func main() {
-	if len(os.Args) < 3 {
-		printError("Please provide file name as the first argument to be run by jsgo\n")
-		printOut("usage ./jsgo <filename> <tree|bytecode> [debug] [-version]", WARNING)
-		os.Exit(1)
-	}
 	version := flag.Bool("version", false, "current version of JSGO")
 	flag.Parse()
 	if *version {
 		printOut(VERSION, RESULT)
 		return
+	}
+	if len(os.Args) < 3 {
+		printError("Please provide file name as the first argument to be run by jsgo\n")
+		printOut("usage ./jsgo <filename> <tree|bytecode> [debug] [-version]", WARNING)
+		os.Exit(1)
 	}
 	fileName := os.Args[1]
 	interpreter := os.Args[2]
