@@ -69,9 +69,9 @@ if (true) {
 
 Above is the example file that our interpreter can parse, 
 
-## Partial evaluation
-
-## Definition interperter
+ ## Correctness
+ All the tests created have passed in this project. 
+ 
 
 ## Present the result of the benchmark
 
@@ -83,3 +83,7 @@ The benchmarks were conducted on a Linux system with an AMD EPYC 7763 64-Core Pr
 
 Representing the result
 Time line
+
+## Partial evaluation
+
+## Definition interperter

@@ -1,4 +1,6 @@
+<div style="text-align: justify">
 ## 1. Introduction
+
 An interpreter may seem like a magic box until one understands how it works. Anyone who writes code might want to learn how to build one to uncover the inner workings of this "magic box". Understanding the basic mechanics of an interpreter is beneficial, as it provides valuable insights into a tool used daily. However, when we have decided to create a programming language, we are often motivated to quickly build out features during the initial phases, focusing solely on adding new capabilities. As a result, testing and measuring performance often take a backseat. Without adopting proper engineering principles and setting up robust engineering infrastructures, the project can become exponentially complex as new features are added. Ultimately, this leads to things breaking down without proper warning, leaving engineers unsure where to start troubleshooting the problem. Additionally, without adequate testing, engineers will have minimal confidence in making changes, fearing that their updates can potentially cause new issues. Consequently slowing down the engineering process and possibly renders the project difficult to contribute to.
 
 This dissertation aims to apply a structured engineering approach to language implementations focusing on correctness, performance, and robust engineering infrastructures. Through adopting these principles, we can make better decisions throughout the interpreter development process. Thus, ensuring that every aspect of the language design and implementation is grounded in sound engineering practices. By applying structured engineering principles, we identify and analyze the trade-offs involved in different approaches, providing valuable insights for more efficient language development in the future. By evaluating the engineering efforts, challenges and benefits in implementing this approaches in interpreter contructions. 
@@ -30,7 +32,6 @@ In this paper, we focus on correctness, performance, and engineering infrastruct
 **Language features**
 ```
 var apple = "apple";
-
 ```
 Above is the specification for JSGO.
 
@@ -67,9 +68,9 @@ Additionally, we will build a definitional interpreter based on the proposed lan
 During the syntactic analysis phase, the parser must verify that the syntax of the source text is correct and report any syntax errors, including the precise location of the error in the source text. To achieve this, we will implement simple error handling that reports the first instance of a grammatical error. Therefore, we are required to write tests to verify that the parser accurately reports errors to users. This approach also distinguishes our implementation from Writing an interpreter.
 
 #### 3.2.3 Tree walking interpreter
-Once we have a complete AST, we can begin constructing the interpreter. We will build a tree-walking interpreter $Inter_{text{tree}}$, which will take the AST and evaluate the program.
+Once we have a complete AST, we can begin constructing the interpreter. We will build a tree-walking interpreter $Inter_{tree}$, which will take the AST and evaluate the program.
 
-To ensure the correctness of $Inter_{text{tree}}$, we will run tests for each new feature introduced by the interpreter. 
+To ensure the correctness of $Inter_{tree}$, we will run tests for each new feature introduced by the interpreter. 
 ```
 var apple = 9; 
 console.log(apple); // The interpreter needs to print out 9.
@@ -125,13 +126,14 @@ Talk about your benchmark and what new test you have added. I am not too sure ho
 concrete text == source text == source codes == human readable tex
 
 ## Implementations
+In this section, we will illustrate the implementation of our language by covering the processes of lexical analysis, syntactic analysis, tree-walking interpreter, and bytecode interpreter. We will highlight the key components of each phase to provide an overview of the implementation. References to the actual code implementation will be provided by hyperlinking the relevant words and noting them in the footnotes. The code snippets presented will usally the part relevant to the text and `...` will be used to denote the code abstracted.
 
-## Lexer
-In this phase, we need to tokensise the user defined source code. We have specific a huge range of tokens and JavaScript keywords. The rationale for this approach is that including a wide range of keywords incurs minimal additional code management, even if we later decide not to use some of them. The primary goals of the lexer are to tokenize numbers, floats, keywords, identifiers, strings, and relevant operators such as `+ - ! == !=`. Additionally, the lexer must accurately report the position of each token in the source text. To do that we have created 2 main components. 
+## Lexical analysis
+In this phase, we built a lexer to tokenize the user-defined source code. We have specified a huge range of tokens and JavaScript keywords. The rationale for this approach is because including a wide range of keywords requires minimal additional code management, even if some are not used later. The primary goals of the lexer are to tokenize numbers, floats, keywords, identifiers, strings, and relevant operators such as +, -, !, ==, and !=. Additionally, the lexer must accurately report the position of each token in the source text. To do that we have created 2 main components.
 
-First is `Token` (Code 1) that represent the smallest element of the language, the fields `Start` and `End` represent the position of the token at the file. While `Literal` is the actual string representation of the token. `TokenType` is the key field for the rest of the interpreter's component to identify different token type. See the actual [TokenType](https://github.com/jf550-kent/jsgo/blob/5415802df0edaffac116917f7d912354a860edee/token/token.go#L23C1-L86C2) definition. 
+First is `Token` (Code 1), which represents the smallest element of the language. The fields `Start` and `End` denote the position of the token within the file, while `Literal` is the actual string representation of the token. `TokenType` is the key field used by the rest of the interpreter's components to identify different token types. The actual `TokenType` definition is: [TokenType](https://github.com/jf550-kent/jsgo/blob/5415802df0edaffac116917f7d912354a860edee/token/token.go#L23C1-L86C2) [Footnote](https://github.com/jf550-kent/jsgo/blob/5415802df0edaffac116917f7d912354a860edee/token/token.go#L23C1-L86C2).
 
-Secondly, we created `Lexer` (Code 1), which is the program that transform our user defined source text into tokens. The `Lexer` has field `src` that store the source text and the `src`'s index of the current pointer as `position` and next pointer as `nextPosition`. The field `line` and `col` represent the current character's position at the source file. The fields are the current character's position at the source file. 
+The second component is the `Lexer` (Code 1), which is the program that transforms our user-defined source text into tokens. The `Lexer` has a field `src` that stores the source text, with the current pointer's index stored as `position` and the next pointer as `nextPosition`. The fields `line` and `col` represent the current character's position in the source file.
 
 ```
 // Token is the smallest element of the JSGO
@@ -156,16 +158,15 @@ type Lexer struct {
 ```
 <center>Code 1</center>
 
-There are 2 key method in the `Lexer` that do the tokenisation. In Go this is denoted as `func (l *Lexer)`, where the `*` in `*Lexer` is the pointer to the `Lexer` struct. Which are `Lex`[^1] (Code 2) and `next`[^2] (Code 2). 
+There are two key methods in the Lexer that perform tokenisation. In Go, this is denoted as func `(l *Lexer)`, where the `*` in `*Lexer` indicates a pointer to the `Lexer` struct. These methods are [`Lex`](https://github.com/jf550-kent/jsgo/blob/5415802df0edaffac116917f7d912354a860edee/lexer/lexer.go#L32) [FOOTNODE] (Code 2) and [`next`](https://github.com/jf550-kent/jsgo/blob/5415802df0edaffac116917f7d912354a860edee/lexer/lexer.go#L211) [FOOT] (Code 2).
 
-The `next` method is responsible to correctly advance the Lexer pointer to the `l.src` and update the correct `col` and `line` position.
+The `next` method is responsible for correctly advancing the `Lexer` pointer to `l.src` and updating the correct column and line positions.
 
-At the `Lex` method we skip the whitespace before we step into the switch statement. In the switch statement we check for the byte `l.ch` which store the current byte for the `Lexer` struct. We check for single byte by specific different case statement, if `l.ch` matches to `+` it will create a token with the `TokenType` of `ADD`. 
+In the `Lex` method, we skip any whitespace before entering the switch statement. Within the switch statement, we examine the byte `l.ch`, which stores the current byte for the `Lexer` struct. We check for individual bytes using specific case statements. For instance, if `l.ch` matches `+`, it will create a token with the `TokenType` of `ADD`.
 
-We will reach the default case when `l.ch` did not match any of our specified case statement. Here in the default case, we use the method `l.isLetter` to check if the current byte is a letter. If it is a letter the lexer will extract the letter then check if it is a keyword which then create a keyword token if it is a keyword if not an identifier token. 
+The default case is reached when `l.ch` does not match any of the specified case statements. In this case, we use the `l.isLetter` method to check if the current byte is a letter. If it is, the lexer will extract the letter, check if it matches a keyword, and create a keyword token if it does; otherwise, it will generate an identifier token.
 
-If the `l.ch` is not a letter, we will then check if it is a digit. If it is a digit we will use the `l.getDigitToken()` [^3] to create an Number token or a Float token. We return an Illegal token if `l.ch` does not match an cases we have specify in our switch statement. 
-
+If `l.ch` is not a letter, we then check if it is a digit. If it is a digit, we use [`l.getDigitToken`](https://github.com/jf550-kent/jsgo/blob/5415802df0edaffac116917f7d912354a860edee/lexer/lexer.go#L134) [FOOT] to create either a `Number` token or a `Float` token. If `l.ch` does not match any of the cases specified in our switch statement, we return an `Illegal` token.
 ```
 func (l *Lexer) next() {
 	if l.nextPosition == len(l.src) {
@@ -213,9 +214,9 @@ func (l *Lexer) Lex() (token.Token, error) {
 	return tok, nil
 }
 ```
-<center>Code 2: The implementation only show the important parts of the code.</center>
+Code 2: [Lexer](https://github.com/jf550-kent/jsgo/blob/main/lexer/lexer.go)
 
-Therefore, the Lexer deals with the byte represntations of our source code. It checks each byte to transform it into tokens based on the `Lex` switch case algorithm we have created. Code 3 show the result of Lexer tokenising the the var statement.
+Therefore, the Lexer processes the byte representations of our source code, examining each byte to transform it into tokens based on the `Lex` switch-case algorithm we have implemented. Code 3 illustrates the result of the Lexer tokenising the var statement.
 
 ```
 var apple = 10;
@@ -228,11 +229,6 @@ Token(NUMBER, "10", {1, 13}, {1, 14})
 Token(SEMICOLON, ";", {1,15}, {1, 15})
 ```
 <center>Code 3</center>
-
-
-
-- [^1] `Lex` actual code implementation: (Here)[]
-- [^2] `next` actual code implementation: (Here)[]
 
 ## Syntactic analysis
 Building an AST allows us to represent the source text in a data structure that is easier for the interpreter to work with. In this phase, we created two main packages: `parser` and `ast`. The parser is responsible for taking the tokens and transforming them into an AST. The `ast` package specifies all the abstract syntax nodes available in $L_{JSGO}$. In the grammar of $L_{JSGO}$, $L_{JSGO}$ is essentially an array of statements. In $L_{JSGO}$, an expression evaluates to a value, whereas a statement executes an action without necessarily producing a value; depending on the context, it can have side effects. The statement types include ExpressionStatement, VarStatement, AssignmentStatement, ReturnStatement, ForStatement, and BlockStatement. For expressions, we have Number, Float, Identifier, Boolean, Function, Null, String, Array, Dictionary, BinaryExpression, IfExpression, UnaryExpression, CallExpression, Index, and BracketDeclaration. Each type of expression and statement represents a different kind of node. Some nodes have other nodes as their children. For instance, VarStatement has child nodes of Identifier and Expression.
@@ -309,13 +305,90 @@ var add = function (a) {
 
 In the above by performing the operation 8 + ((8 -1) * 2) up front and transforming it into a single AST node with value of 22 will efficiently saves memory and number of operations.  Imagine the add function is called 1000 times, the second will efficiently saves the memory for storing 3 binary node and skipped to perform the binary operations at runtime. One might argue this can help improve performance of the parser.
 
-## Tree interpreter
-Essentially, the source code defined by the developer is first transformed into an AST by the parser, which $Inter_{text{tree}}$ then uses to evaluate the program. In this case, $Inter_{text{tree}}$ can treat the AST as a standard tree traversal problem, evaluating the program by visiting each node at runtime.
+# Tree walking interpreter
+The source code defined by the developer is first transformed into an AST by the parser, which is used by $Inter_{tree}$ to evaluate the program. In this case, $Inter_{tree}$ can treat the AST as a standard tree traversal problem, evaluating the program by visiting each node at runtime. During runtime, we need a way to represent values. Therefore, we created an object system to represent these values, keeping them separate from the AST nodes. The object system are our runtime value, the definition is in the `object` package. This approach helps maintain a clean separation between the AST node and object representation, with the object system being more lightweight compared to an AST node that contains syntactic information.
 
-During runtime, we need a way to represent values. Therefore, we plan to create an object system to represent these values, keeping them separate from the AST nodes. This approach helps maintain a clean separation between the AST node and object representation, with the object system being more lightweight compared to an AST node that contains syntactic information.
+Our $Inter_{tree}$ is a Eval[^] function that takes in a AST node `Main` and a boolean debug to opt in for partial evaluation (more context). In `Eval`, it creates the top level environment which is then used for the private function `eval` function. An environment is the context that contains all variable and function bindings during the runitme. In our code, we implemented the environement struct that contain a map. The `eval` function is the main recursive function that walk the AST. In Go, we make a dinstiction if an declaration is exported by Capitalize the first character of the name declaration. This is why `Eval` is exported in the package and `eval` is not exported function. See the code for `eval` to examine how the function evaluate the abstract syntax tree. 
 
-## Bytecode interpreter
-The $Inter_{text{bytecode}}$ will consist of a compiler and a virtual machine. In this context, our compiler is a program that converts the AST into bytecode instructions specifically for use by the virtual machine at runtime. Unlike traditional compilers that produce artifacts such as executables, our compiler generates bytecode instructions on-the-fly without producing permanent files. Once the bytecode instructions are generated by the compiler, the virtual machine will execute them following the fetch-decode-execute cycle.
+We will highlight one example of how does the function evaluate the tree. In the diagram, the interpreter evaluates the Abstract Syntax Tree (AST) as follows: In Step 1, it encounters the vsar statement node and evaluates the binary expression 5 + 5 first to get 10 (Step 2). This result is then bind to apple in Step 4. Next, the interpreter moves to Step 5 the var basket = 8 * apple; statement. In Step 6, it evaluates the binary expression 8 * apple, where apple is looked up (value 10), and the calculation 8 * 10 results in 80, which is then bind to basket. Therefore, by the end, apple holds the value 10, and basket holds the value 80.
+
+```
+var apple = 5 + 5;
+var basket = 8 * apple;
+```
+
+
+![Tree walking](image.png)
+
+
+# Partial evaluator
+We have build a partial evaluator [^]. The goal of the partial evaluator is to reduce the size of the tree. It evaluate the program with the static data availbale to perform some optimistion up front in order to reduce the amount of operations at runtime.
+```
+// user defined add function
+var add = function (a) {
+	var b = 8 + ((8 - 1) * 2);
+	return b + a;
+};
+
+// Transformed add function
+var add = function (a) {
+	var b = 22; 
+	return b + a;
+};
+```
+In the above by performing the operation 8 + ((8 -1) * 2) up front and transforming it into a single AST node with value of 22 will efficiently saves memory and number of operations.  Imagine the add function is called 1000 times, the second transformed add function will efficiently saves the memory for storing 3 binary node and skipped to perform the binary operations at runtime.
+
+# Definition interpreter
+A definition interpreter is used to determine whether a program conforms to the grammar of a specific language (). In our case, we applied this concept to build a checker that validates whether an Abstract Syntax Tree (AST) belongs to $L_{JSGO}$.
+The checker uses a recursive function to evaluate the AST. For each node in the AST, the function checks if it adheres to the grammar of $L_{JSGO}$. This feature is enabled in debug mode, where we can check if the parser builds an AST that belongs to $L_{JSGO}$.
+
+# Bytecode interpreter
+We built an $Inter_{bytecode}$ that consist of a compiler[^] and a stack based virtual machine[^]. Our compiler is a program that converts the AST into bytecode instructions specifically for use by the virtual machine at runtime. Unlike traditional compilers that produce artifacts such as executables, our compiler generates bytecode instructions on-the-fly without producing permanent files. Once the bytecode instructions are generated by the compiler, the virtual machine will execute them following the fetch-decode-execute cycle.
+
+Here we illustrate an simple example of how we implemented our stack based virtual machine. The source text has the same procees of building the AST representation as the $Inter_{tree}$. It is different after the syntaci phase, where our cimpiler will take the AST out the bytecode intsuctions and also a constant slice. We specific all our bytecode in [^] and the element of the constant slice is the element of our runtime representation valude which is the `object` Same as our tree interperter. 
+
+The vm will then take the instruction and execute it. For instance, OpConstant 0: Pushes the constant index at the constant slice 0 onto the stack which is 1. OpConstant 1: Pushes another 1 onto the stack. OpAdd: Pops the first two element on the top of stack, and adds them and take the result to push to the top. OpSetGlobal: Pops 2 from the stack and assigns it to the global variable apple. The final result is that the global variable apple is set to 2
+```
+                  Bytecode instructions:       
+                      OpConstant 0                
+var apple = 1 + 2; -> OpConstant 1  
+                      OpAdd
+                      OpSetGlobal 
+
+                     Constant slice:
+                    Constant: [1, 2]
+```
+
+1. OpConstant 0
+   - Push constant 1
+   Stack: [1]
+
+2. OpConstant 1
+   - Push constant 2
+   Stack: [1, 2]
+
+3. OpAdd
+   - Pop 1 and 2, add them (1 + 2 = 3), push result
+   Stack: [3]
+
+4. OpSetGlobal
+   - Pop 3, and assign it to the global variable `apple`
+   Global Variable `apple` = 3
+   Stack: []
+
+One of the key extension of our $Inter_{bytecode}$ from the Compiler book is support `for`. It also one of the hardest to do in the bytecode interpeter, therefore we will highltht it here.
+
+```        
+for (var i = 0; i < 10; i = i + 1) { 
+  29;
+}; 
+```
+![For loop](image-1.png)
+
+![VM](image-2.png)
+
+# Engineering infrastruture
+We have implemented Continuous Integration (CI) using GitHub Actions workflows configured through YAML files. The setup includes two workflows: the first workflow runs on every commit push to a pull request, performing tasks such as checking code formatting, setting up the Go environment, running all tests, and performing static code analysis. The second workflow triggers when changes are merged into the main branch and includes all the tasks from the pull request workflow, with additional steps to run benchmarks and record the results in the codebase. This setup automates benchmark recording and provides continuous performance monitoring for our application.
 
 ## Result
 - Show the working of the interpereter
@@ -327,3 +400,4 @@ The $Inter_{text{bytecode}}$ will consist of a compiler and a virtual machine. I
 - Performance
 
 In the code snippet ... is abrevaited. and foot node contain the lint to the actual code implementation hosted in github
+</div>
