@@ -51,4 +51,4 @@ var moveDisks = function (disks, fromPile, toPile) {
 buildTowerAt(0, 13)
 moveDisks(13, 0, 1)
 var correct = this_movesDone == 8191
-correct;
+console.log(correct);

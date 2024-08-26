@@ -1,84 +1,18 @@
-?   	github.com/jf550-kent/jsgo	[no test files]
-PASS
-ok  	github.com/jf550-kent/jsgo/ast	0.220s
-goos: darwin
-goarch: arm64
-pkg: github.com/jf550-kent/jsgo/benchmark
-BenchmarkListTree-10         	     236	   4957740 ns/op	 5125749 B/op	  170110 allocs/op
-BenchmarkListTree-10         	     241	   4929093 ns/op	 5125737 B/op	  170110 allocs/op
-BenchmarkListTree-10         	     241	   4948157 ns/op	 5125738 B/op	  170110 allocs/op
-BenchmarkListTree-10         	     243	   4935921 ns/op	 5125731 B/op	  170110 allocs/op
-BenchmarkListTree-10         	     241	   4955472 ns/op	 5125744 B/op	  170110 allocs/op
-BenchmarkListTree-10         	     241	   4955087 ns/op	 5125743 B/op	  170110 allocs/op
-BenchmarkListTree-10         	     243	   5183590 ns/op	 5125739 B/op	  170110 allocs/op
-BenchmarkListTree-10         	     241	   4936611 ns/op	 5125743 B/op	  170110 allocs/op
-BenchmarkListTree-10         	     241	   4944508 ns/op	 5125741 B/op	  170110 allocs/op
-BenchmarkListTree-10         	     240	   4942799 ns/op	 5125744 B/op	  170110 allocs/op
-BenchmarkListTree-10         	     242	   4949003 ns/op	 5125736 B/op	  170110 allocs/op
-BenchmarkListTree-10         	     242	   4931618 ns/op	 5125746 B/op	  170110 allocs/op
-BenchmarkListTree-10         	     242	   5121009 ns/op	 5125747 B/op	  170110 allocs/op
-BenchmarkListTree-10         	     235	   5299180 ns/op	 5125746 B/op	  170110 allocs/op
-BenchmarkListTree-10         	     223	   4934745 ns/op	 5125750 B/op	  170110 allocs/op
-BenchmarkListTree-10         	     229	   4928134 ns/op	 5125740 B/op	  170110 allocs/op
-BenchmarkListTree-10         	     241	   4933447 ns/op	 5125734 B/op	  170110 allocs/op
-BenchmarkListTree-10         	     240	   4952822 ns/op	 5125748 B/op	  170110 allocs/op
-BenchmarkListTree-10         	     240	   4946499 ns/op	 5125738 B/op	  170110 allocs/op
-BenchmarkListTree-10         	     242	   4946258 ns/op	 5125738 B/op	  170110 allocs/op
-BenchmarkListTree-10         	     242	   4949387 ns/op	 5125738 B/op	  170110 allocs/op
-BenchmarkListTree-10         	     242	   4936703 ns/op	 5125740 B/op	  170110 allocs/op
-BenchmarkListTree-10         	     241	   4930337 ns/op	 5125747 B/op	  170110 allocs/op
-BenchmarkListTree-10         	     241	   4942966 ns/op	 5125739 B/op	  170110 allocs/op
-BenchmarkListTree-10         	     241	   4932691 ns/op	 5125749 B/op	  170110 allocs/op
-BenchmarkListTree-10         	     242	   4920844 ns/op	 5125740 B/op	  170110 allocs/op
-BenchmarkListTree-10         	     241	   4934427 ns/op	 5125736 B/op	  170110 allocs/op
-BenchmarkListTree-10         	     241	   4934750 ns/op	 5125739 B/op	  170110 allocs/op
-BenchmarkListTree-10         	     241	   4959665 ns/op	 5125743 B/op	  170110 allocs/op
-BenchmarkListTree-10         	     240	   4937829 ns/op	 5125741 B/op	  170110 allocs/op
-BenchmarkListTreeDebug-10    	     295	   4046024 ns/op	 4646018 B/op	  110115 allocs/op
-BenchmarkListTreeDebug-10    	     295	   4061819 ns/op	 4646029 B/op	  110115 allocs/op
-BenchmarkListTreeDebug-10    	     295	   4048495 ns/op	 4646027 B/op	  110115 allocs/op
-BenchmarkListTreeDebug-10    	     295	   4047681 ns/op	 4646027 B/op	  110115 allocs/op
-BenchmarkListTreeDebug-10    	     296	   4048756 ns/op	 4646026 B/op	  110115 allocs/op
-BenchmarkListTreeDebug-10    	     295	   4045260 ns/op	 4646025 B/op	  110115 allocs/op
-BenchmarkListTreeDebug-10    	     292	   4035029 ns/op	 4646021 B/op	  110115 allocs/op
-BenchmarkListTreeDebug-10    	     296	   4024647 ns/op	 4646024 B/op	  110115 allocs/op
-BenchmarkListTreeDebug-10    	     292	   4039173 ns/op	 4646028 B/op	  110115 allocs/op
-BenchmarkListTreeDebug-10    	     296	   4050158 ns/op	 4646024 B/op	  110115 allocs/op
-BenchmarkListTreeDebug-10    	     294	   4036991 ns/op	 4646023 B/op	  110115 allocs/op
-BenchmarkListTreeDebug-10    	     292	   4043926 ns/op	 4646024 B/op	  110115 allocs/op
-BenchmarkListTreeDebug-10    	     296	   4038828 ns/op	 4646022 B/op	  110115 allocs/op
-BenchmarkListTreeDebug-10    	     295	   4044136 ns/op	 4646029 B/op	  110115 allocs/op
-BenchmarkListTreeDebug-10    	     295	   4041048 ns/op	 4646027 B/op	  110115 allocs/op
-BenchmarkListTreeDebug-10    	     295	   4036793 ns/op	 4646026 B/op	  110115 allocs/op
-BenchmarkListTreeDebug-10    	     292	   4034695 ns/op	 4646025 B/op	  110115 allocs/op
-BenchmarkListTreeDebug-10    	     296	   4058033 ns/op	 4646022 B/op	  110115 allocs/op
-BenchmarkListTreeDebug-10    	     294	   4044751 ns/op	 4646027 B/op	  110115 allocs/op
-BenchmarkListTreeDebug-10    	     295	   4046689 ns/op	 4646028 B/op	  110115 allocs/op
-BenchmarkListTreeDebug-10    	     295	   4055452 ns/op	 4646024 B/op	  110115 allocs/op
-BenchmarkListTreeDebug-10    	     296	   4047617 ns/op	 4646028 B/op	  110115 allocs/op
-BenchmarkListTreeDebug-10    	     296	   4045706 ns/op	 4646021 B/op	  110115 allocs/op
-BenchmarkListTreeDebug-10    	     295	   4045464 ns/op	 4646033 B/op	  110115 allocs/op
-BenchmarkListTreeDebug-10    	     294	   4035898 ns/op	 4646021 B/op	  110115 allocs/op
-BenchmarkListTreeDebug-10    	     295	   4055866 ns/op	 4646026 B/op	  110115 allocs/op
-BenchmarkListTreeDebug-10    	     292	   4042540 ns/op	 4646019 B/op	  110115 allocs/op
-BenchmarkListTreeDebug-10    	     297	   4047358 ns/op	 4646026 B/op	  110115 allocs/op
-BenchmarkListTreeDebug-10    	     295	   4066094 ns/op	 4646023 B/op	  110115 allocs/op
-BenchmarkListTreeDebug-10    	     295	   4061743 ns/op	 4646025 B/op	  110115 allocs/op
-PASS
-ok  	github.com/jf550-kent/jsgo/benchmark	99.158s
-PASS
-ok  	github.com/jf550-kent/jsgo/bytecode	0.195s
-PASS
-ok  	github.com/jf550-kent/jsgo/compiler	0.194s
-PASS
-ok  	github.com/jf550-kent/jsgo/evaluator	0.292s
-PASS
-ok  	github.com/jf550-kent/jsgo/lexer	0.171s
-?   	github.com/jf550-kent/jsgo/object	[no test files]
-PASS
-ok  	github.com/jf550-kent/jsgo/parser	0.189s
-?   	github.com/jf550-kent/jsgo/run	[no test files]
-PASS
-ok  	github.com/jf550-kent/jsgo/token	0.167s
-PASS
-ok  	github.com/jf550-kent/jsgo/vm	0.539s
+BenchmarkListTree-4              	      82	  12434228 ns/op	 3377390 B/op	   75797 allocs/op
+BenchmarkListTreeDebug-4         	      93	  12426883 ns/op	 3377546 B/op	   75799 allocs/op
+BenchmarkListBytecode-4          	     122	   9723327 ns/op	 3836623 B/op	   86373 allocs/op
+BenchmarkTowerTree-4             	      39	  28821471 ns/op	15799438 B/op	  282907 allocs/op
+BenchmarkTowerTreeDebug-4        	      42	  28807471 ns/op	15799611 B/op	  282908 allocs/op
+BenchmarkTowerBytecode-4         	     121	   9912466 ns/op	 2703388 B/op	   82652 allocs/op
+BenchmarkMandelbrotTree-4        	       1	33679514731 ns/op	3261057064 B/op	407626929 allocs/op
+BenchmarkMandelbrotTreeDebug-4   	       1	32879780784 ns/op	3261052808 B/op	407626897 allocs/op
+BenchmarkPermuteTree-4           	      68	  15844331 ns/op	 8315216 B/op	  145896 allocs/op
+BenchmarkPermuteTreeDebug-4      	      69	  15886919 ns/op	 8315383 B/op	  145898 allocs/op
+BenchmarkPermuteBytecode-4       	     244	   4915347 ns/op	 1763794 B/op	   45090 allocs/op
+BenchmarkSieveTree-4             	     145	   8212330 ns/op	 1201700 B/op	  108937 allocs/op
+BenchmarkSieveTreeDebug-4        	     145	   9026527 ns/op	 1201843 B/op	  108939 allocs/op
+BenchmarkQueensTree-4            	      96	  11772284 ns/op	 5929917 B/op	  123239 allocs/op
+BenchmarkQueensTreeDebug-4       	      92	  11792074 ns/op	 5930017 B/op	  123169 allocs/op
+BenchmarkQueensBytecode-4        	     307	   3880841 ns/op	 1620185 B/op	   37608 allocs/op
+
+
