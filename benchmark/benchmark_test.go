@@ -154,6 +154,23 @@ func BenchmarkQueensBytecode(b *testing.B) {
 		testBytecode(b, "queens", src)
 	}
 }
+const partialFileName = "./partial.js"
+func BenchmarkPartialTree(b *testing.B) {
+	byt := setUpFile(b, partialFileName)
+
+	for i := 0; i < b.N; i++ {
+		testEval(b, "partial", byt)
+	}
+}
+
+func BenchmarkPartialTreeDebug(b *testing.B) {
+	src := setUpFile(b, partialFileName)
+
+	for i := 0; i < b.N; i++ {
+		testEvalDebug(b, "partial", src)
+	}
+}
+
 
 func setUpFile(b *testing.B, file string) []byte {
 	byt, err := os.ReadFile(file)

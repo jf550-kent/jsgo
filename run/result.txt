@@ -1,0 +1,32 @@
+|  | char | line |
+|-|-|
+| ../.goreleaser.yaml                      |       1133 |         46 |
+| ../ast/ast.go                            |      12023 |        538 |
+| ../ast/ast_test.go                       |       1421 |         26 |
+| ../benchmark/benchmark.go                |        176 |          4 |
+| ../benchmark/benchmark_test.go           |       4003 |        212 |
+| ../bytecode/bytecode.go                  |       4242 |        194 |
+| ../bytecode/bytecode_test.go             |       1981 |         86 |
+| ../compiler/compiler.go                  |      10596 |        469 |
+| ../compiler/compiler_test.go             |      27864 |       1009 |
+| ../compiler/symbolTable.go               |       1792 |         84 |
+| ../compiler/symbolTable_test.go          |       7138 |        297 |
+| ../evaluator/builtin.go                  |        287 |         19 |
+| ../evaluator/evaluator.go                |      13628 |        569 |
+| ../evaluator/evaluator_test.go           |      11600 |        524 |
+| ../evaluator/partial.go                  |       5069 |        207 |
+| ../is.go                                 |       2015 |         90 |
+| ../lexer/lexer.go                        |       6923 |        314 |
+| ../lexer/lexer_test.go                   |      14890 |        294 |
+| ../main.go                               |       2417 |        116 |
+| ../object/builtin.go                     |        508 |         32 |
+| ../object/environment.go                 |        915 |         48 |
+| ../object/object.go                      |       5314 |        220 |
+| ../parser/parser.go                      |      14616 |        649 |
+| ../parser/parser_test.go                 |      20032 |        830 |
+| ../run/main.go                           |       1183 |         65 |
+| ../token/token.go                        |       3798 |        224 |
+| ../token/token_test.go                   |       2775 |        133 |
+| ../vm/frame.go                           |        402 |         24 |
+| ../vm/vm.go                              |      17947 |        747 |
+| ../vm/vm_test.go                         |       9999 |        425 |

@@ -458,8 +458,7 @@ func TestClosure(t *testing.T) {
 	sum;
 	`
 
-	evaluated := evalSetup(input)
-	print(evaluated)
+	evalSetup(input)
 }
 
 func testValue(t *testing.T, obj object.Object, expectedValue any) {
