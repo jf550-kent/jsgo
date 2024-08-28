@@ -1,13 +1,13 @@
 var apple = 9;
-var appleRohan = 10;
+var appleExample = 10;
 
-apple + appleRohan;
+apple + appleExample;
 
 var add = function(a) {
   return a + a;
 };
 
-add(apple, appleRohan);
+add(apple, appleExample);
 
 var createNode = function(v, n) {
   return { "value": v, "next": n };
