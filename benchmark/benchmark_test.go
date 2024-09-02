@@ -14,9 +14,9 @@ import (
 func BenchmarkListTree(b *testing.B) {
 	byt := setUpFile(b, "./list.js")
 
-	for i := 0; i < b.N; i++ {
-		testEval(b, "list", byt)
-	}
+	main := parser.Parse("name", byt)
+
+	evaluator.Eval(main, false)
 }
 
 func BenchmarkListTreeDebug(b *testing.B) {

@@ -1,74 +1,78 @@
-- Write that we can parse utf character
-- Undestanding the host language
-- Show case your result for partial evaluator
-- Demostrate how you can parse all the benchmark 
-- In the bytecode it is hard to debug, so you need testing infrature 
+<div style="text-align: justify">
 
-Evaluation
-
-# Result
-
-## Interpreter demostration
-You can download the interpreter from Github[]. To run the program type:
+# 5. Result
+We successfully built $Inter_{bytecode}$ and $Inter_{tree}$ for our $L_{JSGO}$. The user can access the interpreter from [Github](https://github.com/jf550-kent/jsgo/releases). **Code 1** shows the command for the interpreter. The user need to specifiy the file name first and then the mode of interpreter to run the program. To enable the checker and partial evaluation you can pass in the optional command `debug`. 
+**5 Code 2** shows how you can run the `example.js` file in different options.
 
 ```
 ./jsgo <filename> <tree|bytecode> [debug] [-version]
 ```
-The user need to specifiy the filename first and the mode of interpreter to run the program. To enable the checker and partial evaluation you can pass in the optional command `debug`. 
-
-```
-./jsgo <filename> <tree|bytecode> [debug] [-version]
-```
-
-Below is shows the user can run the `example.js` file with our interperter.
+**5 Code 1**
 ```
 ./jsgo example.js tree 
 ./jsgo example.js bytecode
 ./jsgo example.js bytecode debug
 ```
+**Code 2**
 
-The language manage to support the feature mentioned in methodology. 
+The language can support all the features mentioned in methodology section 3.1. See Code 3, a list of our langauge capability. In Line 1, we can declare a var statement and Lines 2 - 4 we can assign a value to an identifier. The data type our langauge supports are `null`, string literal, number, float, boolean. We can perform operation between number and float see Line 4. We support bitwise operation `^` and `&` for number see Lines 5 - 6. Lines 5 - 14, illustrates how our language supports binary operations and unary operations with the correct precedence. Interestingly, our string literal supports `/` escaping see Line 35 where we log an emoji. For composite data structure we support array, and objects. See Lines 26 - 29, for array declaration, index and the built in push method and accessing the array length. Lines 31 to 32 shows how to handle objects. Our language can supports recursion and closure see Lines 16 - 22. Lastly, we can define a for loop in Lines 24 and if/else in Lines 37 - 39.
 
-- string parsing
+```
+var apple = 10;
+apple = "Yellow";
+apple = null;
+apple = 80 + 9.0
+8 ^ 7; 
+8 & 9; 
+!true; 
+!false;
+9 + 9;
+9 - 1.0;
+9 * 1.0 + 19;
+9 / 10;
+90 != 90;
+9 == 3;
 
- ## Correctness
- All the tests created have passed in this project. See Diagram below for an example of running the specified package test.
+var recur = function(a) {
+  if (a == 1) {
+    return 1;
+  }
+  var b = a
+  return b + recur(b - 1);
+}
+
+for (var i = 0; i < 10; i = i + 1) {}
+
+var arr = [9, 9.0, true]
+arr[0] // 9
+arr["push"](10) // arr -> [9, 9.0, true, 10]
+arr["length"] // 4
+
+var obj = { "value": 9, "next": 9 }
+obj["value"] // 9
+
+var smile = "\u2603" 
+console.log(smile) -> ☃
+
+if (true) {
+} else {
+}
+```
+Code 3
+
+Furthermore, all of the benchmarks mentioned in section 3.5 can be run by $Inter_{tree}$. Our partial evaluator can produce correct result when used with our interpreter. For $Inter_{bytecode}$ it can run all the benchmarks execpt for Mandelbrot and Sieve. This is because of constraints on the project, we were unable to create additional features to support Mandelbrot and Sieve. See Table for the result of our interpreter performance. 
+
+Our benchmarks have rewritten and the implementation were tested. We end each benchmarks's with a boolean variable to identicate if the bencmark evaluate to pass or fail, so we log all the benchmarks's last line by running the node command. **Diagram 1** show the result of running all the benchmarks which logged all true. This means that our JS implementations is correct. 
+
+![alt text](image-6.png)
+**Diagram 1**
+
+To check if a source code is part of $L_{JSGO}$ we created a definition interpreter to check the correctness of our AST. You can enable it by passing in the `debug` in the command. Diagaram show the command and result when you use `debug` and it will log out if the JS file you have provided is part of our language.
+![alt text](image-7.png)
+
+All the tests created have passed in this project. **Diagram 2** shows result of all passed tests when we run the tests.
 
 ![Example of running test](image-4.png)
+**Diagram 2**
 
-## Present the result of the benchmark
-The workflow mentioned in [Engineering Infrastructure] includes a step in the CI process where, upon merging to the main branch, performance benchmarks are automatically recorded. Below, we demonstrate how we managed to evaluate the benchmarks we created. The benchmark setup can be referenced [HERE](https://github.com/jf550-kent/jsgo/blob/main/benchmark/). These benchmarks were conducted on a Linux system with an AMD EPYC 7763 64-Core Processor, targeting the amd64 architecture.
-
-| Benchmark                      | Count | Time (ns/op) | Memory (B/op) | Allocations (allocs/op) |
-|--------------------------------|-------|--------------|---------------|-------------------------|
-| BenchmarkListTree-4            | 82    | 12434228     | 3377390       | 75797                   |
-| BenchmarkListTreeDebug-4       | 93    | 12426883     | 3377546       | 75799                   |
-| BenchmarkListBytecode-4        | 122   | 9723327      | 3836623       | 86373                   |
-| BenchmarkTowerTree-4           | 39    | 28821471     | 15799438      | 282907                  |
-| BenchmarkTowerTreeDebug-4      | 42    | 28807471     | 15799611      | 282908                  |
-| BenchmarkTowerBytecode-4       | 121   | 9912466      | 2703388       | 82652                   |
-| BenchmarkMandelbrotTree-4      | 1     | 33679514731  | 3261057064    | 407626929               |
-| BenchmarkMandelbrotTreeDebug-4 | 1     | 32879780784  | 3261052808    | 407626897               |
-| BenchmarkPermuteTree-4         | 68    | 15844331     | 8315216       | 145896                  |
-| BenchmarkPermuteTreeDebug-4    | 69    | 15886919     | 8315383       | 145898                  |
-| BenchmarkPermuteBytecode-4     | 244   | 4915347      | 1763794       | 45090                   |
-| BenchmarkSieveTree-4           | 145   | 8212330      | 1201700       | 108937                  |
-| BenchmarkSieveTreeDebug-4      | 145   | 9026527      | 1201843       | 108939                  |
-| BenchmarkQueensTree-4          | 96    | 11772284     | 5929917       | 123239                  |
-| BenchmarkQueensTreeDebug-4     | 92    | 11792074     | 5930017       | 123169                  |
-| BenchmarkQueensBytecode-4      | 307   | 3880841      | 1620185       | 37608                   |
-Table: `ns` is nanosecond, `B` is bytes, `allocs` allocations
-
-To understand the table's results, let’s examine the first item, BenchmarkListTree-4. This entry indicates that the benchmark was run with 4 cores (as denoted by -4 in the name), and the test was executed 82 times. Each execution took approximately 12,434,228 nanoseconds, used 3,377,390 bytes of memory, and allocated memory 75,797 times.
-
-We managed to run all the benchmarks specified for our $Inter_{tree}$. Additionally, we enabled partial evaluation for each benchmark, as indicated by the name with ...Debug. As evident, some benchmarks benefit from the optimisation; however, there are cases where performance is actually slower. We will further evaluate these results in later sections.
-
-For our $Inter_{bytecode}$, it is clear that there is a performance improvement over $Inter_{tree}$, even with partial evaluation enabled. However, due to time constraints on the project, we were unable to create additional features to support Mandelbrot and Sieve. We will further elaborate on this point in the evaluation section, discussing the trade-offs of building both a $Inter_{bytecode}$ and a $Inter_{tree}$.
-
-To understand the table's results, let’s examine the first item, BenchmarkListTree-4. This entry indicates that the benchmark was run with 4 cores `-4` in the name, and the test was executed 82 times. Each execution took approximately 12,434,228 nanoseconds, used 3,377,390 bytes of memory, and allocated memory 75,797 times.
-
-We manage to run all the benchmarks we have specifed for our $Inter_{tree}$, additionally we also enable partial evaluation for each of the benchmark the name with `...Debug`. As ecident some of the benchmark benefiot from the optimistation however, there is some that is in fact slower. We will further evaluate the result later in the sections. 
-
-For our $Inter_{bytecode}$, it is obvious that ther is an imrpove performance from the $Inter_{tree}$ even with partial evaluation ebnle. However, due to time constraints of the project we were create additional feature to suport Mandelbrot and Sieve. We will further elborate this point in the evaluations about the tradeoff of buyulding a $Inter_{bytecode}$ and $Inter_{tree}$. 
-
-I just to say is harder to develop and debug in bytecode because is harder to vislua at each stage of the developement because it is in bytecode. For else for the $Inter_{tree}$, it is much easier because the data structure is visulaise a tree structure. Therefore, bytecode interpereter implementer needs to invest in infrasterure to enable debugg better or building tools to vosialus the state at each points.
+</div>

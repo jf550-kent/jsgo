@@ -1,24 +1,47 @@
+import glob
 import os
 
-def extract_lines_from_file(file_path):
+directory = os.getcwd()
+
+requiredFileName = ["2024-08-05_22-23-57_NULL.txt", "2024-08-02_18-55-50_Assignment.txt", "2024-08-06_14-22-05.txt", "2024-08-06_15-28-32_Object_Key_Declaration.txt", "2024-08-15_14-35-56.txt", "2024-08-07_20-18-17_Bit_Operation.txt", "2024-08-02_19-21-02.txt ", "2024-07-28_14-07-40.txt ", "2024-08-15_17-35-58.txt", "2024-08-11_20-34-52.txt", "2024-08-15_14-33-19.txt"] 
+
+def isNeededFile(fileName):
+    for f in requiredFileName:
+        if f == fileName:
+            return True
+    return False
+
+
+headerTable = ["FileName", "Count", "Time (ns/op)", "Memory (B/op)", "Allocations (allocs/op)"]
+
+records = []
+for file_path in glob.glob(os.path.join(directory, '*.txt')):
     with open(file_path, 'r') as file:
-        for line in file:
-            print(line)
-            # if line.startswith('pkg:') or line.startswith('Bench'):
-            #     print(line.strip())
+        filename = os.path.basename(file_path)
+        print(filename)
+        if isNeededFile(filename):
+            for line in file:
+                if line.startswith('BenchmarkExample-4'):
+                    result = line.split()
+                    header = { "Name": 0, "Count": 1, "Time": 2, "Memory": 4, "Allocations": 6 }
+                    record = [filename]
+                    record.append(result[header["Count"]])
+                    record.append(result[header["Time"]])
+                    record.append(result[header["Memory"]])
+                    record.append(result[header["Allocations"]])
+                    records.append(record)
+                    break
 
-# def process_directory(directory_path):
-#     for root, dirs, files in os.walk(directory_path):
-#         for file in files:
-#             file_path = os.path.join(root, file)
-#             extract_lines_from_file(file_path)
+def format_markdown_table(header, rows):
+    col_widths = [max(len(str(item)) for item in col) for col in zip(header, *rows)]
+    header_row = "| " + " | ".join(f"{header[i]:{col_widths[i]}}" for i in range(len(header))) + " |"
+    separator_row = "|-" + "-|-".join(f"{'-' * col_widths[i]}" for i in range(len(header))) + "-|"
+    data_rows = "\n".join(
+        "| " + " | ".join(f"{str(row[i]):{col_widths[i]}}" for i in range(len(row))) + " |"
+        for row in rows
+    )
+    
+    # Combine all parts into the final table
+    return f"{header_row}\n{separator_row}\n{data_rows}"
 
-if __name__ == "__main__":
-    # process_directory("./2024-08-16_19-46-21.txt")
-    current_directory = os.getcwd() + "/performance/2024-08-16_19-46-21.txt"
-    with open(current_directory, 'r') as file:
-      line = file.readline()
-      while line:
-          if line.startswith('pkg:') or line.startswith('Bench'):
-            print(line.strip())
-          line = file.readline()
+print(format_markdown_table(headerTable, records))
