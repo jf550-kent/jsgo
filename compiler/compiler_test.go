@@ -934,8 +934,6 @@ func testCompilerTests(t *testing.T, tests []compilerTestCase) {
 		}
 
 		bytecode := compiler.ByteCode()
-		a := bytecode.Instructions.String()
-		print(a)
 
 		testInstructions(t, tt.expectedInstructions, bytecode.Instructions)
 		testConstants(t, tt.expectedConstants, bytecode.Constants)

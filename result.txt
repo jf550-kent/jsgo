@@ -1,0 +1,18 @@
+BenchmarkListTree-4              	      82	  12434228 ns/op	 3377390 B/op	   75797 allocs/op
+BenchmarkListTreeDebug-4         	      93	  12426883 ns/op	 3377546 B/op	   75799 allocs/op
+BenchmarkListBytecode-4          	     122	   9723327 ns/op	 3836623 B/op	   86373 allocs/op
+BenchmarkTowerTree-4             	      39	  28821471 ns/op	15799438 B/op	  282907 allocs/op
+BenchmarkTowerTreeDebug-4        	      42	  28807471 ns/op	15799611 B/op	  282908 allocs/op
+BenchmarkTowerBytecode-4         	     121	   9912466 ns/op	 2703388 B/op	   82652 allocs/op
+BenchmarkMandelbrotTree-4        	       1	33679514731 ns/op	3261057064 B/op	407626929 allocs/op
+BenchmarkMandelbrotTreeDebug-4   	       1	32879780784 ns/op	3261052808 B/op	407626897 allocs/op
+BenchmarkPermuteTree-4           	      68	  15844331 ns/op	 8315216 B/op	  145896 allocs/op
+BenchmarkPermuteTreeDebug-4      	      69	  15886919 ns/op	 8315383 B/op	  145898 allocs/op
+BenchmarkPermuteBytecode-4       	     244	   4915347 ns/op	 1763794 B/op	   45090 allocs/op
+BenchmarkSieveTree-4             	     145	   8212330 ns/op	 1201700 B/op	  108937 allocs/op
+BenchmarkSieveTreeDebug-4        	     145	   9026527 ns/op	 1201843 B/op	  108939 allocs/op
+BenchmarkQueensTree-4            	      96	  11772284 ns/op	 5929917 B/op	  123239 allocs/op
+BenchmarkQueensTreeDebug-4       	      92	  11792074 ns/op	 5930017 B/op	  123169 allocs/op
+BenchmarkQueensBytecode-4        	     307	   3880841 ns/op	 1620185 B/op	   37608 allocs/op
+
+

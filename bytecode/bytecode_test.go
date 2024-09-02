@@ -45,9 +45,6 @@ func TestInstructionsString(t *testing.T) {
 		merged = append(merged, ins...)
 	}
 
-	aoksl := merged.String()
-	print(aoksl)
-
 	if merged.String() != expected {
 		t.Errorf("instructions wrongly formatted\ngot:\n%s \nexpected:\n%s", merged.String(), expected)
 	}
